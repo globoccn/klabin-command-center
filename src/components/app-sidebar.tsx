@@ -1,6 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
-  Home, Headphones, Snowflake, ClipboardCheck, ShieldCheck, Database, FileBarChart2, Leaf, Building2,
+  Home,
+  Headphones,
+  Snowflake,
+  ClipboardCheck,
+  ShieldCheck,
+  Database,
+  FileBarChart2,
+  Leaf,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,66 +24,71 @@ const items = [
 
 export function AppSidebar() {
   const currentPath = useRouterState({ select: (r) => r.location.pathname });
+
   return (
-    <aside className="hidden md:flex sticky top-0 h-screen w-[250px] shrink-0 flex-col bg-sidebar border-r border-sidebar-border">
-      <div className="px-6 pt-7 pb-6">
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold tracking-tight text-white">Klabin</span>
-          <span className="h-2 w-2 rounded-full bg-primary-glow glow-primary" />
+    <aside className="relative hidden md:flex sticky top-0 h-screen w-[188px] shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar">
+      <div className="relative z-10 px-7 pt-6 pb-4">
+        <div className="flex items-end gap-1.5">
+          <span className="text-[29px] font-extrabold tracking-[-0.05em] text-white">Klabin</span>
+          <span className="mb-1.5 h-1.5 w-1.5 rounded-full bg-primary-glow shadow-[0_0_14px_rgba(55,237,99,.7)]" />
         </div>
-        <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          Operações
+        <div className="mt-2.5 flex items-center gap-2 text-[11px] font-medium text-primary-glow/90">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary-glow shadow-[0_0_10px_rgba(55,237,99,.55)]" />
+          <span>Operações</span>
+          <span className="h-px flex-1 bg-gradient-to-r from-primary/45 to-transparent" />
         </div>
       </div>
 
-      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
-        {items.map((it) => {
-          const active = currentPath === it.url;
-          const Icon = it.icon;
+      <nav className="relative z-10 flex-1 space-y-2 px-3 pt-2 overflow-y-auto">
+        {items.map((item) => {
+          const active = currentPath === item.url;
+          const Icon = item.icon;
+
           return (
             <Link
-              key={it.url}
-              to={it.url}
+              key={item.url}
+              to={item.url}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all",
+                "group relative flex min-h-[54px] items-center gap-3 overflow-hidden rounded-[14px] border px-3.5 py-2 text-[12px] font-medium leading-[1.25] transition-all duration-200",
                 active
-                  ? "bg-sidebar-accent border border-primary/40 text-accent-foreground shadow-[inset_0_0_0_1px_rgba(57,231,95,0.08)]"
-                  : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50 border border-transparent"
+                  ? "border-primary/35 bg-[linear-gradient(90deg,rgba(9,69,47,.94),rgba(5,45,35,.8))] text-white shadow-[0_0_22px_rgba(18,183,106,.14),inset_0_1px_0_rgba(255,255,255,.03)]"
+                  : "border-transparent text-[#d1d9d6] hover:border-primary/15 hover:bg-sidebar-accent/45 hover:text-white",
               )}
             >
-              <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary-glow" : "text-muted-foreground group-hover:text-primary")} />
-              <span className="truncate">{it.title}</span>
+              {active && (
+                <span className="absolute inset-y-2 left-0 w-[2px] rounded-r-full bg-primary-glow shadow-[0_0_12px_rgba(55,237,99,.9)]" />
+              )}
+              <Icon
+                className={cn(
+                  "h-[18px] w-[18px] shrink-0 transition-colors",
+                  active ? "text-primary-glow drop-shadow-[0_0_7px_rgba(55,237,99,.5)]" : "text-[#d7dfdc] group-hover:text-primary-glow",
+                )}
+                strokeWidth={1.9}
+              />
+              <span>{item.title}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="relative px-4 pt-8 pb-4 mt-4 space-y-3">
-        <div className="absolute inset-x-0 top-0 h-40 pointer-events-none opacity-70"
-          style={{
-            background:
-              "radial-gradient(60% 100% at 20% 100%, rgba(18,183,106,0.25), transparent 70%), radial-gradient(60% 100% at 80% 100%, rgba(57,231,95,0.15), transparent 70%)",
-          }}
-        />
-        <svg viewBox="0 0 200 60" className="w-full h-14 opacity-60 relative">
-          <path d="M0 60 L20 30 L28 45 L40 20 L52 45 L64 25 L76 45 L92 15 L108 45 L120 28 L134 45 L148 22 L162 45 L176 30 L200 60 Z" fill="url(#grad)" />
-          <defs>
-            <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#12B76A" stopOpacity="0.6" />
-              <stop offset="100%" stopColor="#061310" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div className="relative rounded-xl border border-primary/20 bg-card/70 px-3 py-2.5 flex items-start gap-2">
-          <Leaf className="h-4 w-4 text-primary-glow shrink-0 mt-0.5" />
-          <p className="text-[11px] leading-tight text-muted-foreground">Sustentabilidade que nos move hoje e sempre.</p>
-        </div>
-        <div className="relative rounded-xl border border-primary/20 bg-card/70 px-3 py-2.5 flex items-start gap-2">
-          <Building2 className="h-4 w-4 text-primary-glow shrink-0 mt-0.5" />
-          <p className="text-[11px] leading-tight text-muted-foreground">Facility Management com excelência.</p>
-        </div>
+      <div className="forest-silhouette" aria-hidden="true" />
+
+      <div className="relative z-10 space-y-2.5 px-3 pb-4 pt-5">
+        <SidebarNote icon={Leaf} text="Sustentabilidade que nos move hoje e sempre." />
+        <SidebarNote icon={Building2} text="Facility Management escrito com excelência." />
       </div>
     </aside>
+  );
+}
+
+function SidebarNote({ icon: Icon, text }: { icon: typeof Leaf; text: string }) {
+  return (
+    <div className="rounded-[12px] border border-primary/24 bg-[linear-gradient(140deg,rgba(5,46,35,.86),rgba(3,25,23,.92))] px-3 py-2.5 shadow-[0_8px_20px_rgba(0,0,0,.22)] backdrop-blur-sm">
+      <div className="flex items-start gap-2">
+        <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary-glow" strokeWidth={1.8} />
+        <p className="text-[10px] leading-[1.35] text-[#d5dfdc]">{text}</p>
+      </div>
+    </div>
   );
 }

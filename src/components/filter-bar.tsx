@@ -1,27 +1,13 @@
-import { useState } from "react";
-import { Calendar, X } from "lucide-react";
+import { CalendarDays, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { filterOptions } from "@/data/mockData";
+import type { DashboardFilters } from "@/types/dashboard";
+import { cn } from "@/lib/utils";
 
-const opts = {
-  projeto: ["Todos", "Chamados", "Klabin Sede SP"],
-  subprojeto: ["Todos", "Facility", "Manutenção"],
-  andar: ["Todos", "1º andar", "5º andar", "10º andar", "15º andar"],
-  status: ["Todos", "Concluída", "A Fazer", "Fazendo", "Em Espera", "Acompanhamento"],
-  responsavel: ["Todos", "Carlos Silva", "Maria Souza", "João Pereira", "Ana Lima", "Ricardo Alves", "Misael Costa"],
-};
-
-export interface FilterState {
-  periodo: string;
-  projeto: string;
-  subprojeto: string;
-  andar: string;
-  status: string;
-  responsavel: string;
-}
-
-const initial: FilterState = {
-  periodo: "04/11/2025 – 23/07/2026",
+export const DEFAULT_FILTERS: DashboardFilters = {
+  periodo: { inicio: "2025-11-04", fim: "2026-07-23" },
   projeto: "Todos",
   subprojeto: "Todos",
   andar: "Todos",
@@ -29,37 +15,149 @@ const initial: FilterState = {
   responsavel: "Todos",
 };
 
-export function FilterBar({ onChange }: { onChange?: (f: FilterState) => void }) {
-  const [state, setState] = useState<FilterState>(initial);
-  const upd = (k: keyof FilterState, v: string) => {
-    const next = { ...state, [k]: v };
-    setState(next);
-    onChange?.(next);
+interface FilterBarProps {
+  value?: DashboardFilters;
+  onChange?: (filters: DashboardFilters) => void;
+  variant?: "toolbar" | "section";
+  className?: string;
+}
+
+export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "section", className }: FilterBarProps) {
+  const update = <K extends keyof DashboardFilters>(key: K, nextValue: DashboardFilters[K]) => {
+    onChange?.({ ...value, [key]: nextValue });
   };
-  const clear = () => { setState(initial); onChange?.(initial); };
+
+  const content = (
+    <>
+      <PeriodFilter
+        value={value.periodo}
+        onChange={(periodo) => update("periodo", periodo)}
+        toolbar={variant === "toolbar"}
+      />
+      <SelectFilter label="Projeto" value={value.projeto} options={filterOptions.projeto} onChange={(next) => update("projeto", next)} />
+      <SelectFilter label="Subprojeto" value={value.subprojeto} options={filterOptions.subprojeto} onChange={(next) => update("subprojeto", next)} />
+      <SelectFilter label="Andar" value={value.andar} options={filterOptions.andar} onChange={(next) => update("andar", next)} />
+      <SelectFilter label="Status" value={value.status} options={filterOptions.status} onChange={(next) => update("status", next)} />
+      <SelectFilter label="Responsável" value={value.responsavel} options={filterOptions.responsavel} onChange={(next) => update("responsavel", next)} />
+    </>
+  );
+
+  if (variant === "toolbar") {
+    return (
+      <div className={cn("dashboard-filter-area min-w-0", className)}>
+        <div className="dashboard-filter-grid">{content}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 pb-6">
-      <div className="rounded-xl border border-border bg-card px-3 py-2 col-span-2 sm:col-span-1">
-        <div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" />Período</div>
-        <div className="text-xs mt-0.5 truncate">{state.periodo}</div>
-      </div>
-      {(["projeto", "subprojeto", "andar", "status", "responsavel"] as const).map((k) => (
-        <div key={k} className="rounded-xl border border-border bg-card px-2 py-1">
-          <div className="text-[10px] uppercase tracking-wide text-muted-foreground px-1 pt-1 capitalize">{k}</div>
-          <Select value={state[k]} onValueChange={(v) => upd(k, v)}>
-            <SelectTrigger className="h-7 border-0 bg-transparent px-1 text-xs focus:ring-0 shadow-none">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {opts[k].map((o) => (<SelectItem key={o} value={o}>{o}</SelectItem>))}
-            </SelectContent>
-          </Select>
+    <div className={cn("mb-5 rounded-[14px] border border-border bg-card/55 p-2.5 shadow-[0_10px_30px_rgba(0,0,0,.14)]", className)}>
+      <div className="flex items-center justify-between gap-3 px-1 pb-2">
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#dce5e2]">
+          <SlidersHorizontal className="h-3.5 w-3.5 text-primary-glow" />
+          Filtros da análise
         </div>
-      ))}
-      <Button variant="ghost" size="sm" onClick={clear} className="col-span-2 sm:col-span-1 lg:col-span-6 justify-self-end text-xs text-muted-foreground hover:text-primary-glow">
-        <X className="h-3 w-3 mr-1" /> Limpar filtros
-      </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => onChange?.(DEFAULT_FILTERS)}
+          className="h-7 px-2 text-[11px] text-muted-foreground hover:bg-primary/8 hover:text-primary-glow"
+        >
+          <RotateCcw className="mr-1 h-3 w-3" />
+          Limpar filtros
+        </Button>
+      </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">{content}</div>
     </div>
   );
+}
+
+function PeriodFilter({
+  value,
+  onChange,
+  toolbar,
+}: {
+  value: DashboardFilters["periodo"];
+  onChange: (value: DashboardFilters["periodo"]) => void;
+  toolbar: boolean;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" className={cn("filter-shell group flex w-full items-center justify-between gap-2 px-3 text-left", !toolbar && "h-[58px]")}> 
+          <div className="min-w-0">
+            <div className="text-[10px] font-semibold text-[#dce5e2]">Período</div>
+            <div className="mt-1 truncate text-[10px] text-[#f1f5f3]">{formatPeriod(value)}</div>
+          </div>
+          <CalendarDays className="h-4 w-4 shrink-0 text-[#d5dfdc] transition-colors group-hover:text-primary-glow" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 border-border bg-popover p-3 shadow-2xl">
+        <div className="mb-3 text-xs font-semibold">Selecionar período</div>
+        <div className="grid grid-cols-2 gap-2">
+          <DateField
+            label="Início"
+            value={value.inicio}
+            onChange={(inicio) => onChange({ ...value, inicio })}
+          />
+          <DateField
+            label="Fim"
+            value={value.fim}
+            onChange={(fim) => onChange({ ...value, fim })}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => onChange(DEFAULT_FILTERS.periodo)}
+          className="mt-3 flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary-glow"
+        >
+          <RotateCcw className="h-3 w-3" /> Restaurar período completo
+        </button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function DateField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  return (
+    <label className="space-y-1">
+      <span className="text-[10px] uppercase tracking-[.08em] text-muted-foreground">{label}</span>
+      <input
+        type="date"
+        value={value}
+        max={label === "Início" ? undefined : DEFAULT_FILTERS.periodo.fim}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
+        className="h-9 w-full rounded-lg border border-border bg-background px-2 text-[11px] text-foreground outline-none transition focus:border-primary/60 focus:ring-1 focus:ring-primary/30"
+      />
+    </label>
+  );
+}
+
+function SelectFilter({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
+  return (
+    <div className="filter-shell min-w-0 px-2.5 pt-2">
+      <div className="px-1 text-[10px] font-semibold text-[#dce5e2]">{label}</div>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger aria-label={label} className="h-8 min-w-0 border-0 bg-transparent px-1 text-[10px] text-[#f1f5f3] shadow-none focus:ring-0">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="max-h-72 border-border bg-popover">
+          {options.map((option) => (
+            <SelectItem key={option} value={option} className="text-xs">
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+function formatPeriod(period: DashboardFilters["periodo"]) {
+  const format = (date: string) => {
+    const [year, month, day] = date.split("-");
+    return `${day}/${month}/${year}`;
+  };
+  return `${format(period.inicio)} – ${format(period.fim)}`;
 }

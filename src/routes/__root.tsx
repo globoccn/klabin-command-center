@@ -81,11 +81,11 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen w-full flex" style={{ background: "var(--gradient-hero), var(--color-background)" }}>
+      <div className="app-shell">
         <AppSidebar />
         <div className="flex-1 min-w-0 flex flex-col">
           <MobileNav />
-          <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6"><Outlet /></main>
+          <main className="dashboard-main"><Outlet /></main>
         </div>
         <ChatAssistant />
       </div>

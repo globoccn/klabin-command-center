@@ -1,29 +1,47 @@
-# Welcome to your Lovable project
+# Central Operacional Klabin
 
-This project was built with [Lovable](https://lovable.dev).
+Frontend demonstrativo de uma central de comando para operações, manutenção e facility management da Klabin.
 
-## Build with Lovable
+## Tecnologias
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+- React 19
+- TypeScript
+- TanStack Start / Router
+- Tailwind CSS 4
+- shadcn/ui
+- Recharts
+- Lucide Icons
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+## Executar localmente
 
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+```bash
+npm install
 npm run dev
 ```
 
-## Built with
+## Validar o projeto
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+```bash
+npm run validate:source
+npm run lint
+npm run build
+```
+
+O checklist interno valida 65 requisitos de componentes, páginas, filtros, indicadores, relatórios, evidências, chatbot e estrutura visual.
+
+## Estrutura funcional
+
+- Visão geral executiva
+- Chamados e atendimento
+- Climatização
+- Rondas e preventivas
+- Evidências e auditoria
+- Qualidade dos dados
+- Relatórios diário, semanal e mensal
+- Assistente operacional mockado
+
+## Dados e integração
+
+Os dados atuais são mockados em `src/data/mockData.ts`. A camada assíncrona de serviços está separada em `src/services`, permitindo substituir os mocks por endpoints reais sem reconstruir as páginas.
+
+Consulte `VALIDATION_REPORT.md` para o resultado completo da validação e `validation/overview-validated.png` para a evidência visual.

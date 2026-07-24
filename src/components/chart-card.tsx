@@ -1,22 +1,33 @@
 import type { ReactNode } from "react";
-import { ExternalLink } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-interface Props {
+export function ChartCard({
+  title,
+  children,
+  className,
+  action = false,
+}: {
   title: string;
-  action?: boolean;
-  className?: string;
   children: ReactNode;
-}
-
-export function ChartCard({ title, action, className, children }: Props) {
+  className?: string;
+  action?: boolean;
+}) {
   return (
-    <div className={cn("card-premium rounded-2xl p-4 flex flex-col animate-fade-in-up", className)}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-        {action && <ExternalLink className="h-3.5 w-3.5 text-muted-foreground hover:text-primary-glow cursor-pointer" />}
+    <section className={cn("command-card relative flex min-h-0 flex-col p-3.5", className)}>
+      <div className="relative z-10 mb-2 flex min-h-[18px] items-center justify-between gap-2">
+        <h2 className="truncate text-[12px] font-semibold tracking-[-0.01em] text-[#f2f5f4]">{title}</h2>
+        {action && (
+          <button
+            type="button"
+            aria-label={`Abrir detalhes de ${title}`}
+            className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-muted-foreground transition hover:bg-primary/10 hover:text-primary-glow"
+          >
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
-      <div className="flex-1 min-h-0">{children}</div>
-    </div>
+      <div className="chart-card-content relative z-10 min-h-0 flex-1">{children}</div>
+    </section>
   );
 }

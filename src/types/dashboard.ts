@@ -1,4 +1,11 @@
-export type TaskStatus = "A Fazer" | "Fazendo" | "Concluída" | "Em Espera" | "Acompanhamento";
+export type TaskStatus =
+  | "A Fazer"
+  | "Fazendo"
+  | "Concluída"
+  | "Atividades em Espera"
+  | "Acompanhamento"
+  | "Plantão Misael"
+  | "Plantão de Sábado";
 
 export interface Attachment {
   id: string;
@@ -10,6 +17,7 @@ export interface Attachment {
 export interface Task {
   id: string;
   titulo: string;
+  descricao?: string;
   projeto: string;
   subprojeto?: string;
   setor: string;
@@ -36,11 +44,12 @@ export interface Kpi {
   id: string;
   label: string;
   value: number | string;
-  delta: number; // % change
+  delta: number;
   comparison: string;
   tone: "positive" | "negative" | "neutral" | "warning";
   icon: string;
   suffix?: string;
+  deltaUnit?: "%" | "p.p.";
 }
 
 export interface ChartSeries {
@@ -81,6 +90,13 @@ export interface DashboardOverview {
   idadeMediana: number;
 }
 
+export interface ReportMetric {
+  label: string;
+  value: string;
+  delta?: string;
+  tone?: "positive" | "warning" | "neutral";
+}
+
 export interface Report {
   id: string;
   titulo: string;
@@ -92,6 +108,20 @@ export interface Report {
   destaques: string[];
   riscos: string[];
   recomendacoes: string[];
+  indicadores?: ReportMetric[];
+  tendencia?: ChartSeries[];
+}
+
+export interface EvidenceRecord {
+  id: string;
+  taskId: string;
+  titulo: string;
+  atividade: string;
+  andar: string;
+  responsavel: string;
+  data: string;
+  tipo: "Antes" | "Depois" | "Ronda" | "CPD";
+  cor: string;
 }
 
 export interface ChatMessage {

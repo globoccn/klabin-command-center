@@ -1,19 +1,39 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import {
-  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
+import {
+  AlertTriangle,
+  Camera,
+  Database,
+  Droplets,
+  Lightbulb,
+  Monitor,
+  ShieldCheck,
+  Snowflake,
+  Wind,
+} from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
-import { FilterBar } from "@/components/filter-bar";
+import { DEFAULT_FILTERS, FilterBar } from "@/components/filter-bar";
 import { KpiCard } from "@/components/kpi-card";
 import { ChartCard } from "@/components/chart-card";
 import { InsightBanner } from "@/components/insight-banner";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { getOverview } from "@/services/dashboardService";
-import type { DashboardOverview } from "@/types/dashboard";
-import { fmtInt, fmtDec, fmtPct } from "@/lib/format";
-import { Camera, ShieldCheck, Database, ClipboardCheck, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import type { ChartSeries, DashboardFilters, DashboardOverview } from "@/types/dashboard";
+import { fmtDec, fmtInt, fmtPct } from "@/lib/format";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,66 +48,102 @@ export const Route = createFileRoute("/")({
 });
 
 const tooltipStyle = {
-  contentStyle: { background: "#0D2A22", border: "1px solid rgba(89,209,137,0.25)", borderRadius: 12, color: "#F5F7F6", fontSize: 12 },
-  cursor: { fill: "rgba(18,183,106,0.06)" },
+  contentStyle: {
+    background: "#0b1d22",
+    border: "1px solid rgba(110,195,156,.25)",
+    borderRadius: 9,
+    color: "#F5F7F6",
+    fontSize: 10,
+    boxShadow: "0 14px 32px rgba(0,0,0,.38)",
+  },
+  cursor: { fill: "rgba(18,183,106,.045)" },
 };
 
 function Overview() {
+  const [filters, setFilters] = useState<DashboardFilters>(DEFAULT_FILTERS);
   const [data, setData] = useState<DashboardOverview | null>(null);
-  useEffect(() => { getOverview().then(setData); }, []);
+
+  useEffect(() => {
+    let active = true;
+    setData(null);
+    getOverview(filters).then((result) => active && setData(result));
+    return () => { active = false; };
+  }, [filters]);
 
   return (
-    <div className="animate-fade-in-up">
-      <DashboardHeader />
-      <FilterBar />
+    <div className="command-page animate-fade-in-up">
+      <DashboardHeader
+        layout="command"
+        toolbar={<FilterBar variant="toolbar" value={filters} onChange={setFilters} />}
+      />
 
       {!data ? (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {Array.from({ length: 6 }).map((_, i) => <LoadingSkeleton key={i} className="h-32" />)}
-        </div>
+        <OverviewLoading />
       ) : (
         <>
-          <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {data.kpis.map((k) => <KpiCard key={k.id} kpi={k} />)}
+          <section className="kpi-grid-reference" aria-label="Indicadores principais">
+            {data.kpis.map((kpi) => <KpiCard key={kpi.id} kpi={kpi} />)}
           </section>
 
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3">
+          <section className="overview-row-primary">
             <ChartCard title="Tarefas por Projeto">
-              <DonutWithLegend series={data.tarefasPorProjeto} centerLabel="Total" centerValue={fmtInt(data.kpis[0].value as number)} />
+              <DonutWithLegend
+                series={data.tarefasPorProjeto}
+                centerLabel="Total"
+                centerValue={fmtInt(Number(data.kpis[0].value))}
+              />
             </ChartCard>
 
             <ChartCard title="Evolução de Tarefas por Mês">
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart data={data.evolucaoMensal}>
-                  <CartesianGrid stroke="rgba(89,209,137,0.08)" vertical={false} />
-                  <XAxis dataKey="month" stroke="#AAB8B2" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#AAB8B2" fontSize={11} tickLine={false} axisLine={false} />
+              <Legend
+                items={[
+                  { name: "Concluídas", color: "#40C35A" },
+                  { name: "Em Aberto", color: "#FF7918" },
+                  { name: "Total", color: "#E8EEEB", dashed: true },
+                ]}
+              />
+              <ResponsiveContainer width="100%" height={125}>
+                <LineChart data={data.evolucaoMensal} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
+                  <CartesianGrid stroke="rgba(110,195,156,.075)" vertical={false} />
+                  <XAxis dataKey="month" stroke="#99AAA5" fontSize={9} tickLine={false} axisLine={false} dy={5} />
+                  <YAxis stroke="#99AAA5" fontSize={9} tickLine={false} axisLine={false} />
                   <Tooltip {...tooltipStyle} />
-                  <Line type="monotone" dataKey="concluidas" stroke="#12B76A" strokeWidth={2.5} dot={{ r: 3, fill: "#12B76A" }} name="Concluídas" />
-                  <Line type="monotone" dataKey="emAberto" stroke="#F97316" strokeWidth={2} dot={{ r: 3, fill: "#F97316" }} name="Em Aberto" />
-                  <Line type="monotone" dataKey="total" stroke="#F5F7F6" strokeWidth={1.5} strokeDasharray="4 4" dot={false} name="Total" />
+                  <Line type="monotone" dataKey="concluidas" stroke="#40C35A" strokeWidth={2.2} dot={{ r: 2.5, fill: "#40C35A", strokeWidth: 0 }} activeDot={{ r: 4 }} name="Concluídas" />
+                  <Line type="monotone" dataKey="emAberto" stroke="#FF7918" strokeWidth={1.8} dot={{ r: 2.3, fill: "#FF7918", strokeWidth: 0 }} name="Em Aberto" />
+                  <Line type="monotone" dataKey="total" stroke="#E8EEEB" strokeWidth={1.4} strokeDasharray="3 4" dot={false} name="Total" />
                 </LineChart>
               </ResponsiveContainer>
-              <Legend items={[{ name: "Concluídas", color: "#12B76A" }, { name: "Em Aberto", color: "#F97316" }, { name: "Total", color: "#F5F7F6" }]} />
             </ChartCard>
 
             <ChartCard title="Status dos itens em aberto">
-              <DonutWithLegend series={data.statusAbertos} centerLabel="Em aberto" centerValue="111" showPct />
+              <DonutWithLegend
+                series={data.statusAbertos}
+                centerLabel="Em aberto"
+                centerValue={fmtInt(Number(data.kpis[2].value))}
+                showPct
+                dense
+              />
             </ChartCard>
           </section>
 
-          <section className="grid grid-cols-1 lg:grid-cols-4 gap-3 mt-3">
+          <section className="overview-row-secondary">
             <ChartCard title="Climatização — Tipo de Solicitação">
-              <DonutWithLegend series={data.climatizacaoTipo} centerLabel="Total" centerValue="1.943" showPct />
+              <DonutWithLegend
+                series={data.climatizacaoTipo}
+                centerLabel="Total"
+                centerValue={fmtInt(data.climatizacaoTipo.reduce((sum, item) => sum + item.value, 0))}
+                showPct
+                compact
+              />
             </ChartCard>
 
             <ChartCard title="Top 5 Setores — Climatização" action>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={data.topSetoresClimatizacao} layout="vertical" margin={{ left: 20 }}>
+              <ResponsiveContainer width="100%" height={116}>
+                <BarChart data={data.topSetoresClimatizacao} layout="vertical" margin={{ top: 0, right: 26, bottom: 0, left: -8 }}>
                   <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" stroke="#AAB8B2" fontSize={11} tickLine={false} axisLine={false} width={45} />
+                  <YAxis dataKey="name" type="category" width={42} stroke="#D4DEDA" fontSize={9} tickLine={false} axisLine={false} />
                   <Tooltip {...tooltipStyle} />
-                  <Bar dataKey="value" fill="#12B76A" radius={[0, 6, 6, 0]} label={{ position: "right", fill: "#F5F7F6", fontSize: 11 }} />
+                  <Bar dataKey="value" fill="#5CCB42" radius={[0, 2, 2, 0]} barSize={10} label={{ position: "right", fill: "#EAF0ED", fontSize: 9 }} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -101,86 +157,48 @@ function Overview() {
             </ChartCard>
           </section>
 
-          <section className="grid grid-cols-1 lg:grid-cols-4 gap-3 mt-3">
+          <section className="overview-row-tertiary">
             <ChartCard title="Atividades de Ronda (Principais)">
-              <div className="space-y-2.5 mt-1">
-                {data.atividadesRonda.map((a) => {
-                  const max = Math.max(...data.atividadesRonda.map((x) => x.value));
-                  return (
-                    <div key={a.name} className="flex items-center gap-2">
-                      <ClipboardCheck className="h-3.5 w-3.5 text-primary-glow shrink-0" />
-                      <span className="text-xs text-muted-foreground w-40 truncate">{a.name}</span>
-                      <div className="flex-1 h-1.5 rounded-full bg-card-elevated overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow" style={{ width: `${(a.value / max) * 100}%` }} />
-                      </div>
-                      <span className="text-xs font-medium w-10 text-right">{a.value}</span>
-                    </div>
-                  );
-                })}
-              </div>
+              <RoundActivities data={data.atividadesRonda} />
             </ChartCard>
 
             <ChartCard title="Qualidade dos Dados">
-              <div className="grid grid-cols-2 gap-2 mt-1">
+              <div className="grid h-full grid-cols-2 gap-2">
                 <QualityTile icon={<Database className="h-4 w-4" />} value={fmtInt(data.qualidadeDados.semVencimento)} label="Tarefas sem vencimento" tone="primary" />
-                <QualityTile icon={<ShieldCheck className="h-4 w-4" />} value={fmtPct(data.qualidadeDados.coberturaSetor)} label="Cobertura de setor" tone="primary" />
+                <QualityTile icon={<ShieldCheck className="h-4 w-4" />} value={fmtPct(data.qualidadeDados.coberturaSetor)} label="Cobertura de setor" tone="info" />
                 <QualityTile icon={<AlertTriangle className="h-4 w-4" />} value={fmtInt(data.qualidadeDados.fechamentoAnterior)} label="Fechamento anterior à data inicial" tone="warning" />
-                <QualityTile icon={<Database className="h-4 w-4" />} value={fmtInt(data.qualidadeDados.camposDuplicados)} label="Tarefas com campos duplicados" tone="info" />
+                <QualityTile icon={<Database className="h-4 w-4" />} value={fmtInt(data.qualidadeDados.camposDuplicados)} label="Tarefas com campos duplicados" tone="blue" />
               </div>
             </ChartCard>
 
             <ChartCard title="Evidências Fotográficas">
-              <div className="grid grid-cols-2 gap-3 items-center h-full">
-                <div className="relative">
-                  <ResponsiveContainer width="100%" height={140}>
+              <div className="grid h-full grid-cols-[1fr_1.05fr] items-center gap-2">
+                <div className="relative min-w-0">
+                  <ResponsiveContainer width="100%" height={112}>
                     <PieChart>
-                      <Pie data={[{ v: 25 }, { v: 75 }]} dataKey="v" innerRadius={40} outerRadius={55} startAngle={90} endAngle={-270}>
-                        <Cell fill="#12B76A" />
-                        <Cell fill="rgba(89,209,137,0.12)" />
+                      <Pie data={[{ v: data.evidencias.percentualComEvidencia }, { v: 100 - data.evidencias.percentualComEvidencia }]} dataKey="v" innerRadius={39} outerRadius={53} startAngle={90} endAngle={-270} stroke="none">
+                        <Cell fill="#44C94B" />
+                        <Cell fill="rgba(110,195,156,.14)" />
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <div className="text-xl font-bold text-primary-glow">25%</div>
-                    <div className="text-[10px] text-muted-foreground">com evidências</div>
+                  <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <div className="text-[24px] font-bold leading-none text-white">{fmtDec(data.evidencias.percentualComEvidencia)}%</div>
+                    <div className="mt-1 max-w-[70px] text-center text-[8px] leading-tight text-muted-foreground">das tarefas com evidências</div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div>
-                    <div className="text-2xl font-bold">{fmtInt(data.evidencias.totalFotos)}</div>
-                    <div className="text-[11px] text-muted-foreground">Total de fotos</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-semibold">{fmtInt(data.evidencias.tarefasComFotos)}</div>
-                    <div className="text-[11px] text-muted-foreground">Tarefas com fotos</div>
-                  </div>
-                  <Button size="sm" variant="outline" className="border-primary/30 text-primary-glow hover:bg-primary/10 w-full">
-                    <Camera className="h-3.5 w-3.5 mr-1" /> Ver galeria
-                  </Button>
+                <div className="space-y-3">
+                  <EvidenceStat value={fmtInt(data.evidencias.totalFotos)} label="Total de fotos" />
+                  <EvidenceStat value={fmtInt(data.evidencias.tarefasComFotos)} label="Tarefas com fotos" />
+                  <Link to="/evidencias" className="inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-[8px] border border-primary/45 bg-primary/8 text-[10px] font-medium text-[#e5f8e9] hover:bg-primary/15">
+                    <Camera className="h-3.5 w-3.5 text-primary-glow" /> Ver galeria
+                  </Link>
                 </div>
               </div>
             </ChartCard>
 
             <ChartCard title="Backlog por Idade">
-              <div className="space-y-2 mt-1">
-                {data.backlogPorIdade.map((b) => {
-                  const total = data.backlogPorIdade.reduce((s, x) => s + x.value, 0);
-                  const pct = (b.value / total) * 100;
-                  return (
-                    <div key={b.name} className="flex items-center gap-2">
-                      <span className="text-[11px] text-muted-foreground w-24 shrink-0">{b.name}</span>
-                      <div className="flex-1 h-1.5 rounded-full bg-card-elevated overflow-hidden">
-                        <div className="h-full rounded-full bg-warning" style={{ width: `${pct}%` }} />
-                      </div>
-                      <span className="text-xs font-medium w-16 text-right">{b.value} ({fmtDec(pct)}%)</span>
-                    </div>
-                  );
-                })}
-                <div className="mt-3 rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-warning" />
-                  <span className="text-xs">Idade mediana: <span className="font-bold text-warning">{fmtDec(data.idadeMediana)} dias</span></span>
-                </div>
-              </div>
+              <BacklogChart data={data.backlogPorIdade} median={data.idadeMediana} />
             </ChartCard>
           </section>
 
@@ -191,32 +209,61 @@ function Overview() {
   );
 }
 
-function DonutWithLegend({ series, centerLabel, centerValue, showPct }: { series: { name: string; value: number; color?: string }[]; centerLabel: string; centerValue: string; showPct?: boolean }) {
-  const total = series.reduce((s, x) => s + x.value, 0);
-  const colors = ["#12B76A", "#39E75F", "#2E90FA", "#F97316", "#A78BFA", "#F04438"];
+function OverviewLoading() {
   return (
-    <div className="grid grid-cols-[130px_1fr] gap-3 items-center h-full">
-      <div className="relative">
-        <ResponsiveContainer width="100%" height={140}>
+    <div className="space-y-3">
+      <div className="kpi-grid-reference">{Array.from({ length: 6 }, (_, index) => <LoadingSkeleton key={index} className="h-[116px]" />)}</div>
+      <div className="overview-row-primary">{Array.from({ length: 3 }, (_, index) => <LoadingSkeleton key={index} className="h-[190px]" />)}</div>
+      <div className="overview-row-secondary">{Array.from({ length: 4 }, (_, index) => <LoadingSkeleton key={index} className="h-[162px]" />)}</div>
+      <div className="overview-row-tertiary">{Array.from({ length: 4 }, (_, index) => <LoadingSkeleton key={index} className="h-[188px]" />)}</div>
+    </div>
+  );
+}
+
+function DonutWithLegend({
+  series,
+  centerLabel,
+  centerValue,
+  showPct = false,
+  dense = false,
+  compact = false,
+}: {
+  series: ChartSeries[];
+  centerLabel: string;
+  centerValue: string;
+  showPct?: boolean;
+  dense?: boolean;
+  compact?: boolean;
+}) {
+  const total = series.reduce((sum, item) => sum + item.value, 0) || 1;
+  const chartHeight = compact ? 110 : 136;
+  const outerRadius = compact ? 50 : 58;
+  const innerRadius = compact ? 35 : 41;
+
+  return (
+    <div className={dense ? "grid h-full grid-cols-[150px_1fr] items-center gap-2" : compact ? "grid h-full grid-cols-[128px_1fr] items-center gap-2" : "grid h-full grid-cols-[145px_1fr] items-center gap-3"}>
+      <div className="relative min-w-0">
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <PieChart>
-            <Pie data={series} dataKey="value" innerRadius={42} outerRadius={62} paddingAngle={2}>
-              {series.map((s, i) => <Cell key={i} fill={s.color ?? colors[i % colors.length]} />)}
+            <Pie data={series} dataKey="value" innerRadius={innerRadius} outerRadius={outerRadius} paddingAngle={dense ? 0 : 1.5} stroke="none">
+              {series.map((item, index) => <Cell key={`${item.name}-${index}`} fill={item.color ?? ["#10B866", "#54D36A", "#2497F2", "#FF7918", "#7A3FE2"][index % 5]} />)}
             </Pie>
             <Tooltip {...tooltipStyle} />
           </PieChart>
         </ResponsiveContainer>
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <div className="text-lg font-bold">{centerValue}</div>
-          <div className="text-[10px] text-muted-foreground">{centerLabel}</div>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <div className={compact ? "text-[19px] font-bold leading-none" : "text-[22px] font-bold leading-none"}>{centerValue}</div>
+          <div className="mt-1 text-[9px] text-muted-foreground">{centerLabel}</div>
         </div>
       </div>
-      <div className="space-y-1.5 text-xs min-w-0">
-        {series.map((s, i) => (
-          <div key={s.name} className="flex items-center gap-2 min-w-0">
-            <span className="h-2 w-2 rounded-full shrink-0" style={{ background: s.color ?? colors[i % colors.length] }} />
-            <span className="truncate text-muted-foreground">{s.name}</span>
-            <span className="ml-auto font-medium text-foreground shrink-0">
-              {fmtInt(s.value)}{showPct && ` (${fmtDec((s.value / total) * 100)}%)`}
+
+      <div className={dense ? "space-y-1 text-[9px]" : "space-y-1.5 text-[10px]"}>
+        {series.map((item, index) => (
+          <div key={item.name} className="grid min-w-0 grid-cols-[8px_minmax(0,1fr)_auto] items-center gap-2">
+            <span className="h-2 w-2 rounded-[3px]" style={{ background: item.color }} />
+            <span className="truncate text-[#d5dfdc]">{item.name}</span>
+            <span className="whitespace-nowrap font-medium text-white">
+              {fmtInt(item.value)}{showPct ? ` (${fmtDec((item.value / total) * 100)}%)` : ""}
             </span>
           </div>
         ))}
@@ -225,34 +272,107 @@ function DonutWithLegend({ series, centerLabel, centerValue, showPct }: { series
   );
 }
 
-function VerticalBars({ data }: { data: { name: string; value: number }[] }) {
+function Legend({ items }: { items: { name: string; color: string; dashed?: boolean }[] }) {
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={data} margin={{ top: 20 }}>
-        <CartesianGrid stroke="rgba(89,209,137,0.06)" vertical={false} />
-        <XAxis dataKey="name" stroke="#AAB8B2" fontSize={11} tickLine={false} axisLine={false} />
+    <div className="mb-1 flex flex-wrap items-center gap-4 text-[9px] text-[#d7e0dd]">
+      {items.map((item) => (
+        <span key={item.name} className="flex items-center gap-1.5">
+          <span className={item.dashed ? "h-px w-4 border-t border-dashed" : "h-2 w-2 rounded-[3px]"} style={{ background: item.dashed ? undefined : item.color, borderColor: item.color }} />
+          {item.name}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function VerticalBars({ data }: { data: ChartSeries[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={116}>
+      <BarChart data={data} margin={{ top: 18, right: 0, left: 0, bottom: 0 }}>
+        <CartesianGrid stroke="rgba(110,195,156,.06)" vertical={false} />
+        <XAxis dataKey="name" stroke="#D4DEDA" fontSize={9} tickLine={false} axisLine={false} dy={5} />
         <YAxis hide />
         <Tooltip {...tooltipStyle} />
-        <Bar dataKey="value" fill="#12B76A" radius={[6, 6, 0, 0]} label={{ position: "top", fill: "#F5F7F6", fontSize: 11 }} />
+        <Bar dataKey="value" fill="#31B851" radius={[2, 2, 0, 0]} barSize={26} label={{ position: "top", fill: "#F3F6F5", fontSize: 9 }} />
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
-function Legend({ items }: { items: { name: string; color: string }[] }) {
+const roundIcons = [Snowflake, Droplets, Monitor, Wind, Lightbulb];
+
+function RoundActivities({ data }: { data: ChartSeries[] }) {
+  const max = Math.max(...data.map((item) => item.value), 1);
+
   return (
-    <div className="flex flex-wrap gap-3 mt-2 text-[11px] text-muted-foreground">
-      {items.map((i) => (<span key={i.name} className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: i.color }} />{i.name}</span>))}
+    <div className="space-y-[7px] pt-1">
+      {data.map((item, index) => {
+        const Icon = roundIcons[index % roundIcons.length];
+        return (
+          <div key={item.name} className="grid grid-cols-[20px_minmax(0,1fr)_82px_30px] items-center gap-2">
+            <span className="grid h-5 w-5 place-items-center rounded-[5px] bg-primary/12 text-primary-glow"><Icon className="h-3 w-3" /></span>
+            <span className="truncate text-[9px] text-[#d5dfdc]">{item.name}</span>
+            <span className="h-[2px] overflow-hidden rounded-full bg-primary/12"><span className="block h-full bg-primary-glow" style={{ width: `${(item.value / max) * 100}%` }} /></span>
+            <strong className="text-right text-[10px] font-semibold text-white">{item.value}</strong>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-function QualityTile({ icon, value, label, tone }: { icon: React.ReactNode; value: string; label: string; tone: "primary" | "warning" | "info" }) {
-  const cls = tone === "warning" ? "border-warning/30 bg-warning/5 text-warning" : tone === "info" ? "border-info/30 bg-info/5 text-[color:var(--info)]" : "border-primary/30 bg-primary/5 text-primary-glow";
+function QualityTile({ icon, value, label, tone }: { icon: React.ReactNode; value: string; label: string; tone: "primary" | "warning" | "info" | "blue" }) {
+  const toneClass = {
+    primary: "border-primary/24 bg-primary/7 text-[#71dc65]",
+    warning: "border-warning/28 bg-warning/7 text-[#ff9e3d]",
+    info: "border-[#22c6b7]/28 bg-[#22c6b7]/7 text-[#45d8cc]",
+    blue: "border-info/26 bg-info/7 text-[#59aff0]",
+  }[tone];
+
   return (
-    <div className={`rounded-xl border p-3 ${cls}`}>
-      <div className="flex items-center gap-2">{icon}<div className="text-xl font-bold text-foreground">{value}</div></div>
-      <div className="text-[11px] text-muted-foreground mt-1">{label}</div>
+    <div className={`min-h-0 rounded-[10px] border p-2.5 ${toneClass}`}>
+      <div className="flex items-center gap-2">
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-[8px] bg-current/10">{icon}</span>
+        <strong className="text-[21px] leading-none tracking-[-.03em] text-white">{value}</strong>
+      </div>
+      <div className="mt-1.5 text-center text-[8px] leading-[1.25] text-[#d0dad7]">{label}</div>
+    </div>
+  );
+}
+
+function EvidenceStat({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <div className="text-[20px] font-bold leading-none text-[#55d649]">{value}</div>
+      <div className="mt-1 text-[9px] text-[#d0dad7]">{label}</div>
+    </div>
+  );
+}
+
+function BacklogChart({ data, median }: { data: ChartSeries[]; median: number }) {
+  const total = data.reduce((sum, item) => sum + item.value, 0) || 1;
+  const max = Math.max(...data.map((item) => item.value), 1);
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex-1 space-y-[7px] pt-1">
+        {data.map((item, index) => {
+          const pct = (item.value / total) * 100;
+          return (
+            <div key={item.name} className="grid grid-cols-[82px_minmax(0,1fr)_64px] items-center gap-2">
+              <span className="truncate text-[9px] text-[#d3dcda]">{item.name}</span>
+              <span className="h-[10px] overflow-hidden bg-warning/9">
+                <span className="block h-full bg-[linear-gradient(90deg,#db3b12,#ff7a18)]" style={{ width: `${(item.value / max) * 100}%` }} />
+              </span>
+              <span className="whitespace-nowrap text-right text-[9px] text-[#e4e9e7]">{item.value} ({fmtDec(pct)}%)</span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-2 flex h-8 items-center justify-center gap-2 rounded-[8px] border border-warning/30 bg-warning/9 text-[10px] text-[#e8ded6]">
+        <AlertTriangle className="h-3.5 w-3.5 text-warning" />
+        Idade mediana: <strong className="text-[13px] text-warning">{fmtDec(median)} dias</strong>
+      </div>
     </div>
   );
 }

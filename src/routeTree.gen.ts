@@ -9,8 +9,44 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RondasRouteImport } from './routes/rondas'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as QualidadeRouteImport } from './routes/qualidade'
+import { Route as EvidenciasRouteImport } from './routes/evidencias'
+import { Route as ClimatizacaoRouteImport } from './routes/climatizacao'
+import { Route as ChamadosRouteImport } from './routes/chamados'
 import { Route as IndexRouteImport } from './routes/index'
 
+const RondasRoute = RondasRouteImport.update({
+  id: '/rondas',
+  path: '/rondas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QualidadeRoute = QualidadeRouteImport.update({
+  id: '/qualidade',
+  path: '/qualidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EvidenciasRoute = EvidenciasRouteImport.update({
+  id: '/evidencias',
+  path: '/evidencias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClimatizacaoRoute = ClimatizacaoRouteImport.update({
+  id: '/climatizacao',
+  path: '/climatizacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChamadosRoute = ChamadosRouteImport.update({
+  id: '/chamados',
+  path: '/chamados',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +55,116 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chamados': typeof ChamadosRoute
+  '/climatizacao': typeof ClimatizacaoRoute
+  '/evidencias': typeof EvidenciasRoute
+  '/qualidade': typeof QualidadeRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/rondas': typeof RondasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/chamados': typeof ChamadosRoute
+  '/climatizacao': typeof ClimatizacaoRoute
+  '/evidencias': typeof EvidenciasRoute
+  '/qualidade': typeof QualidadeRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/rondas': typeof RondasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chamados': typeof ChamadosRoute
+  '/climatizacao': typeof ClimatizacaoRoute
+  '/evidencias': typeof EvidenciasRoute
+  '/qualidade': typeof QualidadeRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/rondas': typeof RondasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/chamados'
+    | '/climatizacao'
+    | '/evidencias'
+    | '/qualidade'
+    | '/relatorios'
+    | '/rondas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/chamados'
+    | '/climatizacao'
+    | '/evidencias'
+    | '/qualidade'
+    | '/relatorios'
+    | '/rondas'
+  id:
+    | '__root__'
+    | '/'
+    | '/chamados'
+    | '/climatizacao'
+    | '/evidencias'
+    | '/qualidade'
+    | '/relatorios'
+    | '/rondas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChamadosRoute: typeof ChamadosRoute
+  ClimatizacaoRoute: typeof ClimatizacaoRoute
+  EvidenciasRoute: typeof EvidenciasRoute
+  QualidadeRoute: typeof QualidadeRoute
+  RelatoriosRoute: typeof RelatoriosRoute
+  RondasRoute: typeof RondasRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/rondas': {
+      id: '/rondas'
+      path: '/rondas'
+      fullPath: '/rondas'
+      preLoaderRoute: typeof RondasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/qualidade': {
+      id: '/qualidade'
+      path: '/qualidade'
+      fullPath: '/qualidade'
+      preLoaderRoute: typeof QualidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/evidencias': {
+      id: '/evidencias'
+      path: '/evidencias'
+      fullPath: '/evidencias'
+      preLoaderRoute: typeof EvidenciasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/climatizacao': {
+      id: '/climatizacao'
+      path: '/climatizacao'
+      fullPath: '/climatizacao'
+      preLoaderRoute: typeof ClimatizacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chamados': {
+      id: '/chamados'
+      path: '/chamados'
+      fullPath: '/chamados'
+      preLoaderRoute: typeof ChamadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,17 +177,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChamadosRoute: ChamadosRoute,
+  ClimatizacaoRoute: ClimatizacaoRoute,
+  EvidenciasRoute: EvidenciasRoute,
+  QualidadeRoute: QualidadeRoute,
+  RelatoriosRoute: RelatoriosRoute,
+  RondasRoute: RondasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

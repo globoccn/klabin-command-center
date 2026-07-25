@@ -100,3 +100,13 @@ npm run validate:source
 npm run lint
 npm run build
 ```
+
+
+## Ajuste adicional solicitado em 25/07/2026
+
+- removido o botão **Ver relatório completo** do banner inferior;
+- botão flutuante da IA reposicionado para cima em desktop;
+- cards e blocos da visão geral redimensionados para melhor preenchimento vertical em 1900 × 1200;
+- `command-card` com `overflow: visible` e `z-index` elevado em hover/focus para evitar corte e sobreposição incorreta de tooltips;
+- tooltips e hover cards revisados para fundo escuro com texto claro;
+- revisão aplicada em padrão global para todas as telas do frontend.

@@ -42,7 +42,7 @@ export function ChatAssistant() {
         aria-label="Abrir assistente operacional"
         aria-expanded={open}
         className={cn(
-          "fixed bottom-4 right-4 z-40 grid h-12 w-12 place-items-center rounded-[14px] border border-primary/35 bg-[linear-gradient(145deg,#10b866,#36e85f)] text-primary-foreground shadow-[0_12px_35px_rgba(18,183,106,.32)] transition hover:scale-105 hover:shadow-[0_14px_38px_rgba(55,237,99,.4)]",
+          "fixed bottom-4 right-4 z-40 grid h-12 w-12 place-items-center rounded-[14px] border border-primary/35 bg-[linear-gradient(145deg,#10b866,#36e85f)] text-primary-foreground shadow-[0_12px_35px_rgba(18,183,106,.32)] transition hover:scale-105 hover:shadow-[0_14px_38px_rgba(55,237,99,.4)] md:bottom-20 xl:bottom-24 2xl:bottom-28",
           open && "pointer-events-none translate-y-2 opacity-0",
         )}
       >

@@ -71,7 +71,7 @@ function Overview() {
   }, [filters]);
 
   return (
-    <div className="command-page animate-fade-in-up">
+    <div className="command-page overview-command-page animate-fade-in-up">
       <DashboardHeader
         layout="command"
         toolbar={<FilterBar variant="toolbar" value={filters} onChange={setFilters} />}

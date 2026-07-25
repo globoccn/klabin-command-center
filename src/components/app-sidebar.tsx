@@ -74,6 +74,14 @@ export function AppSidebar() {
 
       <div className="forest-silhouette" aria-hidden="true" />
 
+      <div className="sidebar-facilities-brand" aria-label="Facilities AI">
+        <img
+          src="/facilities-ai-logo.png"
+          alt="Facilities AI"
+          className="h-auto w-full object-contain"
+        />
+      </div>
+
       <div className="relative z-10 space-y-2.5 px-3 pb-4 pt-5">
         <SidebarNote icon={Leaf} text="Sustentabilidade que nos move hoje e sempre." />
         <SidebarNote icon={Building2} text="Facility Management escrito com excelência." />

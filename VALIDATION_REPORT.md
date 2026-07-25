@@ -110,3 +110,11 @@ npm run build
 - `command-card` com `overflow: visible` e `z-index` elevado em hover/focus para evitar corte e sobreposição incorreta de tooltips;
 - tooltips e hover cards revisados para fundo escuro com texto claro;
 - revisão aplicada em padrão global para todas as telas do frontend.
+
+
+## Inclusão da logo Facilities AI
+
+- imagem fornecida convertida de fundo quadriculado escuro para PNG com transparência;
+- logo inserida na área intermediária inferior da sidebar, acima dos cards institucionais;
+- posicionamento específico validado para o layout de 1900 × 1200;
+- marca configurada como elemento visual não interativo, sem bloquear navegação.

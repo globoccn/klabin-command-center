@@ -265,6 +265,26 @@
       linear-gradient(180deg, transparent, rgba(1,24,20,.88));
   }
 
+  .sidebar-facilities-brand {
+    position: absolute;
+    z-index: 10;
+    right: 15px;
+    bottom: 188px;
+    left: 15px;
+    display: flex;
+    min-height: 54px;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 5px;
+    pointer-events: none;
+    opacity: .92;
+    filter: drop-shadow(0 6px 15px rgba(0, 0, 0, .5));
+  }
+
+  .sidebar-facilities-brand img {
+    max-width: 158px;
+  }
+
   .forest-silhouette::before,
   .forest-silhouette::after {
     content: "";
@@ -326,6 +346,8 @@
 
 @media (min-width: 1700px) and (min-height: 1100px) {
   .app-sidebar-command { width: 198px; }
+  .sidebar-facilities-brand { right: 17px; bottom: 202px; left: 17px; min-height: 58px; }
+  .sidebar-facilities-brand img { max-width: 164px; }
 
   .dashboard-main { padding: 22px 24px 8px; }
 

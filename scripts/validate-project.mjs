@@ -85,6 +85,8 @@ check("Evidência visual 1900 × 1200", exists("validation/overview-1900x1200.pn
 check("Home com preenchimento ampliado", styles.includes(".overview-command-page") && styles.includes("min-height: calc(100dvh - 18px)") && styles.includes(".kpi-card-reference { height: 150px; }") && styles.includes(".overview-row-primary .chart-card-content { min-height: 232px; }"));
 check("Botão da IA alinhado ao rodapé operacional", read("src/components/chat-assistant.tsx").includes("md:bottom-8") && read("src/components/chat-assistant.tsx").includes("xl:bottom-9"));
 check("KPI Taxa de Conclusão com alinhamento dedicado", read("src/components/kpi-card.tsx").includes('kpi.id === "taxa" ? "items-center justify-between"'));
+check("Logo Facilities AI adicionada à sidebar", read("src/components/app-sidebar.tsx").includes('src="/facilities-ai-logo.png"') && styles.includes(".sidebar-facilities-brand"));
+check("Arquivo transparente da Facilities AI disponível", exists("public/facilities-ai-logo.png"));
 
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));
 const passed = results.filter((result) => result.passed).length;

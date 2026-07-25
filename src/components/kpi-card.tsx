@@ -57,8 +57,18 @@ export function KpiCard({ kpi }: { kpi: Kpi }) {
 
           <div className="min-w-0 flex-1">
             <div className="truncate text-[11px] font-medium text-[#dce5e2]">{kpi.label}</div>
-            <div className="mt-1 flex items-end gap-1.5">
-              <strong className="text-[26px] font-bold leading-none tracking-[-0.035em] text-white">
+            <div
+              className={cn(
+                "mt-1 flex min-h-[44px] gap-1.5",
+                kpi.id === "taxa" ? "items-center justify-between" : "items-end",
+              )}
+            >
+              <strong
+                className={cn(
+                  "font-bold leading-none tracking-[-0.035em] text-white",
+                  kpi.id === "taxa" ? "text-[23px]" : "text-[26px]",
+                )}
+              >
                 {formattedValue}{kpi.suffix}
               </strong>
               {kpi.id === "taxa" && <ProgressRing value={Number(kpi.value)} />}
@@ -90,7 +100,7 @@ function ProgressRing({ value }: { value: number }) {
   const progress = Math.max(0, Math.min(100, value));
 
   return (
-    <svg viewBox="0 0 36 36" className="mb-0.5 ml-auto h-10 w-10 -rotate-90" aria-label={`${value}% concluído`}>
+    <svg viewBox="0 0 36 36" className="h-10 w-10 shrink-0 -rotate-90" aria-label={`${value}% concluído`}>
       <circle cx="18" cy="18" r="15.5" fill="none" stroke="rgba(89,209,137,.14)" strokeWidth="3.4" />
       <circle
         cx="18"

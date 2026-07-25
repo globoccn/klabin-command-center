@@ -152,15 +152,15 @@
     min-width: 0;
     min-height: 100vh;
     min-height: 100dvh;
-    padding: 20px 22px 14px;
+    padding: 20px 22px 10px;
   }
 
   .command-page { width: 100%; }
 
   .overview-command-page {
     display: flex;
-    min-height: calc(100vh - 40px);
-    min-height: calc(100dvh - 40px);
+    min-height: calc(100vh - 30px);
+    min-height: calc(100dvh - 30px);
     flex-direction: column;
   }
 
@@ -233,10 +233,10 @@
   }
 
   .overview-row-primary > *, .overview-row-secondary > *, .overview-row-tertiary > * { min-width: 0; }
-  .kpi-card-reference { height: clamp(118px, 11.5vh, 136px); }
-  .overview-row-primary .chart-card-content { min-height: clamp(156px, 18vh, 210px); }
-  .overview-row-secondary .chart-card-content { min-height: clamp(132px, 15.5vh, 180px); }
-  .overview-row-tertiary .chart-card-content { min-height: clamp(150px, 16.5vh, 198px); }
+  .kpi-card-reference { height: clamp(122px, 12vh, 140px); }
+  .overview-row-primary .chart-card-content { min-height: clamp(166px, 19vh, 220px); }
+  .overview-row-secondary .chart-card-content { min-height: clamp(142px, 16.5vh, 190px); }
+  .overview-row-tertiary .chart-card-content { min-height: clamp(160px, 17.5vh, 208px); }
 
   .overview-line-layout {
     display: flex;
@@ -327,11 +327,11 @@
 @media (min-width: 1700px) and (min-height: 1100px) {
   .app-sidebar-command { width: 198px; }
 
-  .dashboard-main { padding: 24px 24px 12px; }
+  .dashboard-main { padding: 22px 24px 8px; }
 
   .overview-command-page {
-    min-height: calc(100vh - 52px);
-    min-height: calc(100dvh - 52px);
+    min-height: calc(100vh - 18px);
+    min-height: calc(100dvh - 18px);
   }
 
   .dashboard-topbar {
@@ -344,7 +344,7 @@
   .dashboard-filter-grid { gap: 12px; }
   .filter-shell { height: 70px; border-radius: 13px; }
   .kpi-grid-reference { gap: 14px; }
-  .kpi-card-reference { height: 144px; }
+  .kpi-card-reference { height: 150px; }
 
   .overview-row-primary,
   .overview-row-secondary,
@@ -353,16 +353,16 @@
     margin-top: 14px;
   }
 
-  .overview-row-primary .chart-card-content { min-height: 214px; }
-  .overview-row-secondary .chart-card-content { min-height: 182px; }
-  .overview-row-tertiary .chart-card-content { min-height: 202px; }
+  .overview-row-primary .chart-card-content { min-height: 232px; }
+  .overview-row-secondary .chart-card-content { min-height: 196px; }
+  .overview-row-tertiary .chart-card-content { min-height: 218px; }
 
   .command-card { border-radius: 15px; }
   .insight-banner-reference {
     margin-top: auto;
-    min-height: 86px;
+    min-height: 92px;
   }
-  .insight-banner-grid { grid-template-columns: minmax(360px, 2.05fr) repeat(3, minmax(180px, .9fr)); }
+  .insight-banner-grid { grid-template-columns: minmax(380px, 2.2fr) repeat(3, minmax(190px, .95fr)); }
 }
 
 @media (max-width: 1535px) {

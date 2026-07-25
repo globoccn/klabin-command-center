@@ -8,6 +8,7 @@ interface Props {
   updatedAt?: string;
   toolbar?: ReactNode;
   layout?: "command" | "page";
+  statusLabel?: string;
 }
 
 export function DashboardHeader({
@@ -16,13 +17,14 @@ export function DashboardHeader({
   updatedAt = "24/07/2026 08:30",
   toolbar,
   layout = "page",
+  statusLabel = "Dados atualizados",
 }: Props) {
   if (layout === "command") {
     return (
       <header className="dashboard-topbar">
         <HeaderIdentity title={title} subtitle={subtitle} command />
         {toolbar}
-        <UpdateStatus updatedAt={updatedAt} />
+        <UpdateStatus updatedAt={updatedAt} statusLabel={statusLabel} />
       </header>
     );
   }
@@ -30,7 +32,7 @@ export function DashboardHeader({
   return (
     <header className="mb-5 flex flex-col justify-between gap-4 border-b border-border/70 pb-5 sm:flex-row sm:items-center">
       <HeaderIdentity title={title} subtitle={subtitle} />
-      <UpdateStatus updatedAt={updatedAt} />
+      <UpdateStatus updatedAt={updatedAt} statusLabel={statusLabel} />
     </header>
   );
 }
@@ -55,7 +57,7 @@ function HeaderIdentity({ title, subtitle, command = false }: { title: string; s
   );
 }
 
-function UpdateStatus({ updatedAt }: { updatedAt: string }) {
+function UpdateStatus({ updatedAt, statusLabel }: { updatedAt: string; statusLabel: string }) {
   return (
     <div className="h-[clamp(76px,7.3vh,88px)] min-w-[142px] rounded-[13px] border border-border bg-[linear-gradient(150deg,rgba(8,31,29,.92),rgba(3,20,20,.96))] px-3 py-2.5 shadow-[0_9px_24px_rgba(0,0,0,.2)]">
       <div className="flex items-start gap-2">
@@ -69,7 +71,7 @@ function UpdateStatus({ updatedAt }: { updatedAt: string }) {
       </div>
       <div className="mt-2 flex items-center gap-1.5 border-t border-primary/10 pt-1.5 text-[10px] font-medium text-primary-glow">
         <CheckCircle2 className="h-3.5 w-3.5" />
-        Dados atualizados
+        {statusLabel}
       </div>
     </div>
   );

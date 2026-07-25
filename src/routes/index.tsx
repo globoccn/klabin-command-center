@@ -33,7 +33,7 @@ import { InsightBanner } from "@/components/insight-banner";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { getOverview } from "@/services/dashboardService";
 import type { ChartSeries, DashboardFilters, DashboardOverview } from "@/types/dashboard";
-import { fmtDec, fmtInt, fmtPct } from "@/lib/format";
+import { fmtDateTime, fmtDec, fmtInt, fmtPct } from "@/lib/format";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -74,6 +74,8 @@ function Overview() {
     <div className="command-page overview-command-page animate-fade-in-up">
       <DashboardHeader
         layout="command"
+        updatedAt={data?.snapshot?.loadedAt ? fmtDateTime(data.snapshot.loadedAt) : "Carregando snapshot…"}
+        statusLabel="Snapshot demonstrativo"
         toolbar={<FilterBar variant="toolbar" value={filters} onChange={setFilters} />}
       />
 

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Camera, ChevronLeft, ChevronRight, Paperclip, Search } from "lucide-react";
 import { getTasks } from "@/services/dashboardService";
-import type { DashboardFilters, Task } from "@/types/dashboard";
+import type { DashboardFilters, Task, TaskPage } from "@/types/dashboard";
 import { StatusBadge } from "@/components/status-badge";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { EmptyState } from "@/components/empty-state";
@@ -9,26 +9,34 @@ import { DetailDrawer } from "@/components/detail-drawer";
 import { fmtDate } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 
+const EMPTY_PAGE: TaskPage = { items: [], total: 0, page: 1, pageSize: 10, totalPages: 1 };
+
 export function TaskTable({ filters }: { filters?: DashboardFilters }) {
-  const [items, setItems] = useState<Task[] | null>(null);
+  const [result, setResult] = useState<TaskPage | null>(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Task | null>(null);
   const perPage = 10;
 
   useEffect(() => {
-    let active = true;
-    setItems(null);
-    getTasks({ ...filters, search }).then((result) => active && setItems(result));
-    setPage(1);
-    return () => { active = false; };
-  }, [filters, search]);
+    const timer = window.setTimeout(() => setDebouncedSearch(search), 280);
+    return () => window.clearTimeout(timer);
+  }, [search]);
 
-  const paged = useMemo(() => {
-    if (!items) return [];
-    return items.slice((page - 1) * perPage, page * perPage);
-  }, [items, page]);
-  const totalPages = items ? Math.max(1, Math.ceil(items.length / perPage)) : 1;
+  useEffect(() => { setPage(1); }, [filters, debouncedSearch]);
+
+  useEffect(() => {
+    let active = true;
+    setResult(null);
+    getTasks(filters, { search: debouncedSearch, page, pageSize: perPage })
+      .then((response) => active && setResult(response))
+      .catch(() => active && setResult(EMPTY_PAGE));
+    return () => { active = false; };
+  }, [filters, debouncedSearch, page]);
+
+  const items = result?.items ?? [];
+  const totalPages = result?.totalPages ?? 1;
 
   return (
     <section className="command-card">
@@ -44,12 +52,12 @@ export function TaskTable({ filters }: { filters?: DashboardFilters }) {
         </div>
         <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
           <span className="h-2 w-2 rounded-full bg-primary-glow shadow-[0_0_10px_rgba(55,237,99,.45)]" />
-          {items?.length ?? 0} tarefas encontradas
+          {result?.total ?? 0} tarefas encontradas
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        {!items ? (
+        {!result ? (
           <div className="space-y-2 p-4">{Array.from({ length: 8 }, (_, index) => <LoadingSkeleton key={index} className="h-10" />)}</div>
         ) : items.length === 0 ? (
           <EmptyState title="Nenhuma tarefa encontrada" description="Revise os filtros ou o termo pesquisado." />
@@ -63,12 +71,8 @@ export function TaskTable({ filters }: { filters?: DashboardFilters }) {
               </tr>
             </thead>
             <tbody>
-              {paged.map((task) => (
-                <tr
-                  key={task.id}
-                  onClick={() => setSelected(task)}
-                  className="cursor-pointer border-t border-border/72 transition hover:bg-card-elevated/72"
-                >
+              {items.map((task) => (
+                <tr key={task.id} onClick={() => setSelected(task)} className="cursor-pointer border-t border-border/72 transition hover:bg-card-elevated/72 hover:text-foreground">
                   <td className="px-3 py-3 font-mono text-[10px] text-primary-glow/80">{task.id}</td>
                   <td className="max-w-[250px] px-3 py-3">
                     <div className="truncate font-medium text-[#e7ecea]">{task.titulo}</div>
@@ -96,9 +100,9 @@ export function TaskTable({ filters }: { filters?: DashboardFilters }) {
         )}
       </div>
 
-      {items && items.length > 0 && (
+      {result && result.total > 0 && (
         <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
-          <div className="text-[10px] text-muted-foreground">Página {page} de {totalPages}</div>
+          <div className="text-[10px] text-muted-foreground">Página {result.page} de {totalPages}</div>
           <div className="flex gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={page === 1}>
               <ChevronLeft className="h-4 w-4" />

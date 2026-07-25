@@ -3,26 +3,26 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, Copy, Database, ShieldCheck } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { ChartCard } from "@/components/chart-card";
-import { getOverview } from "@/services/dashboardService";
-import type { DashboardOverview } from "@/types/dashboard";
+import { getQuality } from "@/services/dashboardService";
+import type { QualitySummary } from "@/types/dashboard";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { fmtInt, fmtPct } from "@/lib/format";
 
 export const Route = createFileRoute("/qualidade")({
-  head: () => ({
-    meta: [
-      { title: "Qualidade dos Dados · Klabin" },
-      { name: "description", content: "Monitoramento da qualidade e integridade dos dados operacionais." },
-      { property: "og:title", content: "Qualidade dos Dados · Klabin" },
-      { property: "og:description", content: "Cobertura de setor, duplicidades e inconsistências." },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Qualidade dos Dados · Klabin" },
+    { name: "description", content: "Monitoramento da qualidade e integridade dos dados operacionais." },
+  ] }),
   component: Qualidade,
 });
 
 function Qualidade() {
-  const [data, setData] = useState<DashboardOverview | null>(null);
-  useEffect(() => { getOverview().then(setData); }, []);
+  const [data, setData] = useState<QualitySummary | null>(null);
+  useEffect(() => {
+    let active = true;
+    getQuality().then((result) => active && setData(result)).catch(() => active && setData({ metrics: { semVencimento: 0, coberturaSetor: 0, fechamentoAnterior: 0, camposDuplicados: 0 }, coverage: [], issues: [] }));
+    return () => { active = false; };
+  }, []);
 
   return (
     <div className="command-page animate-fade-in-up">
@@ -30,19 +30,16 @@ function Qualidade() {
       {!data ? <LoadingSkeleton className="h-[520px]" /> : (
         <>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <Metric icon={<Database className="h-5 w-5" />} value={fmtInt(data.qualidadeDados.semVencimento)} label="Tarefas sem vencimento" />
-            <Metric icon={<ShieldCheck className="h-5 w-5" />} value={fmtPct(data.qualidadeDados.coberturaSetor)} label="Cobertura de setor" tone="info" />
-            <Metric icon={<AlertTriangle className="h-5 w-5" />} value={fmtInt(data.qualidadeDados.fechamentoAnterior)} label="Fechamento anterior à data inicial" tone="warning" />
-            <Metric icon={<Copy className="h-5 w-5" />} value={fmtInt(data.qualidadeDados.camposDuplicados)} label="Tarefas com campos duplicados" tone="blue" />
+            <Metric icon={<Database className="h-5 w-5" />} value={fmtInt(data.metrics.semVencimento)} label="Tarefas sem vencimento" />
+            <Metric icon={<ShieldCheck className="h-5 w-5" />} value={fmtPct(data.metrics.coberturaSetor)} label="Cobertura de setor" tone="info" />
+            <Metric icon={<AlertTriangle className="h-5 w-5" />} value={fmtInt(data.metrics.fechamentoAnterior)} label="Fechamento anterior à data inicial" tone="warning" />
+            <Metric icon={<Copy className="h-5 w-5" />} value={fmtInt(data.metrics.camposDuplicados)} label="Tarefas com campos duplicados" tone="blue" />
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1.25fr_.75fr]">
             <ChartCard title="Cobertura e Integridade">
               <div className="space-y-5 py-3">
-                <QualityBar label="Setor preenchido" value={67.6} target={80} />
-                <QualityBar label="Serviço preenchido" value={71.8} target={85} />
-                <QualityBar label="Tarefas com evidência" value={25} target={60} warning />
-                <QualityBar label="Comentários preenchidos" value={20.5} target={50} warning />
+                {data.coverage.map((item) => <QualityBar key={item.label} {...item} />)}
               </div>
             </ChartCard>
 
@@ -75,7 +72,7 @@ function QualityBar({ label, value, target, warning = false }: { label: string; 
   return (
     <div>
       <div className="mb-2 flex items-center justify-between text-[11px]"><span className="text-[#dbe3e0]">{label}</span><span className={warning ? "font-semibold text-warning" : "font-semibold text-primary-glow"}>{value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% <span className="font-normal text-muted-foreground">/ meta {target}%</span></span></div>
-      <div className="relative h-2 overflow-hidden rounded-full bg-card-elevated"><span className={`block h-full rounded-full ${warning ? "bg-gradient-to-r from-[#db3b12] to-warning" : "bg-gradient-to-r from-primary to-primary-glow"}`} style={{ width: `${value}%` }} /><span className="absolute inset-y-0 w-px bg-white/65" style={{ left: `${target}%` }} /></div>
+      <div className="relative h-2 overflow-hidden rounded-full bg-card-elevated"><span className={`block h-full rounded-full ${warning ? "bg-gradient-to-r from-[#db3b12] to-warning" : "bg-gradient-to-r from-primary to-primary-glow"}`} style={{ width: `${Math.min(100, value)}%` }} /><span className="absolute inset-y-0 w-px bg-white/65" style={{ left: `${Math.min(100, target)}%` }} /></div>
     </div>
   );
 }

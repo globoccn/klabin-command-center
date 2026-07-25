@@ -1,9 +1,10 @@
 import { CalendarDays, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { filterOptions } from "@/data/mockData";
-import type { DashboardFilters } from "@/types/dashboard";
+import { getFilterOptions } from "@/services/dashboardService";
+import type { DashboardFilters, FilterOptions } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
 
 export const DEFAULT_FILTERS: DashboardFilters = {
@@ -15,6 +16,16 @@ export const DEFAULT_FILTERS: DashboardFilters = {
   responsavel: "Todos",
 };
 
+const INITIAL_OPTIONS: FilterOptions = {
+  periodo: DEFAULT_FILTERS.periodo,
+  projeto: ["Todos"],
+  subprojeto: ["Todos"],
+  andar: ["Todos"],
+  status: ["Todos"],
+  responsavel: ["Todos"],
+  subprojetoPorProjeto: {},
+};
+
 interface FilterBarProps {
   value?: DashboardFilters;
   onChange?: (filters: DashboardFilters) => void;
@@ -23,19 +34,37 @@ interface FilterBarProps {
 }
 
 export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "section", className }: FilterBarProps) {
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(INITIAL_OPTIONS);
+
+  useEffect(() => {
+    let active = true;
+    getFilterOptions().then((result) => {
+      if (!active) return;
+      setFilterOptions(result);
+      if (value.periodo.inicio === DEFAULT_FILTERS.periodo.inicio && value.periodo.fim === DEFAULT_FILTERS.periodo.fim) {
+        onChange?.({ ...value, periodo: result.periodo });
+      }
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, []);
   const update = <K extends keyof DashboardFilters>(key: K, nextValue: DashboardFilters[K]) => {
     onChange?.({ ...value, [key]: nextValue });
   };
+
+  const subprojectOptions = value.projeto === "Todos"
+    ? filterOptions.subprojeto
+    : ["Todos", ...(filterOptions.subprojetoPorProjeto?.[value.projeto] ?? [])];
 
   const content = (
     <>
       <PeriodFilter
         value={value.periodo}
+        fullPeriod={filterOptions.periodo}
         onChange={(periodo) => update("periodo", periodo)}
         toolbar={variant === "toolbar"}
       />
-      <SelectFilter label="Projeto" value={value.projeto} options={filterOptions.projeto} onChange={(next) => update("projeto", next)} />
-      <SelectFilter label="Subprojeto" value={value.subprojeto} options={filterOptions.subprojeto} onChange={(next) => update("subprojeto", next)} />
+      <SelectFilter label="Projeto" value={value.projeto} options={filterOptions.projeto} onChange={(next) => onChange?.({ ...value, projeto: next, subprojeto: "Todos" })} />
+      <SelectFilter label="Subprojeto" value={value.subprojeto} options={subprojectOptions} onChange={(next) => update("subprojeto", next)} />
       <SelectFilter label="Andar" value={value.andar} options={filterOptions.andar} onChange={(next) => update("andar", next)} />
       <SelectFilter label="Status" value={value.status} options={filterOptions.status} onChange={(next) => update("status", next)} />
       <SelectFilter label="Responsável" value={value.responsavel} options={filterOptions.responsavel} onChange={(next) => update("responsavel", next)} />
@@ -61,7 +90,7 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => onChange?.(DEFAULT_FILTERS)}
+          onClick={() => onChange?.({ ...DEFAULT_FILTERS, periodo: filterOptions.periodo })}
           className="h-7 px-2 text-[11px] text-muted-foreground hover:bg-primary/8 hover:text-primary-glow"
         >
           <RotateCcw className="mr-1 h-3 w-3" />
@@ -77,8 +106,10 @@ function PeriodFilter({
   value,
   onChange,
   toolbar,
+  fullPeriod,
 }: {
   value: DashboardFilters["periodo"];
+  fullPeriod: DashboardFilters["periodo"];
   onChange: (value: DashboardFilters["periodo"]) => void;
   toolbar: boolean;
 }) {
@@ -109,7 +140,7 @@ function PeriodFilter({
         </div>
         <button
           type="button"
-          onClick={() => onChange(DEFAULT_FILTERS.periodo)}
+          onClick={() => onChange(fullPeriod)}
           className="mt-3 flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary-glow"
         >
           <RotateCcw className="h-3 w-3" /> Restaurar período completo

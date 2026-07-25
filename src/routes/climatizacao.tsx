@@ -5,20 +5,16 @@ import { Snowflake, Sun, Thermometer, TrendingUp } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { DEFAULT_FILTERS, FilterBar } from "@/components/filter-bar";
 import { ChartCard } from "@/components/chart-card";
-import { getOverview } from "@/services/dashboardService";
-import type { DashboardFilters, DashboardOverview } from "@/types/dashboard";
+import { getClimate } from "@/services/dashboardService";
+import type { ClimateSummary, DashboardFilters } from "@/types/dashboard";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { fmtInt } from "@/lib/format";
 
 export const Route = createFileRoute("/climatizacao")({
-  head: () => ({
-    meta: [
-      { title: "Climatização · Klabin" },
-      { name: "description", content: "Análise operacional dos chamados de climatização por setor, horário e dia." },
-      { property: "og:title", content: "Climatização · Klabin" },
-      { property: "og:description", content: "Distribuição, tipo e picos de atendimento em climatização." },
-    ],
-  }),
+  head: () => ({ meta: [
+    { title: "Climatização · Klabin" },
+    { name: "description", content: "Análise operacional dos chamados de climatização por setor, horário e dia." },
+  ] }),
   component: Climatizacao,
 });
 
@@ -26,12 +22,12 @@ const tooltip = { contentStyle: { background: "#0b1d22", border: "1px solid rgba
 
 function Climatizacao() {
   const [filters, setFilters] = useState<DashboardFilters>(DEFAULT_FILTERS);
-  const [data, setData] = useState<DashboardOverview | null>(null);
+  const [data, setData] = useState<ClimateSummary | null>(null);
 
   useEffect(() => {
     let active = true;
     setData(null);
-    getOverview(filters).then((result) => active && setData(result));
+    getClimate(filters).then((result) => active && setData(result)).catch(() => active && setData({ total: 0, cold: 0, hot: 0, topSector: "—", type: [], sectors: [], hours: [], weekdays: [] }));
     return () => { active = false; };
   }, [filters]);
 
@@ -43,18 +39,18 @@ function Climatizacao() {
       {!data ? <LoadingSkeleton className="h-[560px]" /> : (
         <>
           <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            <ClimateMetric icon={<Thermometer className="h-5 w-5" />} label="Solicitações" value={fmtInt(data.climatizacaoTipo.reduce((sum, item) => sum + item.value, 0))} />
-            <ClimateMetric icon={<Snowflake className="h-5 w-5" />} label="Ambiente frio" value={fmtInt(data.climatizacaoTipo[0]?.value ?? 0)} />
-            <ClimateMetric icon={<Sun className="h-5 w-5" />} label="Ambiente quente" value={fmtInt(data.climatizacaoTipo[1]?.value ?? 0)} tone="warning" />
-            <ClimateMetric icon={<TrendingUp className="h-5 w-5" />} label="Setor mais recorrente" value={data.topSetoresClimatizacao[0]?.name ?? "—"} />
+            <ClimateMetric icon={<Thermometer className="h-5 w-5" />} label="Solicitações" value={fmtInt(data.total)} />
+            <ClimateMetric icon={<Snowflake className="h-5 w-5" />} label="Ambiente frio" value={fmtInt(data.cold)} />
+            <ClimateMetric icon={<Sun className="h-5 w-5" />} label="Ambiente quente" value={fmtInt(data.hot)} tone="warning" />
+            <ClimateMetric icon={<TrendingUp className="h-5 w-5" />} label="Setor mais recorrente" value={data.topSector} />
           </div>
 
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             <ChartCard title="Tipo de Solicitação">
               <ResponsiveContainer width="100%" height={270}>
                 <PieChart>
-                  <Pie data={data.climatizacaoTipo} dataKey="value" innerRadius={68} outerRadius={108} stroke="none">
-                    {data.climatizacaoTipo.map((item, index) => <Cell key={`${item.name}-${index}`} fill={item.color} />)}
+                  <Pie data={data.type} dataKey="value" innerRadius={68} outerRadius={108} stroke="none">
+                    {data.type.map((item, index) => <Cell key={`${item.name}-${index}`} fill={item.color} />)}
                   </Pie>
                   <Tooltip {...tooltip} />
                 </PieChart>
@@ -63,7 +59,7 @@ function Climatizacao() {
 
             <ChartCard title="Top Setores">
               <ResponsiveContainer width="100%" height={270}>
-                <BarChart data={data.topSetoresClimatizacao} layout="vertical" margin={{ left: 8, right: 28 }}>
+                <BarChart data={data.sectors} layout="vertical" margin={{ left: 8, right: 28 }}>
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" width={55} stroke="#AAB8B2" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip {...tooltip} />
@@ -74,7 +70,7 @@ function Climatizacao() {
 
             <ChartCard title="Horário de Abertura">
               <ResponsiveContainer width="100%" height={245}>
-                <BarChart data={data.climatizacaoHorario} margin={{ top: 20 }}>
+                <BarChart data={data.hours} margin={{ top: 20 }}>
                   <CartesianGrid stroke="rgba(110,195,156,.06)" vertical={false} />
                   <XAxis dataKey="name" stroke="#AAB8B2" fontSize={10} tickLine={false} axisLine={false} />
                   <YAxis stroke="#AAB8B2" fontSize={10} tickLine={false} axisLine={false} />
@@ -86,7 +82,7 @@ function Climatizacao() {
 
             <ChartCard title="Dia da Semana">
               <ResponsiveContainer width="100%" height={245}>
-                <BarChart data={data.climatizacaoDiaSemana} margin={{ top: 20 }}>
+                <BarChart data={data.weekdays} margin={{ top: 20 }}>
                   <CartesianGrid stroke="rgba(110,195,156,.06)" vertical={false} />
                   <XAxis dataKey="name" stroke="#AAB8B2" fontSize={10} tickLine={false} axisLine={false} />
                   <YAxis stroke="#AAB8B2" fontSize={10} tickLine={false} axisLine={false} />

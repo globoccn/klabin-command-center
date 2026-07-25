@@ -141,6 +141,7 @@
 @layer components {
   .app-shell {
     min-height: 100vh;
+    min-height: 100dvh;
     width: 100%;
     display: flex;
     background: var(--gradient-page);
@@ -149,6 +150,8 @@
   .dashboard-main {
     flex: 1;
     min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
     padding: 20px 22px 20px;
   }
 
@@ -218,9 +221,24 @@
   }
 
   .overview-row-primary > *, .overview-row-secondary > *, .overview-row-tertiary > * { min-width: 0; }
-  .overview-row-primary .chart-card-content { min-height: 146px; }
-  .overview-row-secondary .chart-card-content { min-height: 117px; }
-  .overview-row-tertiary .chart-card-content { min-height: 142px; }
+  .overview-row-primary .chart-card-content { min-height: clamp(146px, 16vh, 192px); }
+  .overview-row-secondary .chart-card-content { min-height: clamp(117px, 14vh, 168px); }
+  .overview-row-tertiary .chart-card-content { min-height: clamp(142px, 15.5vh, 186px); }
+
+  .overview-line-layout {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  .round-activities-list {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
 
   .forest-silhouette {
     position: absolute;
@@ -266,6 +284,37 @@
 }
 @utility animate-fade-in-up { animation: fade-in-up .38s ease-out both; }
 @utility animate-scan-glow { animation: scan-glow 2.6s ease-in-out infinite; }
+
+@media (min-width: 1700px) and (min-height: 1100px) {
+  .app-sidebar-command { width: 198px; }
+
+  .dashboard-main { padding: 24px 24px 22px; }
+
+  .dashboard-topbar {
+    grid-template-columns: minmax(450px, .95fr) minmax(800px, 1.9fr) 164px;
+    gap: 16px;
+    min-height: 88px;
+    margin-bottom: 16px;
+  }
+
+  .dashboard-filter-grid { gap: 12px; }
+  .filter-shell { height: 70px; border-radius: 13px; }
+  .kpi-grid-reference { gap: 14px; }
+
+  .overview-row-primary,
+  .overview-row-secondary,
+  .overview-row-tertiary {
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .overview-row-primary .chart-card-content { min-height: 192px; }
+  .overview-row-secondary .chart-card-content { min-height: 168px; }
+  .overview-row-tertiary .chart-card-content { min-height: 186px; }
+
+  .command-card { border-radius: 15px; }
+  .insight-banner-reference { margin-top: 14px; }
+}
 
 @media (max-width: 1535px) {
   .dashboard-topbar {

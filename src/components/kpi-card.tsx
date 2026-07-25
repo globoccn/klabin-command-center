@@ -35,7 +35,7 @@ export function KpiCard({ kpi }: { kpi: Kpi }) {
   return (
     <article
       className={cn(
-        "group relative h-[116px] overflow-hidden rounded-[13px] border p-3.5 shadow-[0_10px_28px_rgba(0,0,0,.22)] transition duration-200 hover:-translate-y-0.5",
+        "kpi-card-reference group relative h-[clamp(116px,11vh,132px)] overflow-hidden rounded-[13px] border p-3.5 shadow-[0_10px_28px_rgba(0,0,0,.22)] transition duration-200 hover:-translate-y-0.5",
         warning
           ? "border-warning/32 bg-[linear-gradient(145deg,rgba(62,42,12,.34),rgba(9,27,24,.98))] hover:shadow-[0_12px_30px_rgba(249,115,22,.12)]"
           : "border-border bg-[linear-gradient(145deg,rgba(9,42,34,.96),rgba(5,25,24,.98))] hover:border-primary/34 hover:shadow-[0_12px_30px_rgba(18,183,106,.12)]",

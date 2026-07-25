@@ -4,90 +4,99 @@ Data da validação: 24/07/2026
 
 ## Resultado executivo
 
-A revisão visual, estrutural e funcional do frontend foi concluída antes do empacotamento.
+A interface foi ajustada e validada para a resolução-alvo de **1900 × 1200 px** antes do novo empacotamento.
 
-- Checklist automatizado de requisitos: **65/65 aprovado**.
+- Layout de comando ajustado para utilizar melhor a altura de 1200 px.
+- Sidebar ampliada de forma controlada na resolução-alvo.
+- Cabeçalho, filtros, KPIs, três linhas analíticas e faixa de insight redimensionados proporcionalmente.
+- Gráficos de linha e barras convertidos para altura responsiva dentro dos cards.
+- Cards de rondas e evidências passaram a distribuir melhor o conteúdo verticalmente.
+- Domínio `klabin.facilities-ai.com.br` registrado em `vite.config.ts` por meio de `server.allowedHosts`.
+- Checklist automatizado de requisitos: **67/67 aprovado**.
 - Arquivos TypeScript/TSX verificados sintaticamente: **84**, sem erros.
-- Tipagem do núcleo de dados e serviços: **aprovada**.
-- Consistência dos dados mockados: **aprovada**.
-- Prévia visual em **1672 × 941 px**: sem overflow horizontal ou vertical.
-- Dados pessoais: nenhum telefone/WhatsApp exposto nos mocks.
+- Evidência visual em **1900 × 1200 px**, sem overflow horizontal ou vertical.
+- ZIP validado estruturalmente antes da entrega.
 
-## Itens validados
+## Configuração de domínio no Vite
 
-### Estrutura visual
+O Vite recebe apenas o hostname em `allowedHosts`, sem o protocolo `https://`:
 
-- Sidebar escura fixa e navegação em sete módulos.
-- Cabeçalho no formato de central de comando.
-- Paleta verde, azul-petróleo, laranja e preto alinhada à referência.
-- Seis cards de KPI na primeira linha.
-- Três faixas de gráficos e indicadores.
-- Faixa inferior de insight do período.
-- Botão flutuante do assistente operacional.
-- Layout responsivo e sem overflow na resolução de referência.
+```ts
+vite: {
+  server: {
+    allowedHosts: ["klabin.facilities-ai.com.br"],
+  },
+},
+```
 
-A evidência visual está em `validation/overview-validated.png`.
+O HTTPS deve continuar sendo terminado pelo proxy reverso ou serviço de publicação que atende `https://klabin.facilities-ai.com.br/`.
 
-### Filtros globais
+## Ajustes para 1900 × 1200
 
-- Período.
-- Projeto.
-- Subprojeto.
-- Andar.
-- Status.
-- Responsável.
-- Limpeza dos filtros e atualização dos componentes com estado local.
+Foi criado um breakpoint específico para telas com largura mínima de 1700 px e altura mínima de 1100 px. Na resolução de 1900 × 1200, ele aplica:
 
-### Indicadores da visão geral
+- sidebar de 198 px;
+- espaçamento externo de 24 px;
+- cabeçalho de 88 px;
+- filtros de 70 px;
+- KPIs de até 132 px;
+- cards primários com conteúdo interno de 192 px;
+- cards secundários com conteúdo interno de 168 px;
+- cards terciários com conteúdo interno de 186 px;
+- faixa de insight de até 78 px.
 
-- Total de tarefas: 3.783.
-- Concluídas: 3.672.
-- Em aberto: 111.
-- Taxa de conclusão: 97,1%.
-- Tarefas com anexos: 944.
-- Fotos: 5.358.
+Abaixo desse breakpoint, o layout mantém as regras responsivas anteriores.
 
-Também foram validados os blocos de tarefas por projeto, evolução mensal, status em aberto, climatização, rondas, evidências, qualidade dos dados e backlog por idade.
-
-### Páginas e recursos
+## Itens funcionais preservados
 
 - Visão Geral.
-- Chamados e Atendimento, com busca, filtros, paginação e detalhes.
+- Chamados e Atendimento.
 - Climatização.
 - Rondas e Preventivas.
-- Evidências e Auditoria, incluindo filtros e comparação antes/depois.
+- Evidências e Auditoria.
 - Qualidade dos Dados.
-- Relatórios diário, semanal e mensal, com seletor de período, geração mockada e preview executivo.
-- Chatbot com respostas mockadas para comparação, setores, backlog, rondas, climatização e evidências.
+- Relatórios diário, semanal e mensal.
+- Chatbot com respostas mockadas.
+- Filtros de período, projeto, subprojeto, andar, status e responsável.
+- Comparação antes/depois nas evidências.
+- Dados pessoais não expostos nos mocks.
 
-### Consistência dos mocks
+## Evidência visual
 
-- 3.783 = 3.672 concluídas + 111 em aberto.
-- Projetos somam 3.783 tarefas.
-- Evolução mensal soma 3.783 tarefas.
-- Status em aberto somam 111 tarefas.
-- Climatização soma 1.945 solicitações.
-- 96 tarefas de demonstração.
-- 32 registros de evidência.
-- 6 relatórios, cobrindo Diário, Semanal e Mensal.
-- Andares operacionais: 12º, 14º, 15º e 16º.
+A captura validada está em:
 
-## Comandos de validação incluídos
+```text
+validation/overview-1900x1200.png
+```
+
+Medição do documento durante a captura:
+
+```text
+scrollWidth: 1900
+clientWidth: 1900
+scrollHeight: 1200
+clientHeight: 1200
+```
+
+Isso confirma ausência de overflow na resolução-alvo.
+
+## Comandos de validação
 
 ```bash
 npm run validate:source
+npm run lint
+npm run build
 ```
 
-O comando acima executa o checklist automatizado de componentes, páginas, filtros, KPIs, relatórios, evidências, chatbot e estrutura visual.
+O checklist de origem e a validação sintática foram executados neste ambiente. A validação visual foi feita em Chromium headless com viewport exato de 1900 × 1200 px.
 
-## Limitação do ambiente de validação
+## Observação sobre build
 
-O `npm install` e, consequentemente, o build final com Vite não puderam ser executados neste ambiente porque o registro npm estava indisponível por falha de resolução de DNS. Para reduzir o risco, foram executadas validações independentes de sintaxe, tipagem do núcleo, integridade dos dados, checklist de requisitos e prévia visual. Em um ambiente com acesso ao npm, a validação final recomendada é:
+A instalação das dependências pelo registro npm não pôde ser concluída neste ambiente devido à indisponibilidade de rede. Por isso, o build Vite deve ser repetido no ambiente de publicação que tenha acesso às dependências:
 
 ```bash
 npm install
 npm run validate:source
 npm run lint
 npm run build
-npm run dev
 ```

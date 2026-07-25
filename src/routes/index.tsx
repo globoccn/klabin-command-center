@@ -95,24 +95,28 @@ function Overview() {
             </ChartCard>
 
             <ChartCard title="Evolução de Tarefas por Mês">
-              <Legend
-                items={[
-                  { name: "Concluídas", color: "#40C35A" },
-                  { name: "Em Aberto", color: "#FF7918" },
-                  { name: "Total", color: "#E8EEEB", dashed: true },
-                ]}
-              />
-              <ResponsiveContainer width="100%" height={125}>
-                <LineChart data={data.evolucaoMensal} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
-                  <CartesianGrid stroke="rgba(110,195,156,.075)" vertical={false} />
-                  <XAxis dataKey="month" stroke="#99AAA5" fontSize={9} tickLine={false} axisLine={false} dy={5} />
-                  <YAxis stroke="#99AAA5" fontSize={9} tickLine={false} axisLine={false} />
-                  <Tooltip {...tooltipStyle} />
-                  <Line type="monotone" dataKey="concluidas" stroke="#40C35A" strokeWidth={2.2} dot={{ r: 2.5, fill: "#40C35A", strokeWidth: 0 }} activeDot={{ r: 4 }} name="Concluídas" />
-                  <Line type="monotone" dataKey="emAberto" stroke="#FF7918" strokeWidth={1.8} dot={{ r: 2.3, fill: "#FF7918", strokeWidth: 0 }} name="Em Aberto" />
-                  <Line type="monotone" dataKey="total" stroke="#E8EEEB" strokeWidth={1.4} strokeDasharray="3 4" dot={false} name="Total" />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="overview-line-layout">
+                <Legend
+                  items={[
+                    { name: "Concluídas", color: "#40C35A" },
+                    { name: "Em Aberto", color: "#FF7918" },
+                    { name: "Total", color: "#E8EEEB", dashed: true },
+                  ]}
+                />
+                <div className="min-h-0 flex-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={data.evolucaoMensal} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
+                      <CartesianGrid stroke="rgba(110,195,156,.075)" vertical={false} />
+                      <XAxis dataKey="month" stroke="#99AAA5" fontSize={9} tickLine={false} axisLine={false} dy={5} />
+                      <YAxis stroke="#99AAA5" fontSize={9} tickLine={false} axisLine={false} />
+                      <Tooltip {...tooltipStyle} />
+                      <Line type="monotone" dataKey="concluidas" stroke="#40C35A" strokeWidth={2.2} dot={{ r: 2.5, fill: "#40C35A", strokeWidth: 0 }} activeDot={{ r: 4 }} name="Concluídas" />
+                      <Line type="monotone" dataKey="emAberto" stroke="#FF7918" strokeWidth={1.8} dot={{ r: 2.3, fill: "#FF7918", strokeWidth: 0 }} name="Em Aberto" />
+                      <Line type="monotone" dataKey="total" stroke="#E8EEEB" strokeWidth={1.4} strokeDasharray="3 4" dot={false} name="Total" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </ChartCard>
 
             <ChartCard title="Status dos itens em aberto">
@@ -138,14 +142,16 @@ function Overview() {
             </ChartCard>
 
             <ChartCard title="Top 5 Setores — Climatização" action>
-              <ResponsiveContainer width="100%" height={116}>
-                <BarChart data={data.topSetoresClimatizacao} layout="vertical" margin={{ top: 0, right: 26, bottom: 0, left: -8 }}>
+              <div className="h-full min-h-[116px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data.topSetoresClimatizacao} layout="vertical" margin={{ top: 0, right: 26, bottom: 0, left: -8 }}>
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" width={42} stroke="#D4DEDA" fontSize={9} tickLine={false} axisLine={false} />
                   <Tooltip {...tooltipStyle} />
-                  <Bar dataKey="value" fill="#5CCB42" radius={[0, 2, 2, 0]} barSize={10} label={{ position: "right", fill: "#EAF0ED", fontSize: 9 }} />
-                </BarChart>
-              </ResponsiveContainer>
+                    <Bar dataKey="value" fill="#5CCB42" radius={[0, 2, 2, 0]} barSize={10} label={{ position: "right", fill: "#EAF0ED", fontSize: 9 }} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </ChartCard>
 
             <ChartCard title="Climatização — Horário de Abertura">
@@ -174,14 +180,16 @@ function Overview() {
             <ChartCard title="Evidências Fotográficas">
               <div className="grid h-full grid-cols-[1fr_1.05fr] items-center gap-2">
                 <div className="relative min-w-0">
-                  <ResponsiveContainer width="100%" height={112}>
-                    <PieChart>
+                  <div className="h-full min-h-[112px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
                       <Pie data={[{ v: data.evidencias.percentualComEvidencia }, { v: 100 - data.evidencias.percentualComEvidencia }]} dataKey="v" innerRadius={39} outerRadius={53} startAngle={90} endAngle={-270} stroke="none">
                         <Cell fill="#44C94B" />
                         <Cell fill="rgba(110,195,156,.14)" />
                       </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                   <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                     <div className="text-[24px] font-bold leading-none text-white">{fmtDec(data.evidencias.percentualComEvidencia)}%</div>
                     <div className="mt-1 max-w-[70px] text-center text-[8px] leading-tight text-muted-foreground">das tarefas com evidências</div>
@@ -212,10 +220,10 @@ function Overview() {
 function OverviewLoading() {
   return (
     <div className="space-y-3">
-      <div className="kpi-grid-reference">{Array.from({ length: 6 }, (_, index) => <LoadingSkeleton key={index} className="h-[116px]" />)}</div>
-      <div className="overview-row-primary">{Array.from({ length: 3 }, (_, index) => <LoadingSkeleton key={index} className="h-[190px]" />)}</div>
-      <div className="overview-row-secondary">{Array.from({ length: 4 }, (_, index) => <LoadingSkeleton key={index} className="h-[162px]" />)}</div>
-      <div className="overview-row-tertiary">{Array.from({ length: 4 }, (_, index) => <LoadingSkeleton key={index} className="h-[188px]" />)}</div>
+      <div className="kpi-grid-reference">{Array.from({ length: 6 }, (_, index) => <LoadingSkeleton key={index} className="h-[clamp(116px,11vh,132px)]" />)}</div>
+      <div className="overview-row-primary">{Array.from({ length: 3 }, (_, index) => <LoadingSkeleton key={index} className="h-[clamp(190px,20vh,240px)]" />)}</div>
+      <div className="overview-row-secondary">{Array.from({ length: 4 }, (_, index) => <LoadingSkeleton key={index} className="h-[clamp(162px,18vh,216px)]" />)}</div>
+      <div className="overview-row-tertiary">{Array.from({ length: 4 }, (_, index) => <LoadingSkeleton key={index} className="h-[clamp(188px,20vh,240px)]" />)}</div>
     </div>
   );
 }
@@ -287,15 +295,17 @@ function Legend({ items }: { items: { name: string; color: string; dashed?: bool
 
 function VerticalBars({ data }: { data: ChartSeries[] }) {
   return (
-    <ResponsiveContainer width="100%" height={116}>
-      <BarChart data={data} margin={{ top: 18, right: 0, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke="rgba(110,195,156,.06)" vertical={false} />
-        <XAxis dataKey="name" stroke="#D4DEDA" fontSize={9} tickLine={false} axisLine={false} dy={5} />
-        <YAxis hide />
-        <Tooltip {...tooltipStyle} />
-        <Bar dataKey="value" fill="#31B851" radius={[2, 2, 0, 0]} barSize={26} label={{ position: "top", fill: "#F3F6F5", fontSize: 9 }} />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="h-full min-h-[116px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 18, right: 0, left: 0, bottom: 0 }}>
+          <CartesianGrid stroke="rgba(110,195,156,.06)" vertical={false} />
+          <XAxis dataKey="name" stroke="#D4DEDA" fontSize={9} tickLine={false} axisLine={false} dy={5} />
+          <YAxis hide />
+          <Tooltip {...tooltipStyle} />
+          <Bar dataKey="value" fill="#31B851" radius={[2, 2, 0, 0]} barSize={26} label={{ position: "top", fill: "#F3F6F5", fontSize: 9 }} />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -305,7 +315,7 @@ function RoundActivities({ data }: { data: ChartSeries[] }) {
   const max = Math.max(...data.map((item) => item.value), 1);
 
   return (
-    <div className="space-y-[7px] pt-1">
+    <div className="round-activities-list space-y-[7px] pt-1">
       {data.map((item, index) => {
         const Icon = roundIcons[index % roundIcons.length];
         return (

@@ -75,9 +75,12 @@ const chatSource = read("src/services/chatService.ts");
 for (const intent of ["compare", "setores", "backlog", "rondas", "clima"]) check(`Chatbot: intenção ${intent}`, chatSource.includes(`${intent}:`));
 
 const styles = read("src/styles.css");
-check("Sidebar de referência", styles.includes("w-[188px]") || read("src/components/app-sidebar.tsx").includes("w-[188px]"));
+check("Sidebar de referência", read("src/components/app-sidebar.tsx").includes("w-[188px]") && styles.includes(".app-sidebar-command"));
 check("Grid com 6 KPIs", styles.includes("repeat(6"));
-check("Layout sem overflow na referência", exists("validation/overview-validated.png"));
+check("Layout otimizado para 1900 × 1200", styles.includes("min-width: 1700px") && styles.includes("min-height: 1100px"));
+const viteConfig = read("vite.config.ts");
+check("Host Klabin autorizado no Vite", viteConfig.includes('allowedHosts: ["klabin.facilities-ai.com.br"]'));
+check("Evidência visual 1900 × 1200", exists("validation/overview-1900x1200.png"));
 
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));
 const passed = results.filter((result) => result.passed).length;

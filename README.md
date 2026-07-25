@@ -45,3 +45,19 @@ O checklist interno valida 65 requisitos de componentes, páginas, filtros, indi
 Os dados atuais são mockados em `src/data/mockData.ts`. A camada assíncrona de serviços está separada em `src/services`, permitindo substituir os mocks por endpoints reais sem reconstruir as páginas.
 
 Consulte `VALIDATION_REPORT.md` para o resultado completo da validação e `validation/overview-validated.png` para a evidência visual.
+
+## Publicação Klabin
+
+O host de desenvolvimento autorizado está configurado em `vite.config.ts` como:
+
+```text
+klabin.facilities-ai.com.br
+```
+
+URL prevista de publicação:
+
+```text
+https://klabin.facilities-ai.com.br/
+```
+
+A tela principal possui otimização específica para **1900 × 1200 px**, preservando o comportamento responsivo nas demais resoluções.

@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertTriangle, CalendarDays, CheckCircle2, Lightbulb, Plus, TrendingUp } from "lucide-react";
+import { AlertTriangle, CalendarDays, CheckCircle2, Database, Lightbulb, Plus, TrendingUp } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { ReportCard } from "@/components/report-card";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { downloadReport, generateReport, getReports } from "@/services/reportService";
-import type { Report } from "@/types/dashboard";
+import { getFilterOptions } from "@/services/dashboardService";
+import type { Report, SnapshotMetadata } from "@/types/dashboard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fmtDateTime } from "@/lib/format";
@@ -17,84 +18,182 @@ export const Route = createFileRoute("/relatorios")({
   head: () => ({
     meta: [
       { title: "Relatórios · Klabin" },
-      { name: "description", content: "Geração e visualização de relatórios operacionais diários, semanais e mensais." },
+      { name: "description", content: "Relatórios operacionais ancorados na última data disponível do snapshot." },
       { property: "og:title", content: "Relatórios · Klabin" },
-      { property: "og:description", content: "Resumos executivos, indicadores, destaques, riscos e recomendações." },
+      { property: "og:description", content: "Resumos executivos diários, semanais e mensais." },
     ],
   }),
   component: Relatorios,
 });
 
 const reportTypes: Report["tipo"][] = ["Diário", "Semanal", "Mensal"];
-const initialPeriod = { inicio: "2026-06-01", fim: "2026-07-23" };
+type ReportTab = Report["tipo"] | "Todos";
+
+function addDays(iso: string, days: number) {
+  const date = new Date(`${iso}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+function periodFor(type: Report["tipo"], referenceDate: string) {
+  if (type === "Diário") return { inicio: referenceDate, fim: referenceDate };
+  if (type === "Semanal") return { inicio: addDays(referenceDate, -6), fim: referenceDate };
+  return { inicio: `${referenceDate.slice(0, 7)}-01`, fim: referenceDate };
+}
+
+function fmtDate(iso?: string) {
+  if (!iso) return "—";
+  const [year, month, day] = iso.slice(0, 10).split("-");
+  return `${day}/${month}/${year}`;
+}
+
+function periodLabel(type: ReportTab, period: { inicio: string; fim: string } | null) {
+  if (type === "Todos") return "Todos os relatórios gerados";
+  if (!period) return "Carregando período do snapshot…";
+  if (type === "Diário") return fmtDate(period.fim);
+  return `${fmtDate(period.inicio)} – ${fmtDate(period.fim)}`;
+}
 
 function Relatorios() {
-  const [type, setType] = useState<Report["tipo"] | "Todos">("Todos");
-  const [period, setPeriod] = useState(initialPeriod);
+  const [type, setType] = useState<ReportTab>("Diário");
+  const [snapshot, setSnapshot] = useState<SnapshotMetadata | null>(null);
   const [items, setItems] = useState<Report[] | null>(null);
   const [preview, setPreview] = useState<Report | null>(null);
   const [generating, setGenerating] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
+  const period = useMemo(() => {
+    if (!snapshot?.periodEnd || type === "Todos") return null;
+    return periodFor(type, snapshot.periodEnd.slice(0, 10));
+  }, [snapshot, type]);
+
   useEffect(() => {
     let active = true;
+    getFilterOptions()
+      .then((options) => { if (active) setSnapshot(options.snapshot ?? null); })
+      .catch((error) => toast.error(error instanceof Error ? error.message : "Falha ao carregar o período do snapshot"));
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (type !== "Todos" && !period) return;
+    let active = true;
     setItems(null);
-    getReports(type === "Todos" ? undefined : type, period).then((result) => active && setItems(result)).catch((error) => { if (active) { setItems([]); toast.error(error instanceof Error ? error.message : "Falha ao carregar relatórios"); } });
+    getReports(type === "Todos" ? undefined : type, period ?? undefined)
+      .then((result) => { if (active) setItems(result); })
+      .catch((error) => {
+        if (active) {
+          setItems([]);
+          toast.error(error instanceof Error ? error.message : "Falha ao carregar relatórios");
+        }
+      });
     return () => { active = false; };
   }, [type, period]);
 
   const create = async () => {
+    if (type === "Todos") {
+      toast.info("Selecione Diário, Semanal ou Mensal para gerar um relatório.");
+      return;
+    }
+    if (!snapshot?.periodEnd) {
+      toast.error("A última data do snapshot ainda não foi carregada.");
+      return;
+    }
+
     setGenerating(true);
     try {
-      const report = await generateReport(type === "Todos" ? "Diário" : type, period);
+      const report = await generateReport(type);
       setItems((current) => [report, ...(current ?? []).filter((item) => item.id !== report.id)]);
-      toast.success(report.status === "Pronto" ? "Relatório PDF gerado com sucesso" : "A geração do relatório foi registrada");
+      if (report.status === "Pronto") toast.success("Relatório PDF gerado com sucesso");
+      else if (report.status === "Falhou") toast.error(report.erro || "A geração do PDF falhou. Abra o relatório para ver o detalhe.");
+      else toast.success("A geração do relatório foi registrada");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório");
-    } finally { setGenerating(false); }
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const download = async (report: Report) => {
     setDownloadingId(report.id);
-    try { await downloadReport(report); toast.success("Download do PDF iniciado"); }
-    catch (error) { toast.error(error instanceof Error ? error.message : "Falha ao baixar o PDF"); }
-    finally { setDownloadingId(null); }
+    try {
+      await downloadReport(report);
+      toast.success("Download do PDF iniciado");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Falha ao baixar o PDF");
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   return (
     <div className="command-page animate-fade-in-up">
-      <DashboardHeader title="Relatórios" subtitle="Relatórios diários, semanais e mensais com resumo executivo" />
+      <DashboardHeader title="Relatórios" subtitle="Períodos demonstrativos calculados pela última data disponível no snapshot" />
 
       <div className="command-card mb-4 flex flex-col gap-3 p-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex gap-1 rounded-[10px] border border-border bg-background/38 p-1">
             {(["Todos", ...reportTypes] as const).map((item) => (
-              <button key={item} type="button" onClick={() => setType(item)} className={`rounded-[7px] px-3 py-2 text-[10px] font-medium transition ${type === item ? "bg-primary text-primary-foreground shadow-[0_0_18px_rgba(18,183,106,.16)]" : "text-muted-foreground hover:bg-primary/8 hover:text-foreground"}`}>
+              <button
+                key={item}
+                type="button"
+                onClick={() => setType(item)}
+                className={`rounded-[7px] px-3 py-2 text-[10px] font-medium transition ${type === item ? "bg-primary text-primary-foreground shadow-[0_0_18px_rgba(18,183,106,.16)]" : "text-muted-foreground hover:bg-primary/8 hover:text-foreground"}`}
+              >
                 {item}
               </button>
             ))}
           </div>
 
-          <div className="flex h-10 items-center gap-2 rounded-[10px] border border-border bg-background/38 px-3">
+          <div className="flex h-10 min-w-[250px] items-center gap-2 rounded-[10px] border border-border bg-background/38 px-3">
             <CalendarDays className="h-3.5 w-3.5 text-primary-glow" />
-            <input aria-label="Início do período" type="date" value={period.inicio} onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPeriod((current) => ({ ...current, inicio: event.target.value }))} className="bg-transparent text-[10px] outline-none" />
-            <span className="text-muted-foreground">–</span>
-            <input aria-label="Fim do período" type="date" value={period.fim} onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPeriod((current) => ({ ...current, fim: event.target.value }))} className="bg-transparent text-[10px] outline-none" />
+            <div>
+              <div className="text-[8px] uppercase tracking-wide text-muted-foreground">Período automático</div>
+              <div className="text-[10px] font-medium text-foreground">{periodLabel(type, period)}</div>
+            </div>
           </div>
+
+          {snapshot && (
+            <div className="flex h-10 items-center gap-2 rounded-[10px] border border-primary/18 bg-primary/5 px-3">
+              <Database className="h-3.5 w-3.5 text-primary-glow" />
+              <div>
+                <div className="text-[8px] uppercase tracking-wide text-muted-foreground">Último dado disponível</div>
+                <div className="text-[10px] font-medium text-primary-glow">{fmtDate(snapshot.periodEnd)}</div>
+              </div>
+            </div>
+          )}
         </div>
 
-        <Button onClick={create} disabled={generating} className="h-10 bg-primary text-xs text-primary-foreground hover:bg-primary-glow">
+        <Button
+          onClick={create}
+          disabled={generating || type === "Todos" || !snapshot}
+          className="h-10 bg-primary text-xs text-primary-foreground hover:bg-primary-glow"
+        >
           <Plus className="mr-1 h-4 w-4" /> {generating ? "Gerando…" : "Gerar novo relatório"}
         </Button>
       </div>
 
+      {snapshot && type !== "Todos" && period && (
+        <div className="mb-4 rounded-xl border border-primary/16 bg-primary/5 px-4 py-3 text-[10px] text-muted-foreground">
+          <strong className="text-primary-glow">Regra demonstrativa:</strong>{" "}
+          {type === "Diário" && "último dia existente no JSON."}
+          {type === "Semanal" && "últimos sete dias encerrando na última data do JSON."}
+          {type === "Mensal" && "mês da última data do JSON, do primeiro dia até a data disponível."}
+          {" "}Fonte: {snapshot.fileName} · Base disponível de {fmtDate(snapshot.periodStart)} a {fmtDate(snapshot.periodEnd)}.
+        </div>
+      )}
+
       {!items ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }, (_, index) => <LoadingSkeleton key={index} className="h-[220px]" />)}</div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => <LoadingSkeleton key={index} className="h-[220px]" />)}
+        </div>
       ) : items.length === 0 ? (
-        <div className="command-card"><EmptyState title="Nenhum relatório no período" description="Altere o período ou gere um novo relatório." /></div>
+        <div className="command-card"><EmptyState title="Nenhum relatório gerado" description={type === "Todos" ? "Gere o primeiro relatório demonstrativo." : "Gere o relatório correspondente ao período automático selecionado."} /></div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {items.map((report) => <ReportCard key={report.id} report={report} onView={setPreview} onDownload={download} downloading={downloadingId === report.id} />)}
+          {items.map((report) => (
+            <ReportCard key={report.id} report={report} onView={setPreview} onDownload={download} downloading={downloadingId === report.id} />
+          ))}
         </div>
       )}
 
@@ -107,6 +206,13 @@ function Relatorios() {
                 <div className="text-[10px] text-muted-foreground">{preview.periodo} · Gerado em {fmtDateTime(preview.geradoEm)}</div>
               </DialogHeader>
 
+              {preview.status === "Falhou" && (
+                <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/8 p-3 text-xs text-destructive">
+                  <div className="mb-1 font-semibold">A geração do PDF falhou</div>
+                  <div className="break-words text-[10px] text-[#ffd7d7]">{preview.erro || "O backend não registrou detalhes do erro. Compartilhe a execução do workflow 14 para diagnóstico."}</div>
+                </div>
+              )}
+
               <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4">
                 {preview.indicadores?.map((metric) => (
                   <div key={metric.label} className="rounded-xl border border-primary/20 bg-primary/6 p-3">
@@ -117,14 +223,14 @@ function Relatorios() {
                 ))}
               </div>
 
-              {preview.tendencia && (
+              {preview.tendencia && preview.tendencia.length > 0 && (
                 <div className="mt-4 rounded-xl border border-border bg-background/22 p-3">
                   <div className="mb-2 text-xs font-semibold">Evolução no período</div>
                   <ResponsiveContainer width="100%" height={170}>
                     <BarChart data={preview.tendencia}>
                       <XAxis dataKey="name" stroke="#AAB8B2" fontSize={10} tickLine={false} axisLine={false} />
                       <YAxis stroke="#AAB8B2" fontSize={10} tickLine={false} axisLine={false} />
-                      <Tooltip contentStyle={{ background: "#0b1d22", border: "1px solid rgba(110,195,156,.25)", borderRadius: 8, fontSize: 10 }} />
+                      <Tooltip contentStyle={{ background: "#0b1d22", border: "1px solid rgba(110,195,156,.25)", borderRadius: 8, fontSize: 10, color: "#F5F7F6" }} />
                       <Bar dataKey="value" fill="#39E75F" radius={[5, 5, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -132,13 +238,15 @@ function Relatorios() {
               )}
 
               <div className="mt-4 space-y-3 text-sm">
-                <ReportSection title="Resumo Executivo" icon={<TrendingUp className="h-4 w-4" />}><p className="text-xs leading-relaxed text-muted-foreground">{preview.resumo}</p></ReportSection>
+                <ReportSection title="Resumo Executivo" icon={<TrendingUp className="h-4 w-4" />}><p className="text-xs leading-relaxed text-muted-foreground">{preview.resumo || "Resumo indisponível."}</p></ReportSection>
                 <ReportSection title="Destaques" icon={<CheckCircle2 className="h-4 w-4" />}><List items={preview.destaques} color="text-primary-glow" /></ReportSection>
                 <ReportSection title="Riscos" icon={<AlertTriangle className="h-4 w-4" />} tone="warning"><List items={preview.riscos} color="text-warning" empty="Nenhum risco relevante no período." /></ReportSection>
                 <ReportSection title="Recomendações" icon={<Lightbulb className="h-4 w-4" />} tone="info"><List items={preview.recomendacoes} color="text-[color:var(--info)]" /></ReportSection>
               </div>
 
-              <div className="mt-4 flex justify-end"><Button variant="outline" className="border-primary/30 text-primary-glow" onClick={() => download(preview)} disabled={downloadingId === preview.id}>Baixar PDF</Button></div>
+              <div className="mt-4 flex justify-end">
+                <Button variant="outline" className="border-primary/30 text-primary-glow" onClick={() => download(preview)} disabled={preview.status !== "Pronto" || downloadingId === preview.id}>Baixar PDF</Button>
+              </div>
             </>
           )}
         </DialogContent>

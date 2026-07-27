@@ -11,8 +11,8 @@ export async function getReport(id: string): Promise<Report> {
   return apiGet<Report>(`reports/${encodeURIComponent(id)}`);
 }
 
-export async function generateReport(tipo: Report["tipo"], period: { inicio: string; fim: string }): Promise<Report> {
-  return apiPost<Report>("reports/generate", { type: typeCode[tipo], period, requestedBy: "frontend", force: false });
+export async function generateReport(tipo: Report["tipo"]): Promise<Report> {
+  return apiPost<Report>("reports/generate", { type: typeCode[tipo], requestedBy: "frontend", force: false });
 }
 
 export async function downloadReport(report: Report) {

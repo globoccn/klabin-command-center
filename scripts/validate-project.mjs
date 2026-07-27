@@ -68,7 +68,10 @@ for (const field of ["Tipo", "Atividade", "Andar", "Responsável", "Data inicial
 check("Comparação antes/depois", evidenceSource.includes('label="Antes"') && evidenceSource.includes('label="Depois"'));
 
 const reportSource = read("src/routes/relatorios.tsx");
-check("Seletor de período dos relatórios", reportSource.includes('type="date"'));
+check("Período automático dos relatórios", reportSource.includes("Período automático") && reportSource.includes("Último dado disponível"));
+check("Relatório diário ancorado no último dia", reportSource.includes("último dia existente no JSON"));
+check("Relatório semanal com sete dias", reportSource.includes("últimos sete dias"));
+check("Relatório mensal até a última data", reportSource.includes("mês da última data do JSON"));
 check("Preview executivo dos relatórios", ["Resumo Executivo", "Destaques", "Riscos", "Recomendações", "Evolução no período"].every((item) => reportSource.includes(item)));
 
 const chatSource = read("src/services/chatService.ts");

@@ -93,8 +93,9 @@ check("Arquivo transparente da Facilities AI disponível", exists("public/facili
 
 
 const reportService = read("src/services/reportService.ts");
-check("Relatórios conectados à API n8n", reportService.includes('apiPost<Report>("reports/generate"') && reportService.includes('apiDownload(`reports/${encodeURIComponent(report.id)}/download`)'));
-check("Download real em PDF", reportService.includes('anchor.download') && reportService.includes('blob.slice(0, 5)') && reportService.includes('setTimeout') && reportService.includes('URL.revokeObjectURL'));
+const reportCard = read("src/components/report-card.tsx");
+check("Relatórios conectados à API n8n", reportService.includes('apiPost<Report>("reports/generate"') && reportService.includes('url.searchParams.set("reportId", report.id)'));
+check("Download direto em PDF", reportService.includes('`${baseUrl}/reports/download`') && reportCard.includes('href={getReportDownloadUrl(report)}') && !reportService.includes('URL.createObjectURL'));
 check("Tela de relatórios possui botão Baixar PDF", read("src/components/report-card.tsx").includes("Baixar PDF"));
 
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));

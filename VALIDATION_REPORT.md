@@ -126,3 +126,12 @@ npm run build
 - valida assinatura `%PDF-`;
 - mantém a Object URL ativa por cinco segundos após o clique;
 - evita cancelamento silencioso do download em navegadores que processam o clique de forma assíncrona.
+
+
+## Correção definitiva do download
+
+- removido o fluxo `fetch → Blob → URL.createObjectURL`;
+- download passa a ser uma navegação HTTP direta para o endpoint do n8n;
+- o navegador usa o cabeçalho `Content-Disposition: attachment` retornado pelo workflow;
+- rota estabilizada em `/reports/download?reportId=...`;
+- eliminação da dependência de CORS, permissões de `blob:` e gesto assíncrono do navegador.

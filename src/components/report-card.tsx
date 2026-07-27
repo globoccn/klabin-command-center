@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { fmtDateTime } from "@/lib/format";
 import type { Report } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
+import { getReportDownloadUrl } from "@/services/reportService";
 
-export function ReportCard({ report, onView, onDownload, downloading = false }: { report: Report; onView: (report: Report) => void; onDownload: (report: Report) => void | Promise<void>; downloading?: boolean }) {
+export function ReportCard({ report, onView }: { report: Report; onView: (report: Report) => void }) {
   const ready = report.status === "Pronto" && report.pdfDisponivel !== false;
   const canView = ready || report.status === "Falhou";
   const size = report.tamanhoBytes ? `${(report.tamanhoBytes / 1024).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} KB` : "PDF";
@@ -21,7 +22,25 @@ export function ReportCard({ report, onView, onDownload, downloading = false }: 
       {report.status === "Falhou" && report.erro && <div className="mt-2 line-clamp-2 text-[9px] leading-relaxed text-[#ffb7b7]">{report.erro}</div>}
       <div className="mt-auto flex gap-2 pt-4">
         <Button size="sm" onClick={() => onView(report)} className="h-8 flex-1 bg-primary text-[10px] text-primary-foreground hover:bg-primary-glow" disabled={!canView}><Eye className="mr-1 h-3.5 w-3.5" /> Visualizar</Button>
-        <Button size="sm" variant="outline" className="h-8 min-w-24 border-border px-2 text-[10px] hover:border-primary/35 hover:bg-primary/8" onClick={() => onDownload(report)} disabled={!ready || downloading} aria-label="Baixar relatório PDF"><Download className="mr-1 h-3.5 w-3.5" />{downloading ? "Baixando…" : "Baixar PDF"}</Button>
+        {ready ? (
+          <Button asChild size="sm" variant="outline" className="h-8 min-w-24 border-border px-2 text-[10px] hover:border-primary/35 hover:bg-primary/8">
+            <a
+              href={getReportDownloadUrl(report)}
+              target="_blank"
+              rel="noopener noreferrer"
+              download={report.arquivoNome || undefined}
+              aria-label="Baixar relatório PDF"
+            >
+              <Download className="mr-1 h-3.5 w-3.5" />
+              Baixar PDF
+            </a>
+          </Button>
+        ) : (
+          <Button size="sm" variant="outline" className="h-8 min-w-24 border-border px-2 text-[10px]" disabled aria-label="PDF indisponível">
+            <Download className="mr-1 h-3.5 w-3.5" />
+            Baixar PDF
+          </Button>
+        )}
       </div>
     </article>
   );

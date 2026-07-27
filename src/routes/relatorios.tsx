@@ -5,7 +5,7 @@ import { AlertTriangle, CalendarDays, CheckCircle2, Database, Lightbulb, Plus, T
 import { DashboardHeader } from "@/components/dashboard-header";
 import { ReportCard } from "@/components/report-card";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
-import { downloadReport, generateReport, getReports } from "@/services/reportService";
+import { generateReport, getReportDownloadUrl, getReports } from "@/services/reportService";
 import { getFilterOptions } from "@/services/dashboardService";
 import type { Report, SnapshotMetadata } from "@/types/dashboard";
 import { Button } from "@/components/ui/button";
@@ -60,7 +60,6 @@ function Relatorios() {
   const [items, setItems] = useState<Report[] | null>(null);
   const [preview, setPreview] = useState<Report | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const period = useMemo(() => {
     if (!snapshot?.periodEnd || type === "Todos") return null;
@@ -111,18 +110,6 @@ function Relatorios() {
       toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório");
     } finally {
       setGenerating(false);
-    }
-  };
-
-  const download = async (report: Report) => {
-    setDownloadingId(report.id);
-    try {
-      await downloadReport(report);
-      toast.success("Download do PDF iniciado");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Falha ao baixar o PDF");
-    } finally {
-      setDownloadingId(null);
     }
   };
 
@@ -192,7 +179,7 @@ function Relatorios() {
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((report) => (
-            <ReportCard key={report.id} report={report} onView={setPreview} onDownload={download} downloading={downloadingId === report.id} />
+            <ReportCard key={report.id} report={report} onView={setPreview} />
           ))}
         </div>
       )}
@@ -245,7 +232,20 @@ function Relatorios() {
               </div>
 
               <div className="mt-4 flex justify-end">
-                <Button variant="outline" className="border-primary/30 text-primary-glow" onClick={() => download(preview)} disabled={preview.status !== "Pronto" || downloadingId === preview.id}>Baixar PDF</Button>
+                {preview.status === "Pronto" && preview.pdfDisponivel !== false ? (
+                  <Button asChild variant="outline" className="border-primary/30 text-primary-glow">
+                    <a
+                      href={getReportDownloadUrl(preview)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download={preview.arquivoNome || undefined}
+                    >
+                      Baixar PDF
+                    </a>
+                  </Button>
+                ) : (
+                  <Button variant="outline" className="border-primary/30 text-primary-glow" disabled>Baixar PDF</Button>
+                )}
               </div>
             </>
           )}

@@ -196,6 +196,13 @@ export interface Report {
   recomendacoes: string[];
   indicadores?: ReportMetric[];
   tendencia?: ChartSeries[];
+  tipoCodigo?: "daily" | "weekly" | "monthly";
+  periodoInicio?: string;
+  periodoFim?: string;
+  arquivoNome?: string;
+  tamanhoBytes?: number;
+  pdfDisponivel?: boolean;
+  erro?: string | null;
 }
 
 export interface EvidenceRecord {

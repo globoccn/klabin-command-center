@@ -88,6 +88,12 @@ check("KPI Taxa de Conclusão com alinhamento dedicado", read("src/components/kp
 check("Logo Facilities AI adicionada à sidebar", read("src/components/app-sidebar.tsx").includes('src="/facilities-ai-logo.png"') && styles.includes(".sidebar-facilities-brand"));
 check("Arquivo transparente da Facilities AI disponível", exists("public/facilities-ai-logo.png"));
 
+
+const reportService = read("src/services/reportService.ts");
+check("Relatórios conectados à API n8n", reportService.includes('apiPost<Report>("reports/generate"') && reportService.includes('apiDownload(`reports/${encodeURIComponent(report.id)}/download`)'));
+check("Download real em PDF", reportService.includes('anchor.download') && reportService.includes('application/pdf') === false);
+check("Tela de relatórios possui botão Baixar PDF", read("src/components/report-card.tsx").includes("Baixar PDF"));
+
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));
 const passed = results.filter((result) => result.passed).length;
 console.log(`\n${passed}/${results.length} validações aprovadas.`);

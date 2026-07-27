@@ -26,7 +26,7 @@ export const Route = createFileRoute("/relatorios")({
 });
 
 const reportTypes: Report["tipo"][] = ["Diário", "Semanal", "Mensal"];
-const initialPeriod = { inicio: "2026-06-01", fim: "2026-07-24" };
+const initialPeriod = { inicio: "2026-06-01", fim: "2026-07-23" };
 
 function Relatorios() {
   const [type, setType] = useState<Report["tipo"] | "Todos">("Todos");
@@ -34,20 +34,31 @@ function Relatorios() {
   const [items, setItems] = useState<Report[] | null>(null);
   const [preview, setPreview] = useState<Report | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
     setItems(null);
-    getReports(type === "Todos" ? undefined : type, period).then((result) => active && setItems(result));
+    getReports(type === "Todos" ? undefined : type, period).then((result) => active && setItems(result)).catch((error) => { if (active) { setItems([]); toast.error(error instanceof Error ? error.message : "Falha ao carregar relatórios"); } });
     return () => { active = false; };
   }, [type, period]);
 
   const create = async () => {
     setGenerating(true);
-    const report = await generateReport(type === "Todos" ? "Diário" : type, period);
-    setItems((current) => [report, ...(current ?? [])]);
-    setGenerating(false);
-    toast.success("Novo relatório gerado com sucesso");
+    try {
+      const report = await generateReport(type === "Todos" ? "Diário" : type, period);
+      setItems((current) => [report, ...(current ?? []).filter((item) => item.id !== report.id)]);
+      toast.success(report.status === "Pronto" ? "Relatório PDF gerado com sucesso" : "A geração do relatório foi registrada");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório");
+    } finally { setGenerating(false); }
+  };
+
+  const download = async (report: Report) => {
+    setDownloadingId(report.id);
+    try { await downloadReport(report); toast.success("Download do PDF iniciado"); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "Falha ao baixar o PDF"); }
+    finally { setDownloadingId(null); }
   };
 
   return (
@@ -83,7 +94,7 @@ function Relatorios() {
         <div className="command-card"><EmptyState title="Nenhum relatório no período" description="Altere o período ou gere um novo relatório." /></div>
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {items.map((report) => <ReportCard key={report.id} report={report} onView={setPreview} onDownload={(item) => { downloadReport(item); toast.success("Download iniciado"); }} />)}
+          {items.map((report) => <ReportCard key={report.id} report={report} onView={setPreview} onDownload={download} downloading={downloadingId === report.id} />)}
         </div>
       )}
 
@@ -127,7 +138,7 @@ function Relatorios() {
                 <ReportSection title="Recomendações" icon={<Lightbulb className="h-4 w-4" />} tone="info"><List items={preview.recomendacoes} color="text-[color:var(--info)]" /></ReportSection>
               </div>
 
-              <div className="mt-4 flex justify-end"><Button variant="outline" className="border-primary/30 text-primary-glow" onClick={() => downloadReport(preview)}>Baixar relatório</Button></div>
+              <div className="mt-4 flex justify-end"><Button variant="outline" className="border-primary/30 text-primary-glow" onClick={() => download(preview)} disabled={downloadingId === preview.id}>Baixar PDF</Button></div>
             </>
           )}
         </DialogContent>

@@ -118,3 +118,11 @@ npm run build
 - logo inserida na área intermediária inferior da sidebar, acima dos cards institucionais;
 - posicionamento específico validado para o layout de 1900 × 1200;
 - marca configurada como elemento visual não interativo, sem bloquear navegação.
+
+
+## Correção de download de PDF
+
+- valida tamanho mínimo do arquivo retornado;
+- valida assinatura `%PDF-`;
+- mantém a Object URL ativa por cinco segundos após o clique;
+- evita cancelamento silencioso do download em navegadores que processam o clique de forma assíncrona.

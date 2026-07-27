@@ -17,12 +17,29 @@ export async function generateReport(tipo: Report["tipo"]): Promise<Report> {
 
 export async function downloadReport(report: Report) {
   const { blob, fileName } = await apiDownload(`reports/${encodeURIComponent(report.id)}/download`);
-  const url = URL.createObjectURL(blob);
+
+  if (blob.size < 1024) {
+    throw new Error(`O PDF retornado possui apenas ${blob.size} bytes.`);
+  }
+
+  const header = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
+  const signature = String.fromCharCode(...header);
+  if (signature !== "%PDF-") {
+    throw new Error(`O endpoint de download não retornou um PDF válido. Assinatura recebida: ${signature || "vazia"}.`);
+  }
+
+  const objectUrl = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
-  anchor.href = url;
+  anchor.href = objectUrl;
   anchor.download = fileName || report.arquivoNome || "relatorio-klabin.pdf";
+  anchor.style.display = "none";
   document.body.appendChild(anchor);
   anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
+
+  // Alguns navegadores ainda estão iniciando o download quando o click retorna.
+  // Revogar a URL imediatamente pode cancelar silenciosamente o arquivo.
+  window.setTimeout(() => {
+    anchor.remove();
+    URL.revokeObjectURL(objectUrl);
+  }, 5000);
 }

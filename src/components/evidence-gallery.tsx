@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Camera, CalendarDays, Image, RotateCcw, Search } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Camera, CalendarDays, ChevronDown, Image, LoaderCircle, RotateCcw, Search } from "lucide-react";
 import { getEvidence } from "@/services/dashboardService";
 import type { EvidenceRecord, EvidenceResponse } from "@/types/dashboard";
 import { fmtDate } from "@/lib/format";
@@ -11,6 +11,8 @@ import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { Button } from "@/components/ui/button";
 
 const evidenceTypes = ["Todos", "Antes", "Depois", "Ronda", "CPD"] as const;
+const PAGE_SIZE = 24;
+
 const badgeColor: Record<string, string> = {
   Antes: "border-warning/30 bg-warning/15 text-warning",
   Depois: "border-primary/30 bg-primary/15 text-primary-glow",
@@ -28,32 +30,81 @@ const initialFilters = {
   busca: "",
 };
 
-const EMPTY_RESPONSE: EvidenceResponse = { items: [], total: 0, options: { activities: [], floors: [], responsibles: [] } };
+const EMPTY_RESPONSE: EvidenceResponse = {
+  items: [],
+  total: 0,
+  page: 1,
+  pageSize: PAGE_SIZE,
+  totalPages: 0,
+  hasMore: false,
+  options: { activities: [], floors: [], responsibles: [] },
+};
 
 export function EvidenceGallery() {
   const [filters, setFilters] = useState(initialFilters);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [response, setResponse] = useState<EvidenceResponse | null>(null);
   const [selected, setSelected] = useState<EvidenceRecord | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const requestSequence = useRef(0);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedSearch(filters.busca), 280);
+    const timer = window.setTimeout(() => setDebouncedSearch(filters.busca), 350);
     return () => window.clearTimeout(timer);
   }, [filters.busca]);
 
   useEffect(() => {
-    let active = true;
-    setResponse(null);
-    getEvidence({ ...filters, busca: debouncedSearch, limit: 300 })
-      .then((result) => active && setResponse(result))
-      .catch(() => active && setResponse(EMPTY_RESPONSE));
-    return () => { active = false; };
+    const controller = new AbortController();
+    const requestId = ++requestSequence.current;
+    setLoading(true);
+
+    getEvidence(
+      { ...filters, busca: debouncedSearch, page: 1, pageSize: PAGE_SIZE },
+      controller.signal,
+    )
+      .then((result) => {
+        if (requestId === requestSequence.current) setResponse(result);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        if (requestId === requestSequence.current) setResponse(EMPTY_RESPONSE);
+      })
+      .finally(() => {
+        if (requestId === requestSequence.current) setLoading(false);
+      });
+
+    return () => controller.abort();
   }, [filters.tipo, filters.atividade, filters.andar, filters.responsavel, filters.inicio, filters.fim, debouncedSearch]);
 
   const activities = useMemo(() => ["Todas", ...(response?.options.activities ?? [])], [response]);
   const floors = useMemo(() => ["Todos", ...(response?.options.floors ?? [])], [response]);
   const responsibles = useMemo(() => ["Todos", ...(response?.options.responsibles ?? [])], [response]);
   const update = (key: keyof typeof filters, value: string) => setFilters((current) => ({ ...current, [key]: value }));
+
+  const loadMore = async () => {
+    if (!response?.hasMore || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const next = await getEvidence({
+        ...filters,
+        busca: debouncedSearch,
+        page: response.page + 1,
+        pageSize: PAGE_SIZE,
+      });
+      setResponse((current) => {
+        if (!current) return next;
+        const existingIds = new Set(current.items.map((item) => item.id));
+        return {
+          ...next,
+          items: [...current.items, ...next.items.filter((item) => !existingIds.has(item.id))],
+          options: current.options,
+        };
+      });
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <div>
@@ -81,30 +132,54 @@ export function EvidenceGallery() {
         </div>
       </div>
 
-      <div className="mb-3 flex items-center justify-between">
-        <div className="text-xs font-medium">Galeria operacional</div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-medium">
+          Galeria operacional
+          {loading && response && (
+            <span className="inline-flex items-center gap-1 text-[9px] font-normal text-muted-foreground">
+              <LoaderCircle className="h-3 w-3 animate-spin text-primary-glow" /> atualizando
+            </span>
+          )}
+        </div>
         <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/7 px-2.5 py-1 text-[10px] text-primary-glow">
-          <Image className="h-3 w-3" /> {response?.total ?? 0} evidências
+          <Image className="h-3 w-3" /> {response ? `${response.items.length} de ${response.total}` : "…"} evidências
         </div>
       </div>
 
-      {!response ? (
+      {!response && loading ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">{Array.from({ length: 10 }, (_, index) => <LoadingSkeleton key={index} className="aspect-video" />)}</div>
-      ) : response.items.length === 0 ? (
+      ) : !response || response.items.length === 0 ? (
         <div className="command-card"><EmptyState title="Nenhuma evidência encontrada" description="Ajuste o período ou remova parte dos filtros." /></div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {response.items.map((item) => (
-            <button key={item.id} type="button" onClick={() => setSelected(item)} className="command-card group text-left transition duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_16px_34px_rgba(0,0,0,.28)] hover:text-foreground">
-              <EvidenceVisual record={item} />
-              <div className="p-3">
-                <div className="truncate text-[12px] font-medium text-[#e8eeeb]">{item.titulo}</div>
-                <div className="mt-1 truncate text-[10px] text-muted-foreground">{item.andar} · {item.responsavel}</div>
-                <div className="mt-1 flex items-center justify-between text-[9px] text-muted-foreground"><span>{fmtDate(item.data)}</span><span className="font-mono text-primary-glow/75">{item.taskId}</span></div>
-              </div>
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {response.items.map((item) => (
+              <button key={item.id} type="button" onClick={() => setSelected(item)} className="command-card evidence-card group text-left transition duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_16px_34px_rgba(0,0,0,.28)] hover:text-foreground">
+                <EvidenceVisual record={item} />
+                <div className="p-3">
+                  <div className="truncate text-[12px] font-medium text-[#e8eeeb]">{item.titulo}</div>
+                  <div className="mt-1 truncate text-[10px] text-muted-foreground">{item.andar} · {item.responsavel}</div>
+                  <div className="mt-1 flex items-center justify-between text-[9px] text-muted-foreground"><span>{fmtDate(item.data)}</span><span className="font-mono text-primary-glow/75">{item.taskId}</span></div>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {response.hasMore && (
+            <div className="mt-5 flex justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                className="min-w-[220px] border-primary/30 bg-background/45 text-xs text-[#e5f8e9] hover:border-primary/50 hover:bg-primary/12 hover:text-white"
+                onClick={loadMore}
+                disabled={loadingMore}
+              >
+                {loadingMore ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <ChevronDown className="mr-2 h-4 w-4" />}
+                {loadingMore ? "Carregando…" : `Carregar mais ${Math.min(PAGE_SIZE, response.total - response.items.length)} evidências`}
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       <Dialog open={!!selected} onOpenChange={(open: boolean) => !open && setSelected(null)}>
@@ -150,7 +225,7 @@ function EvidenceComparisonPhoto({ label, url, color }: { label: string; url?: s
   return (
     <div className="relative min-h-[280px] overflow-hidden rounded-xl border border-border bg-background/35">
       {url ? (
-        <img src={url} alt={`Evidência ${label}`} className="h-full max-h-[560px] w-full object-contain" />
+        <img src={url} alt={`Evidência ${label}`} decoding="async" className="h-full max-h-[560px] w-full object-contain" />
       ) : (
         <ComparisonVisual label={label} color={color} />
       )}
@@ -160,11 +235,30 @@ function EvidenceComparisonPhoto({ label, url, color }: { label: string; url?: s
 }
 
 function EvidenceVisual({ record }: { record: EvidenceRecord }) {
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const showImage = Boolean(record.url) && !failed;
+
   return (
     <div className="relative aspect-video overflow-hidden border-b border-border" style={{ background: `radial-gradient(circle at 68% 28%, ${record.cor}3c, transparent 28%), linear-gradient(135deg, ${record.cor}16, #071b1a 64%)` }}>
-      {record.url && <img src={record.url} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-75 transition duration-300 group-hover:scale-105 group-hover:opacity-95" />}
+      {showImage && (
+        <img
+          src={record.url}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          fetchPriority="low"
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-95",
+            loaded ? "opacity-75" : "opacity-0",
+          )}
+        />
+      )}
+      {!loaded && showImage && <div className="absolute inset-0 animate-pulse bg-primary/5" />}
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
-      {!record.url && <Camera className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 text-primary-glow/32" />}
+      {(!showImage || failed) && <Camera className="absolute left-1/2 top-1/2 h-9 w-9 -translate-x-1/2 -translate-y-1/2 text-primary-glow/32" />}
       <span className={cn("absolute left-2.5 top-2.5 rounded-full border px-2 py-0.5 text-[9px] font-medium backdrop-blur-sm", badgeColor[record.tipo])}>{record.tipo}</span>
     </div>
   );

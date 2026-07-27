@@ -13,7 +13,7 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiGet<T>(path: string, params?: Record<string, string | number | undefined>): Promise<T> {
+export async function apiGet<T>(path: string, params?: Record<string, string | number | undefined>, options?: { signal?: AbortSignal }): Promise<T> {
   if (!API_BASE_URL) {
     throw new ApiError("Defina VITE_KLABIN_API_BASE_URL para conectar o frontend aos webhooks do n8n.");
   }
@@ -26,6 +26,7 @@ export async function apiGet<T>(path: string, params?: Record<string, string | n
   const response = await fetch(url.toString(), {
     method: "GET",
     headers: { Accept: "application/json" },
+    signal: options?.signal,
   });
 
   const body = await response.json().catch(() => null);

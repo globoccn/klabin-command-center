@@ -165,6 +165,7 @@
   }
 
   .command-card {
+    position: relative;
     background: var(--gradient-card);
     border: 1px solid var(--border);
     border-radius: 13px;
@@ -332,6 +333,12 @@
 .recharts-tooltip-item-value { font-size: 11px !important; }
 
 .insight-banner-grid > :last-child { border-right: 0; }
+
+.evidence-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 240px;
+}
+
 
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(7px); }

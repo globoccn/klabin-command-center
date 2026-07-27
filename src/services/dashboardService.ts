@@ -58,8 +58,9 @@ export async function getEvidence(filters: {
   andar: string;
   responsavel: string;
   busca: string;
-  limit?: number;
-}): Promise<EvidenceResponse> {
+  page?: number;
+  pageSize?: number;
+}, signal?: AbortSignal): Promise<EvidenceResponse> {
   const isFullPeriod = filters.inicio === SNAPSHOT_START && filters.fim === SNAPSHOT_END;
   return apiGet<EvidenceResponse>("dashboard/evidence", {
     inicio: isFullPeriod ? undefined : filters.inicio,
@@ -69,8 +70,9 @@ export async function getEvidence(filters: {
     andar: filters.andar === "Todos" ? undefined : filters.andar,
     responsavel: filters.responsavel === "Todos" ? undefined : filters.responsavel,
     busca: filters.busca || undefined,
-    limit: (filters.limit ?? 300) === 300 ? undefined : filters.limit,
-  });
+    page: filters.page ?? 1,
+    pageSize: filters.pageSize ?? 24,
+  }, { signal });
 }
 
 function filterParams(filters?: Partial<DashboardFilters>) {

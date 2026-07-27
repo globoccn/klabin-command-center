@@ -217,6 +217,10 @@ export interface EvidenceRecord {
 export interface EvidenceResponse {
   items: EvidenceRecord[];
   total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasMore: boolean;
   options: {
     activities: string[];
     floors: string[];

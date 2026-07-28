@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RondasRouteImport } from './routes/rondas'
+import { Route as AssistenteRouteImport } from './routes/assistente'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as QualidadeRouteImport } from './routes/qualidade'
 import { Route as EvidenciasRouteImport } from './routes/evidencias'
@@ -17,6 +18,11 @@ import { Route as ClimatizacaoRouteImport } from './routes/climatizacao'
 import { Route as ChamadosRouteImport } from './routes/chamados'
 import { Route as IndexRouteImport } from './routes/index'
 
+const AssistenteRoute = AssistenteRouteImport.update({
+  id: '/assistente',
+  path: '/assistente',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RondasRoute = RondasRouteImport.update({
   id: '/rondas',
   path: '/rondas',
@@ -55,6 +61,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/assistente': typeof AssistenteRoute
   '/chamados': typeof ChamadosRoute
   '/climatizacao': typeof ClimatizacaoRoute
   '/evidencias': typeof EvidenciasRoute
@@ -64,6 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/assistente': typeof AssistenteRoute
   '/chamados': typeof ChamadosRoute
   '/climatizacao': typeof ClimatizacaoRoute
   '/evidencias': typeof EvidenciasRoute
@@ -74,6 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/assistente': typeof AssistenteRoute
   '/chamados': typeof ChamadosRoute
   '/climatizacao': typeof ClimatizacaoRoute
   '/evidencias': typeof EvidenciasRoute
@@ -85,6 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/assistente'
     | '/chamados'
     | '/climatizacao'
     | '/evidencias'
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/assistente'
     | '/chamados'
     | '/climatizacao'
     | '/evidencias'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/assistente'
     | '/chamados'
     | '/climatizacao'
     | '/evidencias'
@@ -113,6 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AssistenteRoute: typeof AssistenteRoute
   ChamadosRoute: typeof ChamadosRoute
   ClimatizacaoRoute: typeof ClimatizacaoRoute
   EvidenciasRoute: typeof EvidenciasRoute
@@ -123,6 +136,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/assistente': {
+      id: '/assistente'
+      path: '/assistente'
+      fullPath: '/assistente'
+      preLoaderRoute: typeof AssistenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/rondas': {
       id: '/rondas'
       path: '/rondas'
@@ -177,6 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AssistenteRoute: AssistenteRoute,
   ChamadosRoute: ChamadosRoute,
   ClimatizacaoRoute: ClimatizacaoRoute,
   EvidenciasRoute: EvidenciasRoute,

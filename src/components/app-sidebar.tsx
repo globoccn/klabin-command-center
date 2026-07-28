@@ -9,6 +9,7 @@ import {
   FileBarChart2,
   Leaf,
   Building2,
+  BrainCircuit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,13 +21,14 @@ const items = [
   { title: "Evidências e Auditoria", url: "/evidencias", icon: ShieldCheck },
   { title: "Qualidade dos Dados", url: "/qualidade", icon: Database },
   { title: "Relatórios", url: "/relatorios", icon: FileBarChart2 },
+  { title: "Assistente Operacional", url: "/assistente", icon: BrainCircuit },
 ];
 
 export function AppSidebar() {
   const currentPath = useRouterState({ select: (r) => r.location.pathname });
 
   return (
-    <aside className="app-sidebar-command relative hidden md:flex sticky top-0 h-screen w-[188px] shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar">
+    <aside className="app-sidebar-command relative hidden lg:flex sticky top-0 h-screen w-[188px] shrink-0 flex-col overflow-hidden border-r border-sidebar-border bg-sidebar">
       <div className="relative z-10 px-7 pt-6 pb-4">
         <div className="flex items-end gap-1.5">
           <span className="text-[29px] font-extrabold tracking-[-0.05em] text-white">Klabin</span>

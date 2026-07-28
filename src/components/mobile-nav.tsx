@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Headphones, Snowflake, ClipboardCheck, ShieldCheck, Database, FileBarChart2 } from "lucide-react";
+import { Home, Headphones, Snowflake, ClipboardCheck, ShieldCheck, Database, FileBarChart2, BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -12,13 +12,14 @@ const items = [
   { title: "Evidências", url: "/evidencias", icon: ShieldCheck },
   { title: "Qualidade dos Dados", url: "/qualidade", icon: Database },
   { title: "Relatórios", url: "/relatorios", icon: FileBarChart2 },
+  { title: "Assistente Operacional", url: "/assistente", icon: BrainCircuit },
 ];
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const currentPath = useRouterState({ select: (r) => r.location.pathname });
   return (
-    <div className="md:hidden sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
+    <div className="lg:hidden sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
       <div className="flex items-center justify-between px-4 h-14">
         <div className="flex items-baseline gap-1">
           <span className="text-xl font-bold">Klabin</span>

@@ -3,7 +3,7 @@ import { ArrowDown, ArrowUp, Camera, ClipboardList, Sparkles, Trophy } from "luc
 export function InsightBanner() {
   return (
     <section className="insight-banner-reference mt-3 min-h-[clamp(64px,6.5vh,78px)] overflow-hidden rounded-[13px] border border-primary/38 bg-[linear-gradient(100deg,rgba(5,57,38,.72),rgba(4,28,25,.9)_48%,rgba(4,42,31,.76))] px-4 py-2.5 shadow-[0_12px_30px_rgba(0,0,0,.2),inset_0_1px_0_rgba(255,255,255,.025)]">
-      <div className="grid min-h-[clamp(42px,4.6vh,56px)] grid-cols-[minmax(320px,1.9fr)_repeat(3,minmax(140px,.72fr))] items-center gap-3 insight-banner-grid">
+      <div className="insight-banner-grid grid min-h-[clamp(48px,5vh,62px)] grid-cols-[minmax(280px,1.9fr)_repeat(3,minmax(130px,.72fr))] items-center gap-3">
         <div className="flex min-w-0 items-center gap-3 border-r border-primary/22 pr-4">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] border border-primary/25 bg-primary/10 text-primary-glow shadow-[0_0_18px_rgba(55,237,99,.1)]">
             <Trophy className="h-5 w-5" strokeWidth={1.8} />

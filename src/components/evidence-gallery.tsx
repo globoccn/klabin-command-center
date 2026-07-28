@@ -119,7 +119,7 @@ export function EvidenceGallery() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 xl:grid-cols-[1.35fr_1fr_1fr_1fr_1fr_1fr]">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-[1.35fr_1fr_1fr_1fr_1fr_1fr]">
           <div className="relative col-span-2 md:col-span-2 xl:col-span-1">
             <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input value={filters.busca} onChange={(event: React.ChangeEvent<HTMLInputElement>) => update("busca", event.target.value)} placeholder="Buscar tarefa ou ID…" className="h-[54px] w-full rounded-[11px] border border-border bg-card px-3 pl-9 text-xs outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/25" />
@@ -147,12 +147,12 @@ export function EvidenceGallery() {
       </div>
 
       {!response && loading ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">{Array.from({ length: 10 }, (_, index) => <LoadingSkeleton key={index} className="aspect-video" />)}</div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">{Array.from({ length: 10 }, (_, index) => <LoadingSkeleton key={index} className="aspect-video" />)}</div>
       ) : !response || response.items.length === 0 ? (
         <div className="command-card"><EmptyState title="Nenhuma evidência encontrada" description="Ajuste o período ou remova parte dos filtros." /></div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {response.items.map((item) => (
               <button key={item.id} type="button" onClick={() => setSelected(item)} className="command-card evidence-card group text-left transition duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_16px_34px_rgba(0,0,0,.28)] hover:text-foreground">
                 <EvidenceVisual record={item} />
@@ -273,7 +273,7 @@ function EvidenceFilter({ label, value, onChange, options }: { label: string; va
 }
 
 function DateRange({ inicio, fim, onInicio, onFim }: { inicio: string; fim: string; onInicio: (value: string) => void; onFim: (value: string) => void }) {
-  return <div className="col-span-2 flex h-[54px] items-center gap-1.5 rounded-[11px] border border-border bg-card px-2 md:col-span-1"><CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary-glow" /><input aria-label="Data inicial" type="date" value={inicio} onChange={(event: React.ChangeEvent<HTMLInputElement>) => onInicio(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[9px] outline-none" /><span className="text-muted-foreground">–</span><input aria-label="Data final" type="date" value={fim} onChange={(event: React.ChangeEvent<HTMLInputElement>) => onFim(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[9px] outline-none" /></div>;
+  return <div className="flex h-[54px] sm:col-span-2 items-center gap-1.5 rounded-[11px] border border-border bg-card px-2 md:col-span-1"><CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary-glow" /><input aria-label="Data inicial" type="date" value={inicio} onChange={(event: React.ChangeEvent<HTMLInputElement>) => onInicio(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[9px] outline-none" /><span className="text-muted-foreground">–</span><input aria-label="Data final" type="date" value={fim} onChange={(event: React.ChangeEvent<HTMLInputElement>) => onFim(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[9px] outline-none" /></div>;
 }
 
 function Info({ label, value }: { label: string; value: string }) {

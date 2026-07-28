@@ -28,11 +28,12 @@ const requiredComponents = [
   "evidence-gallery.tsx",
   "task-table.tsx",
   "chat-assistant.tsx",
+  "assistant-conversation.tsx",
   "detail-drawer.tsx",
   "empty-state.tsx",
   "loading-skeleton.tsx",
 ];
-const requiredRoutes = ["index.tsx", "chamados.tsx", "climatizacao.tsx", "rondas.tsx", "evidencias.tsx", "qualidade.tsx", "relatorios.tsx"];
+const requiredRoutes = ["index.tsx", "chamados.tsx", "climatizacao.tsx", "rondas.tsx", "evidencias.tsx", "qualidade.tsx", "relatorios.tsx", "assistente.tsx"];
 
 for (const component of requiredComponents) check(`Componente ${component}`, exists(`src/components/${component}`));
 for (const route of requiredRoutes) check(`Rota ${route}`, exists(`src/routes/${route}`));
@@ -75,7 +76,25 @@ check("Relatório mensal até a última data", reportSource.includes("mês da ú
 check("Preview executivo dos relatórios", ["Resumo Executivo", "Destaques", "Riscos", "Recomendações", "Evolução no período"].every((item) => reportSource.includes(item)));
 
 const chatSource = read("src/services/chatService.ts");
-for (const intent of ["compare", "setores", "backlog", "rondas", "clima"]) check(`Chatbot: intenção ${intent}`, chatSource.includes(`${intent}:`));
+const assistantSource = read("src/components/assistant-conversation.tsx");
+const assistantRoute = read("src/routes/assistente.tsx");
+const floatingAssistant = read("src/components/chat-assistant.tsx");
+const sidebarSource = read("src/components/app-sidebar.tsx");
+const mobileNavSource = read("src/components/mobile-nav.tsx");
+check("Chat conectado ao workflow 32", chatSource.includes('apiPost<ChatApiResponse>("chat"'));
+check("Catálogo conectado ao workflow 35", chatSource.includes('apiGet<ChatCatalogResponse>("chat/catalog"'));
+check("Histórico conectado ao workflow 34", chatSource.includes('apiGet<ChatHistoryResponse>("chat/history"'));
+check("Feedback conectado ao workflow 33", chatSource.includes('apiPost<ChatFeedbackResponse>("chat/feedback"'));
+check("Chat sem respostas locais simuladas", !chatSource.includes("const canned") && !chatSource.includes("await delay"));
+check("Página Assistente Operacional", assistantRoute.includes('createFileRoute("/assistente")') && assistantRoute.includes("AssistantConversation"));
+check("Perguntas guiadas", assistantSource.includes("Perguntas sugeridas") && assistantSource.includes("guidedQuestions"));
+check("Texto livre secundário", assistantSource.includes("Ou pergunte com suas palavras"));
+check("Períodos diário semanal mensal", ["daily", "weekly", "monthly"].every((item) => assistantSource.includes(item)));
+check("Fontes e governança nas respostas", assistantSource.includes("Baseado em regras e dados") && assistantSource.includes("Fonte:"));
+check("Feedback útil ou não útil", assistantSource.includes("ThumbsUp") && assistantSource.includes("ThumbsDown"));
+check("Botão flutuante abre página completa", floatingAssistant.includes('to="/assistente"') && floatingAssistant.includes("AssistantConversation compact"));
+check("Assistente flutuante carregado sob demanda", floatingAssistant.includes("open ? <AssistantConversation"));
+check("Assistente presente nos menus", sidebarSource.includes('url: "/assistente"') && mobileNavSource.includes('url: "/assistente"'));
 
 const styles = read("src/styles.css");
 check("Sidebar de referência", read("src/components/app-sidebar.tsx").includes("w-[188px]") && styles.includes(".app-sidebar-command"));
@@ -85,11 +104,20 @@ const viteConfig = read("vite.config.ts");
 check("Host Klabin autorizado no Vite", viteConfig.includes('allowedHosts: ["klabin.facilities-ai.com.br"]'));
 check("Evidência visual 1900 × 1200", exists("validation/overview-1900x1200.png"));
 
-check("Home com preenchimento ampliado", styles.includes(".overview-command-page") && styles.includes("min-height: calc(100dvh - 18px)") && styles.includes(".kpi-card-reference { height: 150px; }") && styles.includes(".overview-row-primary .chart-card-content { min-height: 232px; }"));
-check("Botão da IA alinhado ao rodapé operacional", read("src/components/chat-assistant.tsx").includes("md:bottom-8") && read("src/components/chat-assistant.tsx").includes("xl:bottom-9"));
+check("Home com preenchimento ampliado", styles.includes(".overview-command-page") && styles.includes(".kpi-card-reference { height: 150px; }") && styles.includes(".overview-row-primary .chart-card-content { min-height: 232px; }"));
+check("Botão da IA responsivo", floatingAssistant.includes("sm:bottom-5") && floatingAssistant.includes("lg:bottom-7"));
 check("KPI Taxa de Conclusão com alinhamento dedicado", read("src/components/kpi-card.tsx").includes('kpi.id === "taxa" ? "items-center justify-between"'));
 check("Logo Facilities AI adicionada à sidebar", read("src/components/app-sidebar.tsx").includes('src="/facilities-ai-logo.png"') && styles.includes(".sidebar-facilities-brand"));
 check("Arquivo transparente da Facilities AI disponível", exists("public/facilities-ai-logo.png"));
+
+check("Responsivo 1600 e abaixo", styles.includes("@media (max-width: 1599px)") && styles.includes("repeat(3, minmax(0, 1fr))"));
+check("Responsivo tablets", styles.includes("@media (max-width: 1023px)") && sidebarSource.includes("hidden lg:flex") && mobileNavSource.includes("lg:hidden"));
+check("Responsivo celulares", styles.includes("@media (max-width: 767px)") && styles.includes(".overview-donut-layout"));
+check("Responsivo telas pequenas", styles.includes("@media (max-width: 479px)"));
+check("Responsivo telas 2K e 4K", styles.includes("@media (min-width: 2200px)") && styles.includes("max-width: 2100px"));
+check("Layout de baixa altura", styles.includes("@media (max-height: 850px)"));
+check("Descrição demonstrativa sem tempo real", overviewSource.includes("apresentação demonstrativa") && !overviewSource.includes("em tempo real"));
+check("Route tree contém assistente", read("src/routeTree.gen.ts").includes("AssistenteRoute"));
 
 
 const reportService = read("src/services/reportService.ts");

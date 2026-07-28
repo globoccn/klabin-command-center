@@ -34,6 +34,7 @@ import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { getOverview } from "@/services/dashboardService";
 import type { ChartSeries, DashboardFilters, DashboardOverview } from "@/types/dashboard";
 import { fmtDateTime, fmtDec, fmtInt, fmtPct } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,7 +42,7 @@ export const Route = createFileRoute("/")({
       { title: "Visão Geral · Central Operacional Klabin" },
       { name: "description", content: "Painel executivo com indicadores de operação, manutenção e facility management." },
       { property: "og:title", content: "Visão Geral · Central Operacional Klabin" },
-      { property: "og:description", content: "KPIs, gráficos e insights operacionais em tempo real." },
+      { property: "og:description", content: "KPIs, gráficos e insights operacionais para apresentação demonstrativa." },
     ],
   }),
   component: Overview,
@@ -171,7 +172,7 @@ function Overview() {
             </ChartCard>
 
             <ChartCard title="Qualidade dos Dados">
-              <div className="grid h-full grid-cols-2 gap-2">
+              <div className="overview-quality-grid grid h-full grid-cols-2 gap-2">
                 <QualityTile icon={<Database className="h-4 w-4" />} value={fmtInt(data.qualidadeDados.semVencimento)} label="Tarefas sem vencimento" tone="primary" />
                 <QualityTile icon={<ShieldCheck className="h-4 w-4" />} value={fmtPct(data.qualidadeDados.coberturaSetor)} label="Cobertura de setor" tone="info" />
                 <QualityTile icon={<AlertTriangle className="h-4 w-4" />} value={fmtInt(data.qualidadeDados.fechamentoAnterior)} label="Fechamento anterior à data inicial" tone="warning" />
@@ -180,7 +181,7 @@ function Overview() {
             </ChartCard>
 
             <ChartCard title="Evidências Fotográficas">
-              <div className="grid h-full grid-cols-[1fr_1.05fr] items-center gap-2">
+              <div className="overview-evidence-grid grid h-full grid-cols-[minmax(100px,1fr)_minmax(105px,1.05fr)] items-center gap-2">
                 <div className="relative min-w-0">
                   <div className="h-full min-h-[112px]">
                     <ResponsiveContainer width="100%" height="100%">
@@ -251,7 +252,7 @@ function DonutWithLegend({
   const innerRadius = compact ? 35 : 41;
 
   return (
-    <div className={dense ? "grid h-full grid-cols-[150px_1fr] items-center gap-2" : compact ? "grid h-full grid-cols-[128px_1fr] items-center gap-2" : "grid h-full grid-cols-[145px_1fr] items-center gap-3"}>
+    <div className={cn("overview-donut-layout grid h-full items-center", dense ? "grid-cols-[minmax(115px,150px)_1fr] gap-2" : compact ? "grid-cols-[minmax(105px,128px)_1fr] gap-2" : "grid-cols-[minmax(110px,145px)_1fr] gap-3")}>
       <div className="relative min-w-0">
         <ResponsiveContainer width="100%" height={chartHeight}>
           <PieChart>

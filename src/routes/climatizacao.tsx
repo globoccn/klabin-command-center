@@ -38,7 +38,7 @@ function Climatizacao() {
 
       {!data ? <LoadingSkeleton className="h-[560px]" /> : (
         <>
-          <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <ClimateMetric icon={<Thermometer className="h-5 w-5" />} label="Solicitações" value={fmtInt(data.total)} />
             <ClimateMetric icon={<Snowflake className="h-5 w-5" />} label="Ambiente frio" value={fmtInt(data.cold)} />
             <ClimateMetric icon={<Sun className="h-5 w-5" />} label="Ambiente quente" value={fmtInt(data.hot)} tone="warning" />

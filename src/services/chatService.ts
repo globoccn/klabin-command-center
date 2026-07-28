@@ -1,74 +1,210 @@
-import type { ChatMessage, ChatResponse } from "@/types/dashboard";
+import { apiGet, apiPost } from "@/services/apiClient";
+import type {
+  ChatApiResponse,
+  ChatCatalogItem,
+  ChatHistoryItem,
+  ChatMessage,
+  DashboardFilters,
+} from "@/types/dashboard";
 
-const delay = (ms = 680) => new Promise((resolve) => setTimeout(resolve, ms));
+const CONVERSATION_KEY = "klabin-assistant-conversation-id";
 
-const canned: Record<string, ChatMessage> = {
-  compare: {
-    id: "", role: "assistant", timestamp: "",
-    content: "Julho/2026 apresenta melhora operacional em relação a junho/2026: a taxa de conclusão subiu 1,8 p.p. e o backlog caiu 12,7%.",
-    table: {
-      headers: ["Indicador", "Junho", "Julho", "Variação"],
-      rows: [
-        ["Tarefas criadas", "317", "343", "+8,2%"],
-        ["Concluídas", "302", "326", "+7,9%"],
-        ["Taxa de conclusão", "95,3%", "97,1%", "+1,8 p.p."],
-        ["Backlog", "127", "111", "-12,7%"],
-      ],
-    },
-  },
-  setores: {
-    id: "", role: "assistant", timestamp: "",
-    content: "O setor 15.09 lidera as solicitações de climatização, seguido por 15.04 e 12.08.\n\nPeríodo: 04/11/2025 a 23/07/2026 · Filtro: serviço Ajuste de ar.",
-    table: {
-      headers: ["Setor", "Chamados"],
-      rows: [["15.09", 181], ["15.04", 106], ["12.08", 86], ["14.20", 67], ["14.26", 66]],
-    },
-  },
-  backlog: {
-    id: "", role: "assistant", timestamp: "",
-    content: "Há 49 atividades abertas há mais de 30 dias. A maior concentração está na faixa de 31 a 90 dias.\n\nPeríodo: backlog atual em 24/07/2026.",
-    table: {
-      headers: ["Faixa", "Tarefas"],
-      rows: [["31 a 90 dias", 30], ["91 a 180 dias", 12], ["Mais de 180 dias", 7]],
-    },
-  },
-  rondas: {
-    id: "", role: "assistant", timestamp: "",
-    content: "Foram identificadas 17 rondas sem evidência fotográfica no período atual. Recomenda-se priorizar EcoQuest e iluminação.",
-    table: { headers: ["Atividade", "Sem evidência"], rows: [["EcoQuest", 7], ["Iluminação", 5], ["Outras rondas", 5]] },
-  },
-  clima: {
-    id: "", role: "assistant", timestamp: "",
-    content: "As solicitações por ambiente frio representam 61,4% dos chamados de climatização. O pico ocorre às 10h.",
-    table: { headers: ["Tipo", "Quantidade", "Participação"], rows: [["Ambiente frio", 1195, "61,4%"], ["Ambiente quente", 729, "37,5%"], ["Outros", 21, "1,1%"]] },
-  },
-};
+export type ChatPeriodCode = "daily" | "weekly" | "monthly";
 
-export async function sendMessage(text: string): Promise<ChatResponse> {
-  await delay();
-  const normalized = normalize(text);
-  let base: ChatMessage;
-
-  if (normalized.includes("compar") || normalized.includes("mes anterior")) base = canned.compare;
-  else if (normalized.includes("setor")) base = canned.setores;
-  else if (normalized.includes("backlog") || normalized.includes("30 dias")) base = canned.backlog;
-  else if (normalized.includes("ronda") || normalized.includes("evidencia")) base = canned.rondas;
-  else if (normalized.includes("climat") || normalized.includes("frio") || normalized.includes("calor")) base = canned.clima;
-  else base = {
-    id: "", role: "assistant", timestamp: "",
-    content: "Posso analisar comparações, climatização, setores, backlog, rondas e evidências. Para uma resposta objetiva, informe o indicador e o período desejado.",
-  };
-
-  return { message: { ...base, id: `m-${Date.now()}`, timestamp: new Date().toISOString() } };
+export interface SendChatInput {
+  message: string;
+  conversationId?: string;
+  period?: ChatPeriodCode;
+  filters?: Partial<DashboardFilters>;
+  pageContext?: Record<string, unknown>;
 }
 
-export const suggestions = [
-  "Compare este mês com o anterior",
-  "Quais setores têm mais chamados?",
-  "Mostre o backlog acima de 30 dias",
-  "Quantas rondas estão sem evidência?",
+export interface ChatCatalogResponse {
+  ok: boolean;
+  mode: string;
+  usedAI: boolean;
+  items: ChatCatalogItem[];
+}
+
+export interface ChatHistoryResponse {
+  ok: boolean;
+  items: ChatHistoryItem[];
+}
+
+export interface ChatFeedbackResponse {
+  ok: boolean;
+  messageId: number;
+  rating: 1 | -1;
+}
+
+export const fallbackCatalog: ChatCatalogItem[] = [
+  {
+    intent: "operational_overview",
+    category: "operação",
+    label: "Resumo operacional",
+    description: "Volume, encerramentos, backlog e conclusão.",
+    examples: ["Como está a operação?", "Faça um resumo da semana", "Resumo mensal"],
+    responseMode: "deterministic",
+  },
+  {
+    intent: "backlog_summary",
+    category: "backlog",
+    label: "Resumo do backlog",
+    description: "Backlog inicial, final e variação.",
+    examples: ["Como está o backlog?", "Quantas pendências temos?"],
+    responseMode: "deterministic",
+  },
+  {
+    intent: "oldest_tasks",
+    category: "backlog",
+    label: "Pendências mais antigas",
+    description: "Lista as pendências mais antigas.",
+    examples: ["Quais são as tarefas mais antigas?", "Mostre as 5 pendências críticas"],
+    responseMode: "deterministic",
+  },
+  {
+    intent: "climate_summary",
+    category: "climatização",
+    label: "Resumo de climatização",
+    description: "Frio, calor, setores e volume.",
+    examples: ["Como foi a climatização?", "Quantos chamados de frio e calor?"],
+    responseMode: "deterministic",
+  },
+  {
+    intent: "rounds_without_evidence",
+    category: "rondas",
+    label: "Rondas sem evidência",
+    description: "Rondas sem anexos ou evidências.",
+    examples: ["Quantas rondas estão sem evidência?"],
+    responseMode: "deterministic",
+  },
+  {
+    intent: "quality_summary",
+    category: "qualidade",
+    label: "Qualidade dos dados",
+    description: "Cobertura e inconsistências cadastrais.",
+    examples: ["Como está a qualidade dos dados?"],
+    responseMode: "deterministic",
+  },
+  {
+    intent: "compare_periods",
+    category: "comparação",
+    label: "Comparação de períodos",
+    description: "Compara os principais indicadores.",
+    examples: ["Compare esta semana com a anterior", "Julho melhorou?"],
+    responseMode: "deterministic",
+  },
+  {
+    intent: "risks_recommendations",
+    category: "decisão",
+    label: "Riscos e recomendações",
+    description: "Riscos calculados e ações sugeridas pelas regras.",
+    examples: ["Quais são os principais riscos?", "O que devemos priorizar?"],
+    responseMode: "deterministic",
+  },
 ];
 
-function normalize(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+export function getStoredConversationId(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  return window.localStorage.getItem(CONVERSATION_KEY) || undefined;
+}
+
+export function storeConversationId(conversationId: string) {
+  if (typeof window === "undefined" || !conversationId) return;
+  window.localStorage.setItem(CONVERSATION_KEY, conversationId);
+}
+
+export function clearStoredConversationId() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(CONVERSATION_KEY);
+}
+
+export async function sendChatMessage(input: SendChatInput): Promise<ChatApiResponse> {
+  const response = await apiPost<ChatApiResponse>("chat", {
+    conversationId: input.conversationId || getStoredConversationId(),
+    message: input.message,
+    period: input.period,
+    filters: {
+      projeto: input.filters?.projeto ?? "Todos",
+      subprojeto: input.filters?.subprojeto ?? "Todos",
+      andar: input.filters?.andar ?? "Todos",
+      status: input.filters?.status ?? "Todos",
+      responsavel: input.filters?.responsavel ?? "Todos",
+    },
+    pageContext: input.pageContext ?? { page: "assistant" },
+    clientTimestamp: new Date().toISOString(),
+  });
+
+  if (response.conversationId) storeConversationId(response.conversationId);
+  return response;
+}
+
+export async function getChatCatalog(): Promise<ChatCatalogItem[]> {
+  const response = await apiGet<ChatCatalogResponse>("chat/catalog");
+  return Array.isArray(response.items) && response.items.length ? response.items : fallbackCatalog;
+}
+
+export async function getChatHistory(conversationId: string, limit = 30): Promise<ChatHistoryItem[]> {
+  if (!conversationId) return [];
+  const response = await apiGet<ChatHistoryResponse>("chat/history", { conversationId, limit });
+  return Array.isArray(response.items) ? response.items : [];
+}
+
+export async function sendChatFeedback(
+  conversationId: string,
+  messageId: number,
+  rating: 1 | -1,
+  comment = "",
+): Promise<ChatFeedbackResponse> {
+  return apiPost<ChatFeedbackResponse>("chat/feedback", {
+    conversationId,
+    messageId,
+    rating,
+    comment,
+  });
+}
+
+export function apiResponseToMessage(response: ChatApiResponse): ChatMessage {
+  return {
+    id: `a-${response.messageId ?? Date.now()}`,
+    role: "assistant",
+    timestamp: new Date().toISOString(),
+    messageId: response.messageId,
+    content: response.answer,
+    intent: response.intent,
+    confidence: response.confidence,
+    mode: response.mode,
+    usedAI: response.usedAI,
+    period: response.period,
+    sources: response.sources ?? [],
+    suggestions: response.suggestions ?? [],
+    data: response.data ?? {},
+    feedback: null,
+  };
+}
+
+export function historyToMessages(items: ChatHistoryItem[]): ChatMessage[] {
+  return [...items]
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+    .flatMap((item) => [
+      {
+        id: `history-user-${item.messageId}`,
+        role: "user" as const,
+        content: item.question,
+        timestamp: item.createdAt,
+      },
+      {
+        id: `history-assistant-${item.messageId}`,
+        role: "assistant" as const,
+        content: item.answer,
+        timestamp: item.createdAt,
+        messageId: item.messageId,
+        intent: item.intent,
+        confidence: Number(item.confidence || 0),
+        mode: item.mode,
+        usedAI: false,
+        period: { code: item.period },
+        feedback: null,
+      },
+    ]);
 }

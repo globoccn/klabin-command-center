@@ -43,7 +43,7 @@ function HeaderIdentity({ title, subtitle, command = false }: { title: string; s
       <h1
         className={cn(
           "font-bold tracking-[-0.038em] text-foreground",
-          command ? "whitespace-nowrap text-[clamp(27px,2vw,35px)] leading-[1.06]" : "text-2xl sm:text-[34px]",
+          command ? "text-[clamp(25px,2vw,35px)] leading-[1.06] lg:whitespace-nowrap" : "text-2xl sm:text-[34px]",
         )}
       >
         {title}
@@ -59,7 +59,7 @@ function HeaderIdentity({ title, subtitle, command = false }: { title: string; s
 
 function UpdateStatus({ updatedAt, statusLabel }: { updatedAt: string; statusLabel: string }) {
   return (
-    <div className="h-[clamp(76px,7.3vh,88px)] min-w-[142px] rounded-[13px] border border-border bg-[linear-gradient(150deg,rgba(8,31,29,.92),rgba(3,20,20,.96))] px-3 py-2.5 shadow-[0_9px_24px_rgba(0,0,0,.2)]">
+    <div className="min-h-[76px] w-full min-w-0 sm:w-auto sm:min-w-[142px] rounded-[13px] border border-border bg-[linear-gradient(150deg,rgba(8,31,29,.92),rgba(3,20,20,.96))] px-3 py-2.5 shadow-[0_9px_24px_rgba(0,0,0,.2)]">
       <div className="flex items-start gap-2">
         <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-primary/25 bg-primary/8">
           <RefreshCw className="h-3.5 w-3.5 text-primary-glow" />

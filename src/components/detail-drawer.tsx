@@ -37,7 +37,7 @@ export function DetailDrawer({ task, onClose }: { task: Task | null; onClose: ()
             <div className="mt-5 space-y-5 text-xs">
               {current.descricao && <div className="rounded-xl border border-border bg-background/28 p-3 leading-relaxed text-[#d5dfdc]">{current.descricao}</div>}
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Info label="Status"><StatusBadge status={current.status} /></Info>
                 <Info label="Projeto" value={current.projeto} />
                 <Info label="Subprojeto" value={current.subprojeto ?? "—"} />
@@ -59,7 +59,7 @@ export function DetailDrawer({ task, onClose }: { task: Task | null; onClose: ()
                 {current.anexos.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border p-6 text-center text-[10px] text-muted-foreground">Nenhuma evidência anexada.</div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {current.anexos.map((attachment) => (
                       <a key={attachment.id} href={attachment.url} target="_blank" rel="noreferrer" className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-[radial-gradient(circle_at_65%_25%,rgba(55,237,99,.17),transparent_30%),linear-gradient(135deg,#0d2a22,#061715)]">
                         {attachment.url ? <img src={attachment.url} alt={attachment.label ?? "Evidência"} loading="lazy" className="h-full w-full object-cover opacity-80 transition group-hover:scale-105 group-hover:opacity-100" /> : <Camera className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 text-primary-glow/38" />}

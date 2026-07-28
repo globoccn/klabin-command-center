@@ -35,7 +35,7 @@ function Rondas() {
 
       {!data ? <LoadingSkeleton className="h-[500px]" /> : (
         <>
-          <div className="mb-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <RoundMetric icon={<ClipboardCheck className="h-5 w-5" />} label="Rondas registradas" value={fmtInt(data.metrics.total)} />
             <RoundMetric icon={<CheckCircle2 className="h-5 w-5" />} label="Com evidência" value={`${fmtDec(data.metrics.evidenceRate)}%`} />
             <RoundMetric icon={<Sun className="h-5 w-5" />} label="Turno predominante" value={data.metrics.predominantShift} />
@@ -48,7 +48,7 @@ function Rondas() {
                 {data.activities.map((item) => {
                   const max = Math.max(...data.activities.map((current) => current.value), 1);
                   return (
-                    <div key={item.name} className="grid grid-cols-[28px_minmax(130px,220px)_1fr_44px] items-center gap-3">
+                    <div key={item.name} className="grid grid-cols-[24px_minmax(0,1.25fr)_minmax(70px,1fr)_36px] items-center gap-3">
                       <span className="grid h-7 w-7 place-items-center rounded-lg border border-primary/24 bg-primary/10 text-primary-glow"><ClipboardCheck className="h-4 w-4" /></span>
                       <span className="truncate text-xs text-[#dce5e2]">{item.name}</span>
                       <span className="h-2 overflow-hidden rounded-full bg-primary/10"><span className="block h-full rounded-full bg-gradient-to-r from-primary to-primary-glow" style={{ width: `${(item.value / max) * 100}%` }} /></span>

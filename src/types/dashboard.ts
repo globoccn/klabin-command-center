@@ -235,14 +235,88 @@ export interface EvidenceResponse {
   };
 }
 
+export interface ChatSource {
+  label: string;
+  period?: string;
+  referenceDate?: string | null;
+}
+
+export interface ChatPeriod {
+  code?: "daily" | "weekly" | "monthly";
+  referenceDate?: string;
+  start?: string;
+  end?: string;
+  previousStart?: string;
+  previousEnd?: string;
+  label?: string;
+  previousLabel?: string;
+}
+
+export interface ChatGovernance {
+  mode?: string;
+  usedAI?: boolean;
+  queryVersion?: string;
+  generatedAt?: string;
+  limitations?: string[];
+  staticResponse?: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  messageId?: number | null;
+  intent?: string;
+  confidence?: number;
+  mode?: string;
+  usedAI?: boolean;
+  period?: ChatPeriod;
+  sources?: ChatSource[];
+  suggestions?: string[];
+  data?: Record<string, unknown>;
   table?: { headers: string[]; rows: (string | number)[][] };
+  feedback?: 1 | -1 | null;
+}
+
+export interface ChatApiResponse {
+  ok: boolean;
+  conversationId: string;
+  messageId: number | null;
+  answer: string;
+  intent: string;
+  confidence: number;
+  mode: string;
+  usedAI: boolean;
+  period: ChatPeriod;
+  filters?: DashboardFilters;
+  data?: Record<string, unknown>;
+  sources?: ChatSource[];
+  suggestions?: string[];
+  governance?: ChatGovernance;
+}
+
+export interface ChatCatalogItem {
+  intent: string;
+  category: string;
+  label: string;
+  description: string;
+  examples: string[];
+  responseMode: string;
+}
+
+export interface ChatHistoryItem {
+  messageId: number;
+  question: string;
+  answer: string;
+  intent: string;
+  confidence: number;
+  period: "daily" | "weekly" | "monthly";
+  mode: string;
+  createdAt: string;
 }
 
 export interface ChatResponse {
   message: ChatMessage;
+  conversationId?: string;
 }

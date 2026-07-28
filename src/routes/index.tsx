@@ -74,8 +74,8 @@ function Overview() {
     <div className="command-page overview-command-page animate-fade-in-up">
       <DashboardHeader
         layout="command"
-        updatedAt={data?.snapshot?.loadedAt ? fmtDateTime(data.snapshot.loadedAt) : "Carregando snapshot…"}
-        statusLabel="Snapshot demonstrativo"
+        updatedAt={data?.snapshot?.loadedAt ? fmtDateTime(data.snapshot.loadedAt) : "Carregando dados…"}
+        statusLabel="Dados operacionais"
         toolbar={<FilterBar variant="toolbar" value={filters} onChange={setFilters} />}
       />
 

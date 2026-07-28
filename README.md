@@ -1,6 +1,6 @@
-# Central Operacional Klabin — frontend integrado
+# Central Operacional Klabin
 
-Frontend React/TypeScript conectado aos webhooks do n8n entregues no pacote Marco 4.
+Frontend React/TypeScript integrado aos webhooks do n8n da demonstração Klabin.
 
 ## Configuração
 
@@ -21,27 +21,28 @@ npm install
 npm run dev
 ```
 
-## Build
+## Build e produção
 
 ```bash
 npm run build
+npm run start
 ```
 
-## Integrações reais do Marco 4
+## Integrações disponíveis
 
-- visão geral;
-- filtros;
+- visão geral e filtros operacionais;
 - chamados e tarefas paginadas;
 - climatização;
-- rondas;
-- evidências;
-- qualidade dos dados.
-
-Relatórios e chatbot permanecem mockados e pertencem ao Marco 5.
+- rondas e preventivas;
+- evidências e auditoria;
+- qualidade dos dados;
+- relatórios diário, semanal e mensal;
+- geração, visualização, download e exclusão de relatórios;
+- interface do assistente preparada para a próxima etapa de IA.
 
 ## Publicação
 
-O `vite.config.ts` mantém o host autorizado:
+O `vite.config.ts` autoriza o host:
 
 ```text
 klabin.facilities-ai.com.br

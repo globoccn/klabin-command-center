@@ -202,7 +202,7 @@ export function historyToMessages(items: ChatHistoryItem[]): ChatMessage[] {
         intent: item.intent,
         confidence: Number(item.confidence || 0),
         mode: item.mode,
-        usedAI: false,
+        usedAI: Boolean(item.usedAI),
         period: { code: item.period },
         feedback: null,
       },

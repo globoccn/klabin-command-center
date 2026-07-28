@@ -313,6 +313,8 @@ export interface ChatHistoryItem {
   confidence: number;
   period: "daily" | "weekly" | "monthly";
   mode: string;
+  usedAI?: boolean;
+  model?: string | null;
   createdAt: string;
 }
 

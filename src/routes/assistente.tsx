@@ -24,7 +24,7 @@ function AssistenteOperacional() {
     <div className="command-page assistant-page animate-fade-in-up">
       <DashboardHeader
         title="Assistente Operacional"
-        subtitle="Perguntas guiadas, comparações e respostas baseadas nos dados disponíveis"
+        subtitle="Perguntas guiadas, respostas determinísticas e análises assistidas com governança"
         statusLabel="Consultas governadas"
       />
 
@@ -35,12 +35,12 @@ function AssistenteOperacional() {
           <GovernanceCard
             icon={<ShieldCheck className="h-4 w-4" />}
             title="Governança da resposta"
-            text="As perguntas são classificadas em intenções permitidas. O sistema não cria SQL livre nem inventa indicadores."
+            text="As perguntas são classificadas em intenções permitidas. Consultas objetivas usam regras; análises autorizadas usam Groq sobre um payload sanitizado, sem SQL livre."
           />
           <GovernanceCard
             icon={<Database className="h-4 w-4" />}
             title="Origem dos dados"
-            text="As respostas utilizam o snapshot operacional ativo e as funções validadas no PostgreSQL."
+            text="As respostas utilizam a base operacional ativa e funções validadas no PostgreSQL. A IA recebe somente indicadores agregados e necessários."
           />
           <GovernanceCard
             icon={<GitCompareArrows className="h-4 w-4" />}
@@ -60,6 +60,7 @@ function AssistenteOperacional() {
                 "Rondas e evidências",
                 "Qualidade dos dados",
                 "Comparações e riscos",
+                "Análise assistida",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-2 rounded-lg border border-border bg-background/25 px-2.5 py-2 text-[10px] text-[#dce5e2]">
                   <BrainCircuit className="h-3.5 w-3.5 shrink-0 text-primary-glow" /> {item}

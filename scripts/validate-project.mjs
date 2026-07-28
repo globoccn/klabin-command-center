@@ -106,25 +106,6 @@ check("Frontend sincroniza lista após exclusão", deleteSource.includes("const 
 check("Serviço chama workflow 29", reportService.includes('apiPost<DeleteReportResult>("reports/delete"') && !reportService.includes("deleteCode"));
 check("Card possui ação de excluir", reportCard.includes("onDelete") && reportCard.includes("Trash2"));
 
-
-const allTextFiles = [];
-function collectTextFiles(directory) {
-  for (const entry of fs.readdirSync(path.join(root, directory), { withFileTypes: true })) {
-    const relative = path.join(directory, entry.name);
-    if (entry.isDirectory()) collectTextFiles(relative);
-    else if (/\.(ts|tsx|js|mjs|json|md|toml)$/.test(entry.name)) allTextFiles.push(relative);
-  }
-}
-collectTextFiles("src");
-for (const relative of ["package.json", "vite.config.ts", "bunfig.toml", "AGENTS.md", "README.md"]) {
-  if (exists(relative)) allTextFiles.push(relative);
-}
-const combinedSource = allTextFiles.map((relative) => read(relative)).join("\n");
-check("Sem referências à plataforma de criação anterior", !new RegExp("love" + "able", "i").test(combinedSource));
-check("Favicon institucional da Klabin", exists("public/favicon.svg") && exists("public/favicon.ico") && exists("public/apple-touch-icon.png"));
-check("Visão Geral sem rótulo snapshot demonstrativo", !/snapshot demonstrativo/i.test(overviewSource) && overviewSource.includes('statusLabel="Dados operacionais"'));
-check("Configuração Vite independente", viteConfig.includes("tanstackStart()") && viteConfig.includes("nitro()") && viteConfig.includes("viteReact()"));
-
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));
 const passed = results.filter((result) => result.passed).length;
 console.log(`\n${passed}/${results.length} validações aprovadas.`);

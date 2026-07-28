@@ -25,10 +25,9 @@ export interface DeleteReportResult {
   message: string;
 }
 
-export async function deleteReport(id: string, deleteCode: string): Promise<DeleteReportResult> {
+export async function deleteReport(id: string): Promise<DeleteReportResult> {
   const result = await apiPost<DeleteReportResult>("reports/delete", {
     reportId: id,
-    deleteCode,
     requestedBy: "frontend",
   });
 

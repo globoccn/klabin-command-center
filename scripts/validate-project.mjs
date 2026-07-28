@@ -98,6 +98,14 @@ check("Relatórios conectados à API n8n", reportService.includes('apiPost<Repor
 check("Download direto em PDF", reportService.includes('`${baseUrl}/reports/download`') && reportCard.includes('href={getReportDownloadUrl(report)}') && !reportService.includes('URL.createObjectURL'));
 check("Tela de relatórios possui botão Baixar PDF", read("src/components/report-card.tsx").includes("Baixar PDF"));
 
+
+const deleteSource = read("src/routes/relatorios.tsx");
+check("Frontend possui exclusão individual de relatórios", deleteSource.includes("confirmDelete") && deleteSource.includes("Excluir definitivamente") && deleteSource.includes("setItems((current) => current?.filter"));
+check("Frontend fecha preview após exclusão", deleteSource.includes("setPreview((current) => (current?.id === reportId ? null : current))"));
+check("Frontend sincroniza lista após exclusão", deleteSource.includes("const refreshed = await getReports"));
+check("Serviço chama workflow 29", reportService.includes('apiPost<DeleteReportResult>("reports/delete"') && reportService.includes("deleteCode"));
+check("Card possui ação de excluir", reportCard.includes("onDelete") && reportCard.includes("Trash2"));
+
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));
 const passed = results.filter((result) => result.passed).length;
 console.log(`\n${passed}/${results.length} validações aprovadas.`);

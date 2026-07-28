@@ -1,15 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertTriangle, CalendarDays, CheckCircle2, Database, Lightbulb, Plus, TrendingUp } from "lucide-react";
+import { AlertTriangle, CalendarDays, CheckCircle2, Database, Lightbulb, Loader2, Plus, Trash2, TrendingUp } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { ReportCard } from "@/components/report-card";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
-import { generateReport, getReportDownloadUrl, getReports } from "@/services/reportService";
+import { deleteReport, generateReport, getReportDownloadUrl, getReports } from "@/services/reportService";
 import { getFilterOptions } from "@/services/dashboardService";
 import type { Report, SnapshotMetadata } from "@/types/dashboard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { fmtDateTime } from "@/lib/format";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/empty-state";
@@ -60,6 +63,9 @@ function Relatorios() {
   const [items, setItems] = useState<Report[] | null>(null);
   const [preview, setPreview] = useState<Report | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Report | null>(null);
+  const [deleteCode, setDeleteCode] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const period = useMemo(() => {
     if (!snapshot?.periodEnd || type === "Todos") return null;
@@ -110,6 +116,52 @@ function Relatorios() {
       toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório");
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const openDeleteDialog = (report: Report) => {
+    if (report.status === "Processando") {
+      toast.info("Aguarde a geração terminar antes de excluir este relatório.");
+      return;
+    }
+    setDeleteCode("");
+    setDeleteTarget(report);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    if (!deleteCode.trim()) {
+      toast.error("Informe o código de exclusão configurado no workflow 29.");
+      return;
+    }
+
+    const reportId = deleteTarget.id;
+    setDeletingId(reportId);
+    try {
+      const result = await deleteReport(reportId, deleteCode.trim());
+
+      // Remove imediatamente o card e fecha a visualização do relatório excluído.
+      setItems((current) => current?.filter((item) => item.id !== reportId) ?? []);
+      setPreview((current) => (current?.id === reportId ? null : current));
+      setDeleteTarget(null);
+      setDeleteCode("");
+
+      const freed = result.freedBytes
+        ? ` Espaço liberado: ${(result.freedBytes / 1024).toLocaleString("pt-BR", { maximumFractionDigits: 0 })} KB.`
+        : "";
+      toast.success(`${result.message}${freed}`);
+
+      // Confirma o estado real do PostgreSQL. A API de listagem não usa cache.
+      try {
+        const refreshed = await getReports(type === "Todos" ? undefined : type, period ?? undefined);
+        setItems(refreshed);
+      } catch {
+        // A remoção local já garante que o card não permaneça visível.
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível excluir o relatório");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -179,7 +231,7 @@ function Relatorios() {
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((report) => (
-            <ReportCard key={report.id} report={report} onView={setPreview} />
+            <ReportCard key={report.id} report={report} onView={setPreview} onDelete={openDeleteDialog} deleting={deletingId === report.id} />
           ))}
         </div>
       )}
@@ -231,7 +283,19 @@ function Relatorios() {
                 <ReportSection title="Recomendações" icon={<Lightbulb className="h-4 w-4" />} tone="info"><List items={preview.recomendacoes} color="text-[color:var(--info)]" /></ReportSection>
               </div>
 
-              <div className="mt-4 flex justify-end">
+              <div className="mt-4 flex flex-wrap justify-end gap-2">
+                {preview.status !== "Processando" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-destructive/35 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => openDeleteDialog(preview)}
+                    disabled={deletingId === preview.id}
+                  >
+                    {deletingId === preview.id ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Trash2 className="mr-1 h-4 w-4" />}
+                    Excluir relatório
+                  </Button>
+                )}
                 {preview.status === "Pronto" && preview.pdfDisponivel !== false ? (
                   <Button asChild variant="outline" className="border-primary/30 text-primary-glow">
                     <a
@@ -251,6 +315,64 @@ function Relatorios() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open && !deletingId) {
+            setDeleteTarget(null);
+            setDeleteCode("");
+          }
+        }}
+      >
+        <AlertDialogContent className="border-destructive/25 bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" /> Excluir relatório permanentemente?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2 text-left">
+              <span className="block">O PDF, o HTML e o histórico deste relatório serão removidos do PostgreSQL. Esta ação não pode ser desfeita.</span>
+              {deleteTarget && (
+                <span className="block rounded-lg border border-border bg-background/35 p-3 text-foreground">
+                  <strong className="block text-sm">{deleteTarget.titulo}</strong>
+                  <span className="mt-1 block text-[10px] text-muted-foreground">{deleteTarget.periodo} · {deleteTarget.id}</span>
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="space-y-2">
+            <Label htmlFor="report-delete-code" className="text-xs">Código de exclusão</Label>
+            <Input
+              id="report-delete-code"
+              type="password"
+              autoComplete="off"
+              value={deleteCode}
+              onChange={(event) => setDeleteCode(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !deletingId) void confirmDelete();
+              }}
+              placeholder="Código configurado no workflow 29"
+              disabled={!!deletingId}
+              className="border-destructive/25 focus-visible:ring-destructive/50"
+            />
+            <p className="text-[10px] text-muted-foreground">O código não é salvo no navegador e é enviado somente no momento da exclusão.</p>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!deletingId}>Cancelar</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => void confirmDelete()}
+              disabled={!!deletingId || !deleteCode.trim()}
+            >
+              {deletingId ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Trash2 className="mr-1 h-4 w-4" />}
+              {deletingId ? "Excluindo…" : "Excluir definitivamente"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

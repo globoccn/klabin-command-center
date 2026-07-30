@@ -25,6 +25,7 @@ import {
   fallbackCatalog,
   getChatCatalog,
   getChatHistory,
+  getStoredConversationExpiresAt,
   getStoredConversationId,
   historyToMessages,
   sendChatFeedback,
@@ -46,7 +47,7 @@ const welcome: ChatMessage = {
   role: "assistant",
   timestamp: new Date().toISOString(),
   content:
-    "Olá! Sou o Assistente Operacional Klabin. Minhas respostas são calculadas a partir dos dados disponíveis e de regras governadas. Selecione uma pergunta ou escreva com suas palavras.",
+    "Olá! Sou o Assistente Operacional Klabin. Utilizo os dados operacionais disponíveis para responder perguntas objetivas e organizar análises com fatos e prioridades já validados. Selecione uma pergunta ou escreva com suas palavras.",
   suggestions: [
     "Como está a operação no último dia?",
     "Compare esta semana com a anterior",
@@ -68,6 +69,7 @@ const categoryLabels: Record<string, string> = {
   comparação: "Comparações",
   decisão: "Decisão",
   geral: "Ajuda",
+  "análise assistida": "Análise assistida",
 };
 
 const categoryOrder = [
@@ -81,6 +83,7 @@ const categoryOrder = [
   "qualidade",
   "comparação",
   "decisão",
+  "análise assistida",
 ];
 
 const periodLabels: Record<ChatPeriodCode, string> = {
@@ -113,7 +116,7 @@ export function AssistantConversation({
 
     Promise.all([
       getChatCatalog().catch(() => fallbackCatalog),
-      stored ? getChatHistory(stored, compact ? 8 : 30).catch(() => []) : Promise.resolve([]),
+      stored ? getChatHistory(stored, compact ? 4 : 8).catch(() => []) : Promise.resolve([]),
     ]).then(([catalogItems, history]) => {
       if (!active) return;
       setCatalog(catalogItems.filter((item) => item.intent !== "unsupported"));
@@ -125,6 +128,21 @@ export function AssistantConversation({
       active = false;
     };
   }, [compact]);
+
+  useEffect(() => {
+    const expireHistory = () => {
+      const expiresAt = getStoredConversationExpiresAt();
+      if (conversationId && (!expiresAt || Date.now() >= expiresAt)) {
+        clearStoredConversationId();
+        setConversationId(undefined);
+        setMessages([welcome]);
+        setError(null);
+      }
+    };
+    expireHistory();
+    const timer = window.setInterval(expireHistory, 60_000);
+    return () => window.clearInterval(timer);
+  }, [conversationId]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -187,7 +205,7 @@ export function AssistantConversation({
             id: `error-${Date.now()}`,
             role: "assistant",
             timestamp: new Date().toISOString(),
-            content: "Não consegui consultar os dados agora. Verifique se os workflows 31 a 35 estão configurados e se o workflow 32 está ativo.",
+            content: "Não consegui consultar os dados agora. Tente novamente em alguns instantes.",
             mode: "error",
             usedAI: false,
           },
@@ -240,7 +258,7 @@ export function AssistantConversation({
                 <span className="inline-flex items-center gap-1 text-primary-glow">
                   <ShieldCheck className="h-3 w-3" /> Respostas governadas
                 </span>
-                <span>Sem IA generativa nesta etapa</span>
+                <span>Histórico das últimas 3 horas</span>
               </div>
             </div>
           </div>
@@ -358,7 +376,7 @@ export function AssistantConversation({
               <i className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-glow [animation-delay:140ms]" />
               <i className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary-glow [animation-delay:280ms]" />
             </span>
-            consultando dados e regras…
+            organizando os dados disponíveis…
           </div>
         )}
       </div>
@@ -426,7 +444,7 @@ export function AssistantConversation({
               Abrir assistente completo <ArrowRight className="h-3 w-3" />
             </Link>
           ) : (
-            <span>Respostas determinísticas · sem geração livre de SQL</span>
+            <span>Respostas baseadas nos dados operacionais disponíveis</span>
           )}
         </div>
       </div>

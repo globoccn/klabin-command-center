@@ -476,3 +476,141 @@
   .overview-row-tertiary .chart-card-content { min-height: 190px; }
   .insight-banner-reference { margin-top: 12px; }
 }
+
+
+/* Referência visual: 1920 × 1200.
+   Em desktops menores, a composição não é comprimida nem reorganizada:
+   o navegador disponibiliza rolagem horizontal e vertical. */
+@media (min-width: 1024px) and (max-width: 2199px) {
+  html,
+  body {
+    min-width: 1900px;
+    overflow-x: auto;
+  }
+
+  .app-shell {
+    width: 100%;
+    min-width: 1900px;
+  }
+
+  .app-sidebar-command {
+    width: 198px;
+    flex: 0 0 198px;
+  }
+
+  .app-content-reference {
+    width: calc(100% - 198px);
+    min-width: 1702px;
+    flex: 1 0 1702px;
+  }
+
+  .dashboard-main {
+    width: 100%;
+    min-width: 1702px;
+    flex: 1 0 auto;
+    padding: 22px 24px 12px;
+  }
+
+  .command-page {
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  .overview-command-page {
+    min-height: 1178px;
+  }
+
+  .dashboard-topbar {
+    display: grid;
+    grid-template-columns: minmax(430px, .95fr) minmax(760px, 1.9fr) 164px;
+    align-items: center;
+    gap: 16px;
+    min-height: 88px;
+    margin-bottom: 16px;
+  }
+
+  .dashboard-topbar > *,
+  .dashboard-topbar > .dashboard-filter-area,
+  .dashboard-topbar > :last-child {
+    width: auto;
+    grid-column: auto;
+    grid-row: auto;
+    align-self: auto;
+  }
+
+  .dashboard-filter-grid {
+    grid-template-columns: 1.45fr repeat(5, minmax(92px, 1fr));
+    gap: 12px;
+  }
+
+  .filter-shell {
+    height: 70px;
+    min-height: 70px;
+    border-radius: 13px;
+  }
+
+  .kpi-grid-reference {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .kpi-card-reference {
+    height: 150px;
+    min-height: 150px;
+  }
+
+  .overview-row-primary {
+    grid-template-columns: 1.03fr 1.78fr 1.48fr;
+  }
+
+  .overview-row-primary > :last-child {
+    grid-column: auto;
+  }
+
+  .overview-row-secondary,
+  .overview-row-tertiary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .overview-row-primary,
+  .overview-row-secondary,
+  .overview-row-tertiary {
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .overview-row-primary .chart-card-content { min-height: 232px; }
+  .overview-row-secondary .chart-card-content { min-height: 196px; }
+  .overview-row-tertiary .chart-card-content { min-height: 218px; }
+
+  .insight-banner-grid {
+    grid-template-columns: minmax(380px, 2.2fr) repeat(3, minmax(190px, .95fr));
+  }
+
+  .insight-banner-grid > :first-child { grid-column: auto; }
+
+  .assistant-page-layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+
+  .assistant-governance-column {
+    display: block;
+  }
+
+  .assistant-governance-column > * + * {
+    margin-top: 12px;
+  }
+
+  .assistant-governance-column > :last-child { grid-column: auto; }
+  .assistant-question-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .section-filter-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .page-kpi-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .page-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .page-grid-rounds { grid-template-columns: minmax(0, 1.45fr) minmax(0, .75fr); }
+  .page-grid-quality { grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); }
+  .reports-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .evidence-filter-grid { grid-template-columns: 1.35fr repeat(5, minmax(0, 1fr)); }
+  .evidence-gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+}

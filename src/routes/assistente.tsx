@@ -24,7 +24,7 @@ function AssistenteOperacional() {
     <div className="command-page assistant-page animate-fade-in-up">
       <DashboardHeader
         title="Assistente Operacional"
-        subtitle="Perguntas guiadas, respostas determinísticas e análises assistidas com governança"
+        subtitle="Perguntas guiadas, respostas objetivas e análises assistidas"
         statusLabel="Consultas governadas"
       />
 
@@ -35,12 +35,12 @@ function AssistenteOperacional() {
           <GovernanceCard
             icon={<ShieldCheck className="h-4 w-4" />}
             title="Governança da resposta"
-            text="As perguntas são classificadas em intenções permitidas. Consultas objetivas usam regras; análises autorizadas usam Groq sobre um payload sanitizado, sem SQL livre."
+            text="Consultas objetivas usam indicadores calculados. Nas análises assistidas, o sistema apenas seleciona, prioriza e organiza fatos, riscos e ações previamente validados."
           />
           <GovernanceCard
             icon={<Database className="h-4 w-4" />}
             title="Origem dos dados"
-            text="As respostas utilizam a base operacional ativa e funções validadas no PostgreSQL. A IA recebe somente indicadores agregados e necessários."
+            text="As respostas utilizam a base operacional disponível e indicadores consolidados para o período selecionado."
           />
           <GovernanceCard
             icon={<GitCompareArrows className="h-4 w-4" />}
@@ -70,7 +70,7 @@ function AssistenteOperacional() {
           </section>
 
           <div className="rounded-xl border border-info/25 bg-info/5 p-3 text-[10px] leading-relaxed text-muted-foreground">
-            <strong className="block text-[11px] text-foreground">Limites desta demonstração</strong>
+            <strong className="block text-[11px] text-foreground">Limites da análise</strong>
             Não são utilizados SLA, custos, metas contratuais, consumo energético, ocupação ou dados externos porque essas informações não existem na fonte atual.
           </div>
         </aside>

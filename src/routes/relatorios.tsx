@@ -19,7 +19,7 @@ export const Route = createFileRoute("/relatorios")({
   head: () => ({
     meta: [
       { title: "Relatórios · Klabin" },
-      { name: "description", content: "Relatórios operacionais ancorados na última data disponível do snapshot." },
+      { name: "description", content: "Relatórios operacionais calculados a partir da última data disponível." },
       { property: "og:title", content: "Relatórios · Klabin" },
       { property: "og:description", content: "Resumos executivos diários, semanais e mensais." },
     ],
@@ -50,7 +50,7 @@ function fmtDate(iso?: string) {
 
 function periodLabel(type: ReportTab, period: { inicio: string; fim: string } | null) {
   if (type === "Todos") return "Todos os relatórios gerados";
-  if (!period) return "Carregando período do snapshot…";
+  if (!period) return "Carregando período disponível…";
   if (type === "Diário") return fmtDate(period.fim);
   return `${fmtDate(period.inicio)} – ${fmtDate(period.fim)}`;
 }
@@ -73,7 +73,7 @@ function Relatorios() {
     let active = true;
     getFilterOptions()
       .then((options) => { if (active) setSnapshot(options.snapshot ?? null); })
-      .catch((error) => toast.error(error instanceof Error ? error.message : "Falha ao carregar o período do snapshot"));
+      .catch((error) => toast.error(error instanceof Error ? error.message : "Falha ao carregar o período disponível"));
     return () => { active = false; };
   }, []);
 
@@ -98,7 +98,7 @@ function Relatorios() {
       return;
     }
     if (!snapshot?.periodEnd) {
-      toast.error("A última data do snapshot ainda não foi carregada.");
+      toast.error("A última data disponível ainda não foi carregada.");
       return;
     }
 
@@ -142,7 +142,6 @@ function Relatorios() {
         : "";
       toast.success(`${result.message}${freed}`);
 
-      // Confirma o estado real do PostgreSQL. A API de listagem não usa cache.
       try {
         const refreshed = await getReports(type === "Todos" ? undefined : type, period ?? undefined);
         setItems(refreshed);
@@ -158,7 +157,7 @@ function Relatorios() {
 
   return (
     <div className="command-page animate-fade-in-up">
-      <DashboardHeader title="Relatórios" subtitle="Períodos demonstrativos calculados pela última data disponível no snapshot" />
+      <DashboardHeader title="Relatórios" subtitle="Períodos calculados automaticamente pela última data disponível" />
 
       <div className="command-card mb-4 flex flex-col gap-3 p-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
@@ -205,22 +204,22 @@ function Relatorios() {
 
       {snapshot && type !== "Todos" && period && (
         <div className="mb-4 rounded-xl border border-primary/16 bg-primary/5 px-4 py-3 text-[10px] text-muted-foreground">
-          <strong className="text-primary-glow">Regra demonstrativa:</strong>{" "}
-          {type === "Diário" && "último dia existente no JSON."}
-          {type === "Semanal" && "últimos sete dias encerrando na última data do JSON."}
-          {type === "Mensal" && "mês da última data do JSON, do primeiro dia até a data disponível."}
-          {" "}Fonte: {snapshot.fileName} · Base disponível de {fmtDate(snapshot.periodStart)} a {fmtDate(snapshot.periodEnd)}.
+          <strong className="text-primary-glow">Período automático:</strong>{" "}
+          {type === "Diário" && "último dia disponível na base."}
+          {type === "Semanal" && "últimos sete dias encerrando na data mais recente."}
+          {type === "Mensal" && "mês da data mais recente, do primeiro dia até a data disponível."}
+          {" "}Base disponível de {fmtDate(snapshot.periodStart)} a {fmtDate(snapshot.periodEnd)}.
         </div>
       )}
 
       {!items ? (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="reports-grid grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 3 }, (_, index) => <LoadingSkeleton key={index} className="h-[220px]" />)}
         </div>
       ) : items.length === 0 ? (
-        <div className="command-card"><EmptyState title="Nenhum relatório gerado" description={type === "Todos" ? "Gere o primeiro relatório demonstrativo." : "Gere o relatório correspondente ao período automático selecionado."} /></div>
+        <div className="command-card"><EmptyState title="Nenhum relatório gerado" description={type === "Todos" ? "Gere o primeiro relatório operacional." : "Gere o relatório correspondente ao período automático selecionado."} /></div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="reports-grid grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((report) => (
             <ReportCard key={report.id} report={report} onView={setPreview} onDelete={openDeleteDialog} deleting={deletingId === report.id} />
           ))}
@@ -239,7 +238,7 @@ function Relatorios() {
               {preview.status === "Falhou" && (
                 <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/8 p-3 text-xs text-destructive">
                   <div className="mb-1 font-semibold">A geração do PDF falhou</div>
-                  <div className="break-words text-[10px] text-[#ffd7d7]">{preview.erro || "O backend não registrou detalhes do erro. Compartilhe a execução do workflow 14 para diagnóstico."}</div>
+                  <div className="break-words text-[10px] text-[#ffd7d7]">{preview.erro || "Não foram registrados detalhes adicionais. Tente gerar o relatório novamente ou acione o suporte técnico."}</div>
                 </div>
               )}
 

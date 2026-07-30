@@ -29,14 +29,14 @@ function Qualidade() {
       <DashboardHeader title="Qualidade dos Dados" subtitle="Governança, integridade e cobertura da base operacional" />
       {!data ? <LoadingSkeleton className="h-[520px]" /> : (
         <>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="page-kpi-grid-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Metric icon={<Database className="h-5 w-5" />} value={fmtInt(data.metrics.semVencimento)} label="Tarefas sem vencimento" />
             <Metric icon={<ShieldCheck className="h-5 w-5" />} value={fmtPct(data.metrics.coberturaSetor)} label="Cobertura de setor" tone="info" />
             <Metric icon={<AlertTriangle className="h-5 w-5" />} value={fmtInt(data.metrics.fechamentoAnterior)} label="Fechamento anterior à data inicial" tone="warning" />
             <Metric icon={<Copy className="h-5 w-5" />} value={fmtInt(data.metrics.camposDuplicados)} label="Tarefas com campos duplicados" tone="blue" />
           </div>
 
-          <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1.25fr_.75fr]">
+          <div className="page-grid-quality mt-3 grid grid-cols-1 gap-3 xl:grid-cols-[1.25fr_.75fr]">
             <ChartCard title="Cobertura e Integridade">
               <div className="space-y-5 py-3">
                 {data.coverage.map((item) => <QualityBar key={item.label} {...item} />)}

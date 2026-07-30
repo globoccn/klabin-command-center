@@ -70,9 +70,9 @@ check("Comparação antes/depois", evidenceSource.includes('label="Antes"') && e
 
 const reportSource = read("src/routes/relatorios.tsx");
 check("Período automático dos relatórios", reportSource.includes("Período automático") && reportSource.includes("Último dado disponível"));
-check("Relatório diário ancorado no último dia", reportSource.includes("último dia existente no JSON"));
+check("Relatório diário ancorado no último dia", reportSource.includes("último dia disponível na base"));
 check("Relatório semanal com sete dias", reportSource.includes("últimos sete dias"));
-check("Relatório mensal até a última data", reportSource.includes("mês da última data do JSON"));
+check("Relatório mensal até a última data", reportSource.includes("mês da data mais recente"));
 check("Preview executivo dos relatórios", ["Resumo Executivo", "Destaques", "Riscos", "Recomendações", "Evolução no período"].every((item) => reportSource.includes(item)));
 
 const chatSource = read("src/services/chatService.ts");
@@ -81,10 +81,10 @@ const assistantRoute = read("src/routes/assistente.tsx");
 const floatingAssistant = read("src/components/chat-assistant.tsx");
 const sidebarSource = read("src/components/app-sidebar.tsx");
 const mobileNavSource = read("src/components/mobile-nav.tsx");
-check("Chat conectado ao workflow 32", chatSource.includes('apiPost<ChatApiResponse>("chat"'));
-check("Catálogo conectado ao workflow 35", chatSource.includes('apiGet<ChatCatalogResponse>("chat/catalog"'));
-check("Histórico conectado ao workflow 34", chatSource.includes('apiGet<ChatHistoryResponse>("chat/history"'));
-check("Feedback conectado ao workflow 33", chatSource.includes('apiPost<ChatFeedbackResponse>("chat/feedback"'));
+check("Chat conectado à API operacional", chatSource.includes('apiPost<ChatApiResponse>("chat"'));
+check("Catálogo conectado à API operacional", chatSource.includes('apiGet<ChatCatalogResponse>("chat/catalog"'));
+check("Histórico conectado à API operacional", chatSource.includes('apiGet<ChatHistoryResponse>("chat/history"'));
+check("Feedback conectado à API operacional", chatSource.includes('apiPost<ChatFeedbackResponse>("chat/feedback"'));
 check("Chat sem respostas locais simuladas", !chatSource.includes("const canned") && !chatSource.includes("await delay"));
 check("Página Assistente Operacional", assistantRoute.includes('createFileRoute("/assistente")') && assistantRoute.includes("AssistantConversation"));
 check("Perguntas guiadas", assistantSource.includes("Perguntas sugeridas") && assistantSource.includes("guidedQuestions"));
@@ -110,19 +110,19 @@ check("KPI Taxa de Conclusão com alinhamento dedicado", read("src/components/kp
 check("Logo Facilities AI adicionada à sidebar", read("src/components/app-sidebar.tsx").includes('src="/facilities-ai-logo.png"') && styles.includes(".sidebar-facilities-brand"));
 check("Arquivo transparente da Facilities AI disponível", exists("public/facilities-ai-logo.png"));
 
-check("Responsivo 1600 e abaixo", styles.includes("@media (max-width: 1599px)") && styles.includes("repeat(3, minmax(0, 1fr))"));
+check("Referência fixa para desktops menores", styles.includes("min-width: 1900px") && styles.includes("overflow-x: auto") && styles.includes("grid-template-columns: repeat(6, minmax(0, 1fr))"));
 check("Responsivo tablets", styles.includes("@media (max-width: 1023px)") && sidebarSource.includes("hidden lg:flex") && mobileNavSource.includes("lg:hidden"));
 check("Responsivo celulares", styles.includes("@media (max-width: 767px)") && styles.includes(".overview-donut-layout"));
 check("Responsivo telas pequenas", styles.includes("@media (max-width: 479px)"));
 check("Responsivo telas 2K e 4K", styles.includes("@media (min-width: 2200px)") && styles.includes("max-width: 2100px"));
 check("Layout de baixa altura", styles.includes("@media (max-height: 850px)"));
-check("Descrição demonstrativa sem tempo real", overviewSource.includes("apresentação demonstrativa") && !overviewSource.includes("em tempo real"));
+check("Descrição operacional sem termos de demonstração", !overviewSource.toLowerCase().includes("demonstra") && !overviewSource.includes("em tempo real"));
 check("Route tree contém assistente", read("src/routeTree.gen.ts").includes("AssistenteRoute"));
 
 
 const reportService = read("src/services/reportService.ts");
 const reportCard = read("src/components/report-card.tsx");
-check("Relatórios conectados à API n8n", reportService.includes('apiPost<Report>("reports/generate"') && reportService.includes('url.searchParams.set("reportId", report.id)'));
+check("Relatórios conectados à API operacional", reportService.includes('apiPost<Report>("reports/generate"') && reportService.includes('url.searchParams.set("reportId", report.id)'));
 check("Download direto em PDF", reportService.includes('`${baseUrl}/reports/download`') && reportCard.includes('href={getReportDownloadUrl(report)}') && !reportService.includes('URL.createObjectURL'));
 check("Tela de relatórios possui botão Baixar PDF", read("src/components/report-card.tsx").includes("Baixar PDF"));
 
@@ -131,8 +131,18 @@ const deleteSource = read("src/routes/relatorios.tsx");
 check("Frontend possui exclusão individual de relatórios", deleteSource.includes("confirmDelete") && deleteSource.includes("Sim, excluir relatório") && deleteSource.includes("setItems((current) => current?.filter"));
 check("Frontend fecha preview após exclusão", deleteSource.includes("setPreview((current) => (current?.id === reportId ? null : current))"));
 check("Frontend sincroniza lista após exclusão", deleteSource.includes("const refreshed = await getReports"));
-check("Serviço chama workflow 29", reportService.includes('apiPost<DeleteReportResult>("reports/delete"') && !reportService.includes("deleteCode"));
+check("Serviço de exclusão conectado à API", reportService.includes('apiPost<DeleteReportResult>("reports/delete"') && !reportService.includes("deleteCode"));
 check("Card possui ação de excluir", reportCard.includes("onDelete") && reportCard.includes("Trash2"));
+
+const visibleFrontendSources = [
+  read("src/routes/index.tsx"),
+  read("src/routes/assistente.tsx"),
+  read("src/routes/relatorios.tsx"),
+  read("src/components/assistant-conversation.tsx"),
+  read("src/services/apiClient.ts"),
+].join("\n").toLowerCase();
+check("Interface sem menções técnicas internas", !["workflow", "n8n", "demonstração", "demonstrativo", "groq", "postgresql", "sql livre"].some((term) => visibleFrontendSources.includes(term)));
+check("Histórico local limitado a três horas", chatSource.includes("CHAT_HISTORY_TTL_MS = 3 * 60 * 60 * 1000") && assistantSource.includes("Histórico das últimas 3 horas"));
 
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));
 const passed = results.filter((result) => result.passed).length;

@@ -97,7 +97,7 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
           Limpar filtros
         </Button>
       </div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">{content}</div>
+      <div className="section-filter-grid grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">{content}</div>
     </div>
   );
 }

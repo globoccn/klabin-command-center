@@ -76,10 +76,10 @@ export function KpiCard({ kpi }: { kpi: Kpi }) {
           </div>
         </div>
 
-        <div className="relative mt-2 flex items-center gap-2 border-t border-primary/16 pt-2">
+        <div className="relative mt-2 grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-2 border-t border-primary/16 pt-2">
           <span
             className={cn(
-              "inline-flex h-[22px] items-center gap-1 rounded-[7px] border px-2 text-[10px] font-semibold",
+              "inline-flex h-[22px] shrink-0 items-center gap-1 whitespace-nowrap rounded-[7px] border px-2 text-[10px] font-semibold",
               warning
                 ? "border-warning/20 bg-warning/10 text-warning"
                 : "border-primary/20 bg-primary/10 text-primary-glow",

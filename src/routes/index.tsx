@@ -42,7 +42,7 @@ export const Route = createFileRoute("/")({
       { title: "Visão Geral · Central Operacional Klabin" },
       { name: "description", content: "Painel executivo com indicadores de operação, manutenção e facility management." },
       { property: "og:title", content: "Visão Geral · Central Operacional Klabin" },
-      { property: "og:description", content: "KPIs, gráficos e insights operacionais para apresentação demonstrativa." },
+      { property: "og:description", content: "KPIs, gráficos e direcionamentos para acompanhamento operacional." },
     ],
   }),
   component: Overview,

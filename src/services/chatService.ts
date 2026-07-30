@@ -8,6 +8,8 @@ import type {
 } from "@/types/dashboard";
 
 const CONVERSATION_KEY = "klabin-assistant-conversation-id";
+const CONVERSATION_STARTED_AT_KEY = "klabin-assistant-conversation-started-at";
+export const CHAT_HISTORY_TTL_MS = 3 * 60 * 60 * 1000;
 
 export type ChatPeriodCode = "daily" | "weekly" | "monthly";
 
@@ -98,25 +100,91 @@ export const fallbackCatalog: ChatCatalogItem[] = [
     intent: "risks_recommendations",
     category: "decisão",
     label: "Riscos e recomendações",
-    description: "Riscos calculados e ações sugeridas pelas regras.",
+    description: "Riscos calculados e ações recomendadas a partir dos dados.",
     examples: ["Quais são os principais riscos?", "O que devemos priorizar?"],
     responseMode: "deterministic",
+  },
+  {
+    intent: "executive_analysis",
+    category: "análise assistida",
+    label: "Análise executiva",
+    description: "Organiza fatos, riscos e prioridades já calculados.",
+    examples: ["Faça uma análise executiva da operação desta semana", "Analise o desempenho da operação neste mês"],
+    responseMode: "hybrid",
+  },
+  {
+    intent: "explain_operational_risks",
+    category: "análise assistida",
+    label: "Leitura dos riscos",
+    description: "Apresenta os riscos calculados em ordem de relevância.",
+    examples: ["Explique os riscos operacionais desta semana", "Interprete os principais riscos do mês"],
+    responseMode: "hybrid",
+  },
+  {
+    intent: "recommend_action_plan",
+    category: "análise assistida",
+    label: "Plano de ação",
+    description: "Prioriza ações já aprovadas conforme o cenário do período.",
+    examples: ["Sugira um plano de ação para esta semana", "O que devemos fazer primeiro diante dos dados atuais?"],
+    responseMode: "hybrid",
+  },
+  {
+    intent: "compare_periods_executive",
+    category: "análise assistida",
+    label: "Comparação executiva",
+    description: "Organiza a comparação com o período anterior.",
+    examples: ["Compare esta semana com a anterior de forma executiva", "Faça uma leitura gerencial deste mês contra o anterior"],
+    responseMode: "hybrid",
+  },
+  {
+    intent: "summarize_for_meeting",
+    category: "análise assistida",
+    label: "Resumo para reunião",
+    description: "Seleciona os pontos mais relevantes para apresentação.",
+    examples: ["Resuma a operação desta semana para uma reunião", "Prepare um resumo gerencial do mês"],
+    responseMode: "hybrid",
+  },
+  {
+    intent: "identify_possible_patterns",
+    category: "análise assistida",
+    label: "Padrões e concentrações",
+    description: "Destaca concentrações já identificadas nos dados.",
+    examples: ["Identifique possíveis padrões nos dados desta semana", "Há alguma concentração relevante na operação deste mês?"],
+    responseMode: "hybrid",
   },
 ];
 
 export function getStoredConversationId(): string | undefined {
   if (typeof window === "undefined") return undefined;
-  return window.localStorage.getItem(CONVERSATION_KEY) || undefined;
+  const conversationId = window.localStorage.getItem(CONVERSATION_KEY) || undefined;
+  const startedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
+  if (!conversationId || !startedAt || Date.now() - startedAt >= CHAT_HISTORY_TTL_MS) {
+    clearStoredConversationId();
+    return undefined;
+  }
+  return conversationId;
+}
+
+export function getStoredConversationExpiresAt(): number | undefined {
+  if (typeof window === "undefined") return undefined;
+  const startedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
+  return startedAt ? startedAt + CHAT_HISTORY_TTL_MS : undefined;
 }
 
 export function storeConversationId(conversationId: string) {
   if (typeof window === "undefined" || !conversationId) return;
+  const currentId = window.localStorage.getItem(CONVERSATION_KEY);
+  const currentStartedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
   window.localStorage.setItem(CONVERSATION_KEY, conversationId);
+  if (currentId !== conversationId || !currentStartedAt) {
+    window.localStorage.setItem(CONVERSATION_STARTED_AT_KEY, String(Date.now()));
+  }
 }
 
 export function clearStoredConversationId() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(CONVERSATION_KEY);
+  window.localStorage.removeItem(CONVERSATION_STARTED_AT_KEY);
 }
 
 export async function sendChatMessage(input: SendChatInput): Promise<ChatApiResponse> {

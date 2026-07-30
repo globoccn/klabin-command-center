@@ -14,7 +14,7 @@ export class ApiError extends Error {
 }
 
 function buildUrl(path: string, params?: Record<string, string | number | undefined>) {
-  if (!API_BASE_URL) throw new ApiError("Defina VITE_KLABIN_API_BASE_URL para conectar o frontend aos webhooks do n8n.");
+  if (!API_BASE_URL) throw new ApiError("Defina VITE_KLABIN_API_BASE_URL para conectar a aplicação à API operacional.");
   const url = new URL(`${API_BASE_URL}/${path.replace(/^\//, "")}`);
   Object.entries(params ?? {}).forEach(([key, value]) => {
     if (value !== undefined && value !== "") url.searchParams.set(key, String(value));

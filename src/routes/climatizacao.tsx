@@ -38,14 +38,14 @@ function Climatizacao() {
 
       {!data ? <LoadingSkeleton className="h-[560px]" /> : (
         <>
-          <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="page-kpi-grid-4 mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <ClimateMetric icon={<Thermometer className="h-5 w-5" />} label="Solicitações" value={fmtInt(data.total)} />
             <ClimateMetric icon={<Snowflake className="h-5 w-5" />} label="Ambiente frio" value={fmtInt(data.cold)} />
             <ClimateMetric icon={<Sun className="h-5 w-5" />} label="Ambiente quente" value={fmtInt(data.hot)} tone="warning" />
             <ClimateMetric icon={<TrendingUp className="h-5 w-5" />} label="Setor mais recorrente" value={data.topSector} />
           </div>
 
-          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <div className="page-grid-2 grid grid-cols-1 gap-3 lg:grid-cols-2">
             <ChartCard title="Tipo de Solicitação">
               <ResponsiveContainer width="100%" height={270}>
                 <PieChart>

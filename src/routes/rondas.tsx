@@ -35,14 +35,14 @@ function Rondas() {
 
       {!data ? <LoadingSkeleton className="h-[500px]" /> : (
         <>
-          <div className="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="page-kpi-grid-4 mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <RoundMetric icon={<ClipboardCheck className="h-5 w-5" />} label="Rondas registradas" value={fmtInt(data.metrics.total)} />
             <RoundMetric icon={<CheckCircle2 className="h-5 w-5" />} label="Com evidência" value={`${fmtDec(data.metrics.evidenceRate)}%`} />
             <RoundMetric icon={<Sun className="h-5 w-5" />} label="Turno predominante" value={data.metrics.predominantShift} />
             <RoundMetric icon={<Moon className="h-5 w-5" />} label="Rondas noturnas" value={fmtInt(data.metrics.nightCount)} />
           </div>
 
-          <div className="grid grid-cols-1 gap-3 xl:grid-cols-[1.45fr_.75fr]">
+          <div className="page-grid-rounds grid grid-cols-1 gap-3 xl:grid-cols-[1.45fr_.75fr]">
             <ChartCard title="Atividades de Ronda">
               <div className="space-y-4 py-2">
                 {data.activities.map((item) => {

@@ -156,35 +156,51 @@ export const fallbackCatalog: ChatCatalogItem[] = [
 
 export function getStoredConversationId(): string | undefined {
   if (typeof window === "undefined") return undefined;
-  const conversationId = window.localStorage.getItem(CONVERSATION_KEY) || undefined;
-  const startedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
-  if (!conversationId || !startedAt || Date.now() - startedAt >= CHAT_HISTORY_TTL_MS) {
-    clearStoredConversationId();
+  try {
+    const conversationId = window.localStorage.getItem(CONVERSATION_KEY) || undefined;
+    const startedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
+    if (!conversationId || !startedAt || Date.now() - startedAt >= CHAT_HISTORY_TTL_MS) {
+      clearStoredConversationId();
+      return undefined;
+    }
+    return conversationId;
+  } catch {
     return undefined;
   }
-  return conversationId;
 }
 
 export function getStoredConversationExpiresAt(): number | undefined {
   if (typeof window === "undefined") return undefined;
-  const startedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
-  return startedAt ? startedAt + CHAT_HISTORY_TTL_MS : undefined;
+  try {
+    const startedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
+    return startedAt ? startedAt + CHAT_HISTORY_TTL_MS : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 export function storeConversationId(conversationId: string) {
   if (typeof window === "undefined" || !conversationId) return;
-  const currentId = window.localStorage.getItem(CONVERSATION_KEY);
-  const currentStartedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
-  window.localStorage.setItem(CONVERSATION_KEY, conversationId);
-  if (currentId !== conversationId || !currentStartedAt) {
-    window.localStorage.setItem(CONVERSATION_STARTED_AT_KEY, String(Date.now()));
+  try {
+    const currentId = window.localStorage.getItem(CONVERSATION_KEY);
+    const currentStartedAt = Number(window.localStorage.getItem(CONVERSATION_STARTED_AT_KEY) || 0);
+    window.localStorage.setItem(CONVERSATION_KEY, conversationId);
+    if (currentId !== conversationId || !currentStartedAt) {
+      window.localStorage.setItem(CONVERSATION_STARTED_AT_KEY, String(Date.now()));
+    }
+  } catch {
+    // O assistente continua funcional mesmo quando o navegador bloqueia armazenamento local.
   }
 }
 
 export function clearStoredConversationId() {
   if (typeof window === "undefined") return;
-  window.localStorage.removeItem(CONVERSATION_KEY);
-  window.localStorage.removeItem(CONVERSATION_STARTED_AT_KEY);
+  try {
+    window.localStorage.removeItem(CONVERSATION_KEY);
+    window.localStorage.removeItem(CONVERSATION_STARTED_AT_KEY);
+  } catch {
+    // Não interrompe a renderização se o navegador bloquear armazenamento local.
+  }
 }
 
 export async function sendChatMessage(input: SendChatInput): Promise<ChatApiResponse> {

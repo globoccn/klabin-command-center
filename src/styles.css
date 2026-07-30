@@ -477,19 +477,16 @@
   .insight-banner-reference { margin-top: 12px; }
 }
 
-
-/* Referência visual: 1920 × 1200.
-   Em desktops menores, a composição não é comprimida nem reorganizada:
-   o navegador disponibiliza rolagem horizontal e vertical. */
-@media (min-width: 1024px) and (max-width: 2199px) {
-  html,
+/* Desktop com referência visual ampla.
+   A largura mínima é aplicada apenas ao shell da aplicação, sem alterar html
+   e sem fixar flex-basis do conteúdo. Isso preserva o layout e permite que o
+   navegador ofereça rolagem horizontal em telas menores. */
+@media (min-width: 1024px) and (max-width: 1699px) {
   body {
-    min-width: 1900px;
     overflow-x: auto;
   }
 
   .app-shell {
-    width: 100%;
     min-width: 1900px;
   }
 
@@ -498,16 +495,8 @@
     flex: 0 0 198px;
   }
 
-  .app-content-reference {
-    width: calc(100% - 198px);
-    min-width: 1702px;
-    flex: 1 0 1702px;
-  }
-
   .dashboard-main {
-    width: 100%;
-    min-width: 1702px;
-    flex: 1 0 auto;
+    min-width: 0;
     padding: 22px 24px 12px;
   }
 
@@ -542,6 +531,10 @@
   .dashboard-filter-grid {
     grid-template-columns: 1.45fr repeat(5, minmax(92px, 1fr));
     gap: 12px;
+  }
+
+  .dashboard-filter-grid > :first-child {
+    grid-column: auto;
   }
 
   .filter-shell {
@@ -588,7 +581,9 @@
     grid-template-columns: minmax(380px, 2.2fr) repeat(3, minmax(190px, .95fr));
   }
 
-  .insight-banner-grid > :first-child { grid-column: auto; }
+  .insight-banner-grid > :first-child {
+    grid-column: auto;
+  }
 
   .assistant-page-layout {
     grid-template-columns: minmax(0, 1fr) 300px;
@@ -602,7 +597,10 @@
     margin-top: 12px;
   }
 
-  .assistant-governance-column > :last-child { grid-column: auto; }
+  .assistant-governance-column > :last-child {
+    grid-column: auto;
+  }
+
   .assistant-question-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .section-filter-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .page-kpi-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -611,6 +609,6 @@
   .page-grid-quality { grid-template-columns: minmax(0, 1.25fr) minmax(0, .75fr); }
   .reports-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .evidence-filter-grid { grid-template-columns: 1.35fr repeat(5, minmax(0, 1fr)); }
+  .evidence-filter-grid > :first-child { grid-column: auto; }
   .evidence-gallery-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-
 }

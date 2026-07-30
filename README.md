@@ -1,16 +1,48 @@
-# Central Operacional Klabin
+# Central Operacional Klabin — frontend integrado
 
-Aplicação React/TypeScript para acompanhamento de indicadores operacionais, relatórios e Assistente Operacional.
+Frontend React/TypeScript conectado aos webhooks do n8n entregues no pacote Marco 4.
 
 ## Configuração
 
-Defina `VITE_KLABIN_API_BASE_URL` com a URL base da API operacional e publique a aplicação no EasyPanel.
+```bash
+cp .env.example .env
+```
 
-## Validação
+Preencha:
+
+```env
+VITE_KLABIN_API_BASE_URL=https://SEU-N8N.DOMINIO/webhook/klabin-demo
+```
+
+## Execução
 
 ```bash
-npm run validate:source
+npm install
+npm run dev
+```
+
+## Build
+
+```bash
 npm run build
 ```
 
-A interface de desktop utiliza como referência a resolução 1920 × 1200. Em resoluções menores, a composição principal é preservada e pode ser acessada por rolagem.
+## Integrações reais do Marco 4
+
+- visão geral;
+- filtros;
+- chamados e tarefas paginadas;
+- climatização;
+- rondas;
+- evidências;
+- qualidade dos dados.
+
+Relatórios e chatbot permanecem mockados e pertencem ao Marco 5.
+
+## Publicação
+
+O `vite.config.ts` mantém o host autorizado:
+
+```text
+klabin.facilities-ai.com.br
+```

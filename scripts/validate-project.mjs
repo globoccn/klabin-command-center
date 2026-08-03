@@ -70,9 +70,9 @@ check("Comparação antes/depois", evidenceSource.includes('label="Antes"') && e
 
 const reportSource = read("src/routes/relatorios.tsx");
 check("Período automático dos relatórios", reportSource.includes("Período automático") && reportSource.includes("Último dado disponível"));
-check("Relatório diário ancorado no último dia", reportSource.includes("último dia existente no JSON"));
+check("Relatório diário ancorado no último dia", reportSource.includes("último dia disponível na base"));
 check("Relatório semanal com sete dias", reportSource.includes("últimos sete dias"));
-check("Relatório mensal até a última data", reportSource.includes("mês da última data do JSON"));
+check("Relatório mensal até a última data", reportSource.includes("mês da data mais recente, do primeiro dia até a data disponível"));
 check("Preview executivo dos relatórios", ["Resumo Executivo", "Destaques", "Riscos", "Recomendações", "Evolução no período"].every((item) => reportSource.includes(item)));
 
 const chatSource = read("src/services/chatService.ts");
@@ -107,16 +107,21 @@ check("Evidência visual 1900 × 1200", exists("validation/overview-1900x1200.pn
 check("Home com preenchimento ampliado", styles.includes(".overview-command-page") && styles.includes(".kpi-card-reference { height: 150px; }") && styles.includes(".overview-row-primary .chart-card-content { min-height: 232px; }"));
 check("Botão da IA responsivo", floatingAssistant.includes("sm:bottom-5") && floatingAssistant.includes("lg:bottom-7"));
 check("KPI Taxa de Conclusão com alinhamento dedicado", read("src/components/kpi-card.tsx").includes('kpi.id === "taxa" ? "items-center justify-between"'));
-check("Logo Facilities AI adicionada à sidebar", read("src/components/app-sidebar.tsx").includes('src="/facilities-ai-logo.png"') && styles.includes(".sidebar-facilities-brand"));
+check("Logo Facilities AI adicionada ao rodapé da sidebar", sidebarSource.includes('src="/facilities-ai-logo.png"') && sidebarSource.includes('<footer className="sidebar-footer">') && styles.includes(".sidebar-partner-brand"));
+check("Logo sem posicionamento absoluto", !/\.sidebar-partner-brand\s*\{[^}]*position\s*:\s*absolute/s.test(styles));
+check("Rodapé da sidebar fora da navegação", sidebarSource.indexOf('<nav') < sidebarSource.indexOf('<footer className="sidebar-footer">'));
+check("Navegação independente e rolável", sidebarSource.includes("min-h-0 flex-1") && sidebarSource.includes("overflow-y-auto") && styles.includes("scrollbar-gutter: stable"));
+check("Logo com dimensões reservadas", sidebarSource.includes("width={900}") && sidebarSource.includes("height={213}"));
+check("Logo e menu adaptados em telas de baixa altura", styles.includes("@media (max-height: 850px) and (min-width: 1024px)") && styles.includes("width: min(100%, 124px)") && styles.includes("min-height: 46px") && styles.includes("@media (max-height: 700px) and (min-width: 1024px)"));
 check("Arquivo transparente da Facilities AI disponível", exists("public/facilities-ai-logo.png"));
 
 check("Responsivo 1600 e abaixo", styles.includes("@media (max-width: 1599px)") && styles.includes("repeat(3, minmax(0, 1fr))"));
-check("Responsivo tablets", styles.includes("@media (max-width: 1023px)") && sidebarSource.includes("hidden lg:flex") && mobileNavSource.includes("lg:hidden"));
+check("Responsivo tablets", styles.includes("@media (max-width: 1023px)") && sidebarSource.includes("lg:flex") && sidebarSource.includes("hidden") && mobileNavSource.includes("lg:hidden"));
 check("Responsivo celulares", styles.includes("@media (max-width: 767px)") && styles.includes(".overview-donut-layout"));
 check("Responsivo telas pequenas", styles.includes("@media (max-width: 479px)"));
 check("Responsivo telas 2K e 4K", styles.includes("@media (min-width: 2200px)") && styles.includes("max-width: 2100px"));
 check("Layout de baixa altura", styles.includes("@media (max-height: 850px)"));
-check("Descrição demonstrativa sem tempo real", overviewSource.includes("apresentação demonstrativa") && !overviewSource.includes("em tempo real"));
+check("Visão geral sem linguagem de demonstração ou tempo real", !/demonstra(?:ção|tiv)/i.test(overviewSource) && !overviewSource.includes("em tempo real"));
 check("Route tree contém assistente", read("src/routeTree.gen.ts").includes("AssistenteRoute"));
 
 

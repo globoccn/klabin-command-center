@@ -9,6 +9,7 @@ import { deleteReport, generateReport, getReportDownloadUrl, getReports } from "
 import { getFilterOptions } from "@/services/dashboardService";
 import type { Report, SnapshotMetadata } from "@/types/dashboard";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { fmtDateTime } from "@/lib/format";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/relatorios")({
   head: () => ({
     meta: [
       { title: "Relatórios · Klabin" },
-      { name: "description", content: "Relatórios operacionais calculados a partir da última data disponível." },
+      { name: "description", content: "Relatórios operacionais por período disponível, com seleção mensal." },
       { property: "og:title", content: "Relatórios · Klabin" },
       { property: "og:description", content: "Resumos executivos diários, semanais e mensais." },
     ],
@@ -28,7 +29,11 @@ export const Route = createFileRoute("/relatorios")({
 });
 
 const reportTypes: Report["tipo"][] = ["Diário", "Semanal", "Mensal"];
+const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
 type ReportTab = Report["tipo"] | "Todos";
+type ReportPeriod = { inicio: string; fim: string };
+type MonthOption = { value: string; label: string };
 
 function addDays(iso: string, days: number) {
   const date = new Date(`${iso}T12:00:00Z`);
@@ -36,10 +41,48 @@ function addDays(iso: string, days: number) {
   return date.toISOString().slice(0, 10);
 }
 
-function periodFor(type: Report["tipo"], referenceDate: string) {
+function periodFor(type: Exclude<Report["tipo"], "Mensal">, referenceDate: string): ReportPeriod {
   if (type === "Diário") return { inicio: referenceDate, fim: referenceDate };
-  if (type === "Semanal") return { inicio: addDays(referenceDate, -6), fim: referenceDate };
-  return { inicio: `${referenceDate.slice(0, 7)}-01`, fim: referenceDate };
+  return { inicio: addDays(referenceDate, -6), fim: referenceDate };
+}
+
+function monthEnd(month: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  return new Date(Date.UTC(year, monthNumber, 0)).toISOString().slice(0, 10);
+}
+
+function monthlyPeriod(month: string, snapshot: SnapshotMetadata): ReportPeriod {
+  const snapshotStart = snapshot.periodStart.slice(0, 10);
+  const snapshotEnd = snapshot.periodEnd.slice(0, 10);
+  const start = `${month}-01`;
+  const end = monthEnd(month);
+
+  return {
+    inicio: start < snapshotStart ? snapshotStart : start,
+    fim: end > snapshotEnd ? snapshotEnd : end,
+  };
+}
+
+function availableMonths(snapshot: SnapshotMetadata | null): MonthOption[] {
+  if (!snapshot?.periodStart || !snapshot.periodEnd) return [];
+
+  const start = snapshot.periodStart.slice(0, 7);
+  const end = snapshot.periodEnd.slice(0, 7);
+  const [startYear, startMonth] = start.split("-").map(Number);
+  const [endYear, endMonth] = end.split("-").map(Number);
+  const cursor = new Date(Date.UTC(startYear, startMonth - 1, 1));
+  const last = new Date(Date.UTC(endYear, endMonth - 1, 1));
+  const months: MonthOption[] = [];
+
+  while (cursor <= last) {
+    const year = cursor.getUTCFullYear();
+    const monthNumber = cursor.getUTCMonth() + 1;
+    const value = `${year}-${String(monthNumber).padStart(2, "0")}`;
+    months.push({ value, label: `${monthNames[monthNumber - 1]} de ${year}` });
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+
+  return months.reverse();
 }
 
 function fmtDate(iso?: string) {
@@ -58,16 +101,36 @@ function periodLabel(type: ReportTab, period: { inicio: string; fim: string } | 
 function Relatorios() {
   const [type, setType] = useState<ReportTab>("Diário");
   const [snapshot, setSnapshot] = useState<SnapshotMetadata | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState("");
   const [items, setItems] = useState<Report[] | null>(null);
   const [preview, setPreview] = useState<Report | null>(null);
   const [generating, setGenerating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Report | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const monthOptions = useMemo(() => availableMonths(snapshot), [snapshot]);
+
+  useEffect(() => {
+    if (!monthOptions.length) {
+      setSelectedMonth("");
+      return;
+    }
+
+    setSelectedMonth((current) => (
+      monthOptions.some((option) => option.value === current)
+        ? current
+        : monthOptions[0].value
+    ));
+  }, [monthOptions]);
+
   const period = useMemo(() => {
     if (!snapshot?.periodEnd || type === "Todos") return null;
+    if (type === "Mensal") {
+      if (!selectedMonth) return null;
+      return monthlyPeriod(selectedMonth, snapshot);
+    }
     return periodFor(type, snapshot.periodEnd.slice(0, 10));
-  }, [snapshot, type]);
+  }, [snapshot, type, selectedMonth]);
 
   useEffect(() => {
     let active = true;
@@ -104,7 +167,7 @@ function Relatorios() {
 
     setGenerating(true);
     try {
-      const report = await generateReport(type);
+      const report = await generateReport(type, type === "Mensal" ? period ?? undefined : undefined);
       setItems((current) => [report, ...(current ?? []).filter((item) => item.id !== report.id)]);
       if (report.status === "Pronto") toast.success("Relatório PDF gerado com sucesso");
       else if (report.status === "Falhou") toast.error(report.erro || "A geração do PDF falhou. Abra o relatório para ver o detalhe.");
@@ -157,7 +220,7 @@ function Relatorios() {
 
   return (
     <div className="command-page animate-fade-in-up">
-      <DashboardHeader title="Relatórios" subtitle="Períodos calculados automaticamente pela última data disponível" />
+      <DashboardHeader title="Relatórios" subtitle="Consulte e gere relatórios por período disponível na base" />
 
       <div className="command-card mb-4 flex flex-col gap-3 p-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-wrap items-center gap-2">
@@ -174,10 +237,36 @@ function Relatorios() {
             ))}
           </div>
 
+          {type === "Mensal" && (
+            <div className="flex h-10 min-w-[190px] items-center gap-2 rounded-[10px] border border-primary/20 bg-primary/5 px-3">
+              <CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary-glow" />
+              <div className="min-w-0 flex-1">
+                <div className="text-[8px] uppercase tracking-wide text-muted-foreground">Mês do relatório</div>
+                <Select value={selectedMonth} onValueChange={setSelectedMonth} disabled={!monthOptions.length}>
+                  <SelectTrigger
+                    aria-label="Selecionar mês do relatório"
+                    className="h-5 border-0 bg-transparent p-0 text-[10px] font-medium text-primary-glow shadow-none focus:ring-0"
+                  >
+                    <SelectValue placeholder="Selecione o mês" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72 border-border bg-popover">
+                    {monthOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value} className="text-xs">
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
           <div className="flex h-10 min-w-[250px] items-center gap-2 rounded-[10px] border border-border bg-background/38 px-3">
             <CalendarDays className="h-3.5 w-3.5 text-primary-glow" />
             <div>
-              <div className="text-[8px] uppercase tracking-wide text-muted-foreground">Período automático</div>
+              <div className="text-[8px] uppercase tracking-wide text-muted-foreground">
+                {type === "Mensal" ? "Período selecionado" : type === "Todos" ? "Período" : "Período automático"}
+              </div>
               <div className="text-[10px] font-medium text-foreground">{periodLabel(type, period)}</div>
             </div>
           </div>
@@ -195,7 +284,7 @@ function Relatorios() {
 
         <Button
           onClick={create}
-          disabled={generating || type === "Todos" || !snapshot}
+          disabled={generating || type === "Todos" || !snapshot || (type === "Mensal" && !period)}
           className="h-10 bg-primary text-xs text-primary-foreground hover:bg-primary-glow"
         >
           <Plus className="mr-1 h-4 w-4" /> {generating ? "Gerando…" : "Gerar novo relatório"}
@@ -204,10 +293,17 @@ function Relatorios() {
 
       {snapshot && type !== "Todos" && period && (
         <div className="mb-4 rounded-xl border border-primary/16 bg-primary/5 px-4 py-3 text-[10px] text-muted-foreground">
-          <strong className="text-primary-glow">Período automático:</strong>{" "}
-          {type === "Diário" && "último dia disponível na base."}
-          {type === "Semanal" && "últimos sete dias encerrando na data mais recente."}
-          {type === "Mensal" && "mês da data mais recente, do primeiro dia até a data disponível."}
+          {type === "Mensal" ? (
+            <>
+              <strong className="text-primary-glow">Período mensal selecionado:</strong>{" "}
+              {periodLabel(type, period)}. Meses nas extremidades da base são limitados aos dias realmente disponíveis.
+            </>
+          ) : (
+            <>
+              <strong className="text-primary-glow">Período automático:</strong>{" "}
+              {type === "Diário" ? "último dia disponível na base." : "últimos sete dias encerrando na data mais recente."}
+            </>
+          )}
           {" "}Base disponível de {fmtDate(snapshot.periodStart)} a {fmtDate(snapshot.periodEnd)}.
         </div>
       )}
@@ -217,7 +313,7 @@ function Relatorios() {
           {Array.from({ length: 3 }, (_, index) => <LoadingSkeleton key={index} className="h-[220px]" />)}
         </div>
       ) : items.length === 0 ? (
-        <div className="command-card"><EmptyState title="Nenhum relatório gerado" description={type === "Todos" ? "Gere o primeiro relatório operacional." : "Gere o relatório correspondente ao período automático selecionado."} /></div>
+        <div className="command-card"><EmptyState title="Nenhum relatório gerado" description={type === "Todos" ? "Gere o primeiro relatório operacional." : type === "Mensal" ? "Gere o relatório correspondente ao mês selecionado." : "Gere o relatório correspondente ao período automático selecionado."} /></div>
       ) : (
         <div className="reports-grid grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {items.map((report) => (

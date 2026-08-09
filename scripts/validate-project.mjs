@@ -72,7 +72,8 @@ const reportSource = read("src/routes/relatorios.tsx");
 check("Período automático dos relatórios", reportSource.includes("Período automático") && reportSource.includes("Último dado disponível"));
 check("Relatório diário ancorado no último dia", reportSource.includes("último dia disponível na base"));
 check("Relatório semanal com sete dias", reportSource.includes("últimos sete dias"));
-check("Relatório mensal até a última data", reportSource.includes("mês da data mais recente, do primeiro dia até a data disponível"));
+check("Relatório mensal com seleção de mês", reportSource.includes("Mês do relatório") && reportSource.includes("availableMonths") && reportSource.includes("monthlyPeriod"));
+check("Relatório mensal respeita os limites da base", reportSource.includes("start < snapshotStart ? snapshotStart : start") && reportSource.includes("end > snapshotEnd ? snapshotEnd : end"));
 check("Preview executivo dos relatórios", ["Resumo Executivo", "Destaques", "Riscos", "Recomendações", "Evolução no período"].every((item) => reportSource.includes(item)));
 
 const chatSource = read("src/services/chatService.ts");
@@ -128,6 +129,7 @@ check("Route tree contém assistente", read("src/routeTree.gen.ts").includes("As
 const reportService = read("src/services/reportService.ts");
 const reportCard = read("src/components/report-card.tsx");
 check("Relatórios conectados à API n8n", reportService.includes('apiPost<Report>("reports/generate"') && reportService.includes('url.searchParams.set("reportId", report.id)'));
+check("Geração mensal envia início e fim", reportService.includes("inicio: period?.inicio") && reportService.includes("fim: period?.fim"));
 check("Download direto em PDF", reportService.includes('`${baseUrl}/reports/download`') && reportCard.includes('href={getReportDownloadUrl(report)}') && !reportService.includes('URL.createObjectURL'));
 check("Tela de relatórios possui botão Baixar PDF", read("src/components/report-card.tsx").includes("Baixar PDF"));
 

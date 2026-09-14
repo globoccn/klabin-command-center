@@ -2539,3 +2539,13 @@ html[data-theme="light"] .overview-recommendation-row:hover {
 
 /* Evidências: o período compartilhado deve ficar claro no bloco de filtros. */
 .evidence-filter-grid input[type="date"] { color: var(--foreground); }
+
+/* V5.2 — o card redundante "Última atualização / Dados atualizados" foi removido
+   de todos os DashboardHeader. Mantemos o cabeçalho pronto para toolbar sem reservar
+   a antiga terceira coluna de status. */
+.dashboard-topbar.dashboard-topbar-without-status {
+  grid-template-columns: minmax(420px, .95fr) minmax(0, 1.85fr);
+}
+.dashboard-topbar.dashboard-topbar-without-status > :last-child:not(:first-child) {
+  justify-self: stretch;
+}

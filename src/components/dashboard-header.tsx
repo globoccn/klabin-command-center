@@ -1,38 +1,37 @@
 import type { ReactNode } from "react";
-import { CheckCircle2, RefreshCw, Square } from "lucide-react";
+import { Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
   title?: string;
   subtitle?: string;
+  /** Mantido por compatibilidade com chamadas existentes. O card de status foi removido da UI. */
   updatedAt?: string;
   toolbar?: ReactNode;
   layout?: "command" | "page";
+  /** Mantido por compatibilidade com chamadas existentes. O card de status foi removido da UI. */
   statusLabel?: string;
 }
 
 export function DashboardHeader({
   title = "Central Operacional Klabin",
   subtitle = "Inteligência em operações, manutenção e facility management",
-  updatedAt = "24/07/2026 08:30",
   toolbar,
   layout = "page",
-  statusLabel = "Dados atualizados",
 }: Props) {
   if (layout === "command") {
     return (
-      <header className="dashboard-topbar">
+      <header className="dashboard-topbar dashboard-topbar-without-status">
         <HeaderIdentity title={title} subtitle={subtitle} command />
         {toolbar}
-        <UpdateStatus updatedAt={updatedAt} statusLabel={statusLabel} />
       </header>
     );
   }
 
   return (
-    <header className="mb-5 flex flex-col justify-between gap-4 border-b border-border/70 pb-5 sm:flex-row sm:items-center">
+    <header className="mb-5 flex flex-col gap-4 border-b border-border/70 pb-5 sm:flex-row sm:items-center">
       <HeaderIdentity title={title} subtitle={subtitle} />
-      <UpdateStatus updatedAt={updatedAt} statusLabel={statusLabel} />
+      {toolbar}
     </header>
   );
 }
@@ -52,26 +51,6 @@ function HeaderIdentity({ title, subtitle, command = false }: { title: string; s
         <Square className="h-3 w-3 shrink-0 rounded-[3px] text-primary-glow" strokeWidth={2.3} />
         <span className="truncate">{subtitle}</span>
         <span className="hidden h-px w-5 shrink-0 bg-primary-glow lg:block" />
-      </div>
-    </div>
-  );
-}
-
-function UpdateStatus({ updatedAt, statusLabel }: { updatedAt: string; statusLabel: string }) {
-  return (
-    <div className="header-status-card min-h-[76px] w-full min-w-0 sm:w-auto sm:min-w-[142px] rounded-[13px] border border-border px-3 py-2.5">
-      <div className="flex items-start gap-2">
-        <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-primary/25 bg-primary/8">
-          <RefreshCw className="h-3.5 w-3.5 text-primary-glow" />
-        </div>
-        <div className="min-w-0">
-          <div className="text-[9px] text-muted-foreground">Última atualização</div>
-          <div className="mt-0.5 whitespace-nowrap text-[10px] font-medium text-foreground">{updatedAt}</div>
-        </div>
-      </div>
-      <div className="mt-2 flex items-center gap-1.5 border-t border-primary/10 pt-1.5 text-[10px] font-medium text-primary-glow">
-        <CheckCircle2 className="h-3.5 w-3.5" />
-        {statusLabel}
       </div>
     </div>
   );

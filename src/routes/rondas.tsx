@@ -36,10 +36,10 @@ function Rondas() {
       {!data ? <LoadingSkeleton className="h-[500px]" /> : (
         <>
           <div className="page-kpi-grid-4 mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <RoundMetric icon={<ClipboardCheck className="h-5 w-5" />} label="Rondas registradas" value={fmtInt(data.metrics.total)} />
-            <RoundMetric icon={<CheckCircle2 className="h-5 w-5" />} label="Com evidência" value={`${fmtDec(data.metrics.evidenceRate)}%`} />
-            <RoundMetric icon={<Sun className="h-5 w-5" />} label="Turno predominante" value={data.metrics.predominantShift} />
-            <RoundMetric icon={<Moon className="h-5 w-5" />} label="Rondas noturnas" value={fmtInt(data.metrics.nightCount)} />
+            <RoundMetric icon={<ClipboardCheck className="h-5 w-5" />} label="Rondas registradas" value={fmtInt(data.metrics.total)} accent="green" />
+            <RoundMetric icon={<CheckCircle2 className="h-5 w-5" />} label="Com evidência" value={`${fmtDec(data.metrics.evidenceRate)}%`} accent="cyan" />
+            <RoundMetric icon={<Sun className="h-5 w-5" />} label="Turno predominante" value={data.metrics.predominantShift} accent="orange" />
+            <RoundMetric icon={<Moon className="h-5 w-5" />} label="Rondas noturnas" value={fmtInt(data.metrics.nightCount)} accent="purple" />
           </div>
 
           <div className="page-grid-rounds grid grid-cols-1 gap-3 xl:grid-cols-[1.45fr_.75fr]">
@@ -74,9 +74,10 @@ function Rondas() {
   );
 }
 
-function RoundMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function RoundMetric({ icon, label, value, accent = "green" }: { icon: React.ReactNode; label: string; value: string; accent?: "green" | "cyan" | "orange" | "purple" }) {
+  const color = accent === "cyan" ? "var(--accent-cyan)" : accent === "orange" ? "var(--accent-orange)" : accent === "purple" ? "var(--accent-purple)" : "var(--accent-green)";
   return (
-    <div className="command-card metric-summary-card">
+    <div className="command-card metric-summary-card" style={{ "--metric-accent": color, "--card-accent": color } as React.CSSProperties}>
       <span className="metric-summary-icon">{icon}</span>
       <div className="min-w-0"><div className="metric-summary-label">{label}</div><div className="metric-summary-value">{value}</div></div>
     </div>

@@ -157,16 +157,24 @@ function ExecutiveKpi({ kpi }: { kpi: Kpi }) {
   const DeltaIcon = kpi.delta === 0 ? ArrowRight : kpi.delta > 0 ? ArrowUpRight : ArrowDownRight;
   const suffix = kpi.suffix ?? "";
   const deltaUnit = kpi.deltaUnit ?? "%";
+  const accent = kpi.id === "total"
+    ? "var(--accent-cyan)"
+    : kpi.id === "concluidas"
+      ? "var(--accent-green)"
+      : kpi.id === "abertas"
+        ? "var(--accent-orange)"
+        : "var(--accent-blue)";
 
   return (
-    <article className={cn("overview-kpi-card", kpi.id === "abertas" && "is-warning")}>
-      <div className="overview-kpi-icon"><Icon className="h-5 w-5" /></div>
+    <article className="overview-kpi-card panel-v5" style={{ "--card-accent": accent } as CSSProperties}>
+      <div className="overview-kpi-glow" aria-hidden="true" />
+      <div className="overview-kpi-icon"><Icon className="h-5 w-5" strokeWidth={2} /></div>
       <div className="overview-kpi-copy">
         <div className="overview-kpi-label">{kpi.label}</div>
         <div className="overview-kpi-value">{typeof kpi.value === "number" ? fmtInt(kpi.value) : kpi.value}{suffix}</div>
         <div className="overview-kpi-comparison">
           <span className={cn("overview-kpi-delta", deltaGood ? "is-good" : "is-bad")}>
-            <DeltaIcon className="h-3 w-3" /> {kpi.delta > 0 ? "+" : ""}{fmtDec(kpi.delta)}{deltaUnit}
+            <DeltaIcon className="h-3 w-3" /> {kpi.delta > 0 ? "+" : ""}{fmtDec(kpi.delta)}{deltaUnit === "p.p." ? " p.p." : deltaUnit}
           </span>
           <span>{kpi.comparison}</span>
         </div>
@@ -216,26 +224,50 @@ function HealthMetric({ icon, value, label, tone = "neutral" }: { icon: ReactNod
 
 function Recommendations({ items }: { items: OverviewRecommendation[] }) {
   return (
-    <article className="overview-white-card overview-recommendations-card">
+    <article className="overview-white-card overview-recommendations-card panel-v5" style={{ "--card-accent": "var(--accent-green)" } as CSSProperties}>
       <div className="overview-card-heading-row">
         <div>
-          <div className="overview-white-title"><Target className="h-4 w-4" /> Recomendações para sua operação</div>
-          <p>Priorização determinística baseada nos indicadores do período.</p>
+          <div className="overview-white-title"><span className="overview-detail-title-icon"><Target className="h-4 w-4" /></span> Recomendações para sua operação</div>
+          <p>Prioridades calculadas com os dados do período selecionado.</p>
         </div>
       </div>
       <div className="overview-recommendation-list">
-        {items.map((item, index) => (
-          <Link key={`${item.title}-${index}`} to={item.href} className="overview-recommendation-row">
-            <span className="overview-recommendation-rank">{index + 1}</span>
-            <span className="overview-recommendation-symbol"><RecommendationIcon href={item.href} /></span>
-            <span className="overview-recommendation-copy"><strong>{item.title}</strong><small>{item.detail}</small></span>
-            <span className={cn("overview-priority-badge", `is-${item.tone}`)}>{priorityLabel(item.tone)}</span>
-            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-          </Link>
-        ))}
+        {items.map((item, index) => {
+          const color = recommendationAccent(item.tone);
+          return (
+            <Link key={`${item.title}-${index}`} to={item.href} className="overview-recommendation-row" style={{ "--insight-accent": color } as CSSProperties}>
+              <span className="overview-recommendation-accent" aria-hidden="true" />
+              <span className="overview-recommendation-symbol"><RecommendationIcon href={item.href} /></span>
+              <span className="overview-recommendation-copy">
+                <em>{recommendationCategory(item)}</em>
+                <strong>{item.title}</strong>
+                <small>{item.detail}</small>
+              </span>
+              <span className={cn("overview-priority-badge", `is-${item.tone}`)}>{priorityLabel(item.tone)}</span>
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+            </Link>
+          );
+        })}
       </div>
     </article>
   );
+}
+
+function recommendationAccent(tone: RecommendationTone) {
+  if (tone === "high") return "var(--accent-red)";
+  if (tone === "medium") return "var(--accent-orange)";
+  if (tone === "positive") return "var(--accent-green)";
+  return "var(--accent-blue)";
+}
+
+function recommendationCategory(item: OverviewRecommendation) {
+  if (item.tone === "high") return "Prioridade";
+  if (item.tone === "positive") return "Destaque";
+  if (item.href === "/qualidade") return "Qualidade";
+  if (item.href === "/evidencias") return "Evidências";
+  if (item.href === "/climatizacao") return "Climatização";
+  if (item.href === "/rondas") return "Rondas";
+  return "Oportunidade";
 }
 
 function RecommendationIcon({ href }: { href: OverviewRecommendation["href"] }) {
@@ -274,7 +306,7 @@ function ClimateCard({ data }: { data: DashboardOverview }) {
     : "#dfe8e4 0deg 360deg";
 
   return (
-    <DetailCard title="Climatização" subtitle="Chamados classificados no período" icon={<Snowflake className="h-4 w-4" />} href="/climatizacao">
+    <DetailCard title="Climatização" subtitle="Chamados classificados no período" icon={<Snowflake className="h-4 w-4" />} href="/climatizacao" accent="cyan">
       <div className="overview-climate-layout">
         <div className="overview-small-gauge overview-climate-donut" style={{ background: `conic-gradient(${gradient})` }}>
           <div><strong>{fmtInt(total)}</strong><span>chamados no período</span></div>
@@ -306,7 +338,7 @@ function RoundsCard({ data }: { data: DashboardOverview }) {
   const totalShown = shown.reduce((sum, item) => sum + Number(item.value || 0), 0);
 
   return (
-    <DetailCard title="Rondas" subtitle="Principais atividades registradas" icon={<ClipboardCheck className="h-4 w-4" />} href="/rondas">
+    <DetailCard title="Rondas" subtitle="Principais atividades registradas" icon={<ClipboardCheck className="h-4 w-4" />} href="/rondas" accent="green">
       <div className="overview-detail-highlight"><strong>{fmtInt(totalShown)}</strong><span>registros nas principais atividades</span></div>
       <div className="overview-mini-bars is-compact">
         {shown.map((item) => <MiniBar key={item.name} label={item.name} value={item.value} max={max} />)}
@@ -318,7 +350,7 @@ function RoundsCard({ data }: { data: DashboardOverview }) {
 function QualityCard({ data }: { data: DashboardOverview }) {
   const coverage = Math.max(0, Math.min(100, Number(data.qualidadeDados.coberturaSetor || 0)));
   return (
-    <DetailCard title="Qualidade dos Dados" subtitle="Integridade e consistência dos registros" icon={<Database className="h-4 w-4" />} href="/qualidade">
+    <DetailCard title="Qualidade dos Dados" subtitle="Integridade e consistência dos registros" icon={<Database className="h-4 w-4" />} href="/qualidade" accent="purple">
       <div className="overview-gauge-layout">
         <div className="overview-small-gauge" style={{ "--score": `${coverage * 3.6}deg` } as CSSProperties}>
           <div><strong>{fmtDec(coverage)}%</strong><span>setor preenchido</span></div>
@@ -338,7 +370,7 @@ function EvidenceCard({ data }: { data: DashboardOverview }) {
   const coverage = Math.max(0, Math.min(100, Number(data.evidencias.percentualComEvidencia || 0)));
   const kpi = kpiById(data, "anexos");
   return (
-    <DetailCard title="Evidências" subtitle="Cobertura fotográfica das tarefas" icon={<ImageIcon className="h-4 w-4" />} href="/evidencias">
+    <DetailCard title="Evidências" subtitle="Cobertura fotográfica das tarefas" icon={<ImageIcon className="h-4 w-4" />} href="/evidencias" accent="blue">
       <div className="overview-evidence-summary">
         <div className="overview-small-gauge" style={{ "--score": `${coverage * 3.6}deg` } as CSSProperties}>
           <div><strong>{fmtDec(coverage)}%</strong><span>com evidência</span></div>
@@ -353,9 +385,10 @@ function EvidenceCard({ data }: { data: DashboardOverview }) {
   );
 }
 
-function DetailCard({ title, subtitle, icon, href, children }: { title: string; subtitle: string; icon: ReactNode; href: "/climatizacao" | "/rondas" | "/qualidade" | "/evidencias"; children: ReactNode }) {
+function DetailCard({ title, subtitle, icon, href, children, accent }: { title: string; subtitle: string; icon: ReactNode; href: "/climatizacao" | "/rondas" | "/qualidade" | "/evidencias"; children: ReactNode; accent: "cyan" | "green" | "purple" | "blue" }) {
+  const color = accent === "cyan" ? "var(--accent-cyan)" : accent === "purple" ? "var(--accent-purple)" : accent === "blue" ? "var(--accent-blue)" : "var(--accent-green)";
   return (
-    <article className="overview-white-card overview-detail-card">
+    <article className="overview-white-card overview-detail-card panel-v5" style={{ "--card-accent": color } as CSSProperties}>
       <div className="overview-card-heading-row">
         <div>
           <div className="overview-white-title"><span className="overview-detail-title-icon">{icon}</span>{title}</div>

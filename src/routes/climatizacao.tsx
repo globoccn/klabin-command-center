@@ -39,10 +39,10 @@ function Climatizacao() {
       {!data ? <LoadingSkeleton className="h-[560px]" /> : (
         <>
           <div className="page-kpi-grid-4 mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <ClimateMetric icon={<Thermometer className="h-5 w-5" />} label="Solicitações" value={fmtInt(data.total)} />
-            <ClimateMetric icon={<Snowflake className="h-5 w-5" />} label="Ambiente frio" value={fmtInt(data.cold)} />
-            <ClimateMetric icon={<Sun className="h-5 w-5" />} label="Ambiente quente" value={fmtInt(data.hot)} tone="warning" />
-            <ClimateMetric icon={<TrendingUp className="h-5 w-5" />} label="Setor mais recorrente" value={data.topSector} />
+            <ClimateMetric icon={<Thermometer className="h-5 w-5" />} label="Solicitações" value={fmtInt(data.total)} accent="cyan" />
+            <ClimateMetric icon={<Snowflake className="h-5 w-5" />} label="Ambiente frio" value={fmtInt(data.cold)} accent="blue" />
+            <ClimateMetric icon={<Sun className="h-5 w-5" />} label="Ambiente quente" value={fmtInt(data.hot)} accent="orange" />
+            <ClimateMetric icon={<TrendingUp className="h-5 w-5" />} label="Setor mais recorrente" value={data.topSector} accent="green" />
           </div>
 
           <div className="page-grid-2 grid grid-cols-1 gap-3 lg:grid-cols-2">
@@ -63,7 +63,7 @@ function Climatizacao() {
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" width={55} stroke="var(--chart-axis)" fontSize={11} tickLine={false} axisLine={false} />
                   <Tooltip {...tooltip} />
-                  <Bar dataKey="value" fill="#55CB46" radius={[0, 5, 5, 0]} label={{ position: "right", fill: "var(--chart-label)", fontSize: 10 }} />
+                  <Bar dataKey="value" fill="var(--accent-cyan)" radius={[0, 5, 5, 0]} label={{ position: "right", fill: "var(--chart-label)", fontSize: 10 }} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -75,7 +75,7 @@ function Climatizacao() {
                   <XAxis dataKey="name" stroke="var(--chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
                   <YAxis stroke="var(--chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
                   <Tooltip {...tooltip} />
-                  <Bar dataKey="value" fill="#39E75F" radius={[5, 5, 0, 0]} label={{ position: "top", fill: "var(--chart-label)", fontSize: 10 }} />
+                  <Bar dataKey="value" fill="var(--accent-blue)" radius={[5, 5, 0, 0]} label={{ position: "top", fill: "var(--chart-label)", fontSize: 10 }} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -87,7 +87,7 @@ function Climatizacao() {
                   <XAxis dataKey="name" stroke="var(--chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
                   <YAxis stroke="var(--chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
                   <Tooltip {...tooltip} />
-                  <Bar dataKey="value" fill="#10B866" radius={[5, 5, 0, 0]} label={{ position: "top", fill: "var(--chart-label)", fontSize: 10 }} />
+                  <Bar dataKey="value" fill="var(--accent-green)" radius={[5, 5, 0, 0]} label={{ position: "top", fill: "var(--chart-label)", fontSize: 10 }} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -98,10 +98,11 @@ function Climatizacao() {
   );
 }
 
-function ClimateMetric({ icon, label, value, tone = "primary" }: { icon: React.ReactNode; label: string; value: string; tone?: "primary" | "warning" }) {
+function ClimateMetric({ icon, label, value, accent = "green" }: { icon: React.ReactNode; label: string; value: string; accent?: "green" | "cyan" | "blue" | "orange" }) {
+  const color = accent === "cyan" ? "var(--accent-cyan)" : accent === "blue" ? "var(--accent-blue)" : accent === "orange" ? "var(--accent-orange)" : "var(--accent-green)";
   return (
-    <div className={`command-card metric-summary-card ${tone === "warning" ? "is-warning" : ""}`}>
-      <span className={`metric-summary-icon ${tone === "warning" ? "is-warning" : ""}`}>{icon}</span>
+    <div className="command-card metric-summary-card" style={{ "--metric-accent": color, "--card-accent": color } as React.CSSProperties}>
+      <span className="metric-summary-icon">{icon}</span>
       <div className="min-w-0"><div className="metric-summary-label">{label}</div><div className="metric-summary-value">{value}</div></div>
     </div>
   );

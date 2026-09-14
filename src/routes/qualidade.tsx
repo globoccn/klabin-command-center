@@ -59,10 +59,10 @@ function Qualidade() {
 }
 
 function Metric({ icon, value, label, tone = "primary" }: { icon: React.ReactNode; value: string; label: string; tone?: "primary" | "warning" | "info" | "blue" }) {
-  const style = tone === "warning" ? "is-warning" : tone === "info" ? "is-info" : tone === "blue" ? "is-blue" : "";
+  const color = tone === "warning" ? "var(--accent-orange)" : tone === "info" ? "var(--accent-cyan)" : tone === "blue" ? "var(--accent-blue)" : "var(--accent-green)";
   return (
-    <article className={`command-card metric-summary-card ${style}`}>
-      <span className={`metric-summary-icon ${style}`}>{icon}</span>
+    <article className="command-card metric-summary-card" style={{ "--metric-accent": color, "--card-accent": color } as React.CSSProperties}>
+      <span className="metric-summary-icon">{icon}</span>
       <div className="min-w-0"><div className="metric-summary-value">{value}</div><div className="metric-summary-label mt-1.5">{label}</div></div>
     </article>
   );

@@ -112,7 +112,7 @@ check("Evidência visual 1900 × 1200", exists("validation/overview-1900x1200.pn
 
 check("Home executiva repaginada", styles.includes(".overview-health-card") && styles.includes(".overview-recommendations-card") && styles.includes(".overview-detail-grid"));
 check("Botão da IA responsivo", floatingAssistant.includes("sm:bottom-5") && floatingAssistant.includes("lg:bottom-7"));
-check("KPI Taxa de Conclusão com alinhamento dedicado", read("src/components/kpi-card.tsx").includes('kpi.id === "taxa" ? "items-center justify-between"'));
+check("KPI Taxa de Conclusão com semântica visual dedicada", read("src/components/kpi-card.tsx").includes('taxa: "green"') && read("src/components/kpi-card.tsx").includes("lowerBetter"));
 check("Logo Facilities AI adicionada ao rodapé da sidebar", sidebarSource.includes('src="/facilities-ai-logo.png"') && sidebarSource.includes('<footer className="sidebar-footer">') && styles.includes(".sidebar-partner-brand"));
 check("Logo sem posicionamento absoluto", !/\.sidebar-partner-brand\s*\{[^}]*position\s*:\s*absolute/s.test(styles));
 check("Rodapé da sidebar fora da navegação", sidebarSource.indexOf('<nav') < sidebarSource.indexOf('<footer className="sidebar-footer">'));

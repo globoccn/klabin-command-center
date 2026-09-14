@@ -89,7 +89,7 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
   }
 
   return (
-    <div className={cn("mb-5 rounded-[14px] border border-border bg-card/55 p-2.5 shadow-[0_10px_30px_rgba(0,0,0,.14)]", className)}>
+    <div className={cn("filter-panel-v5 mb-5 rounded-[14px] border border-border p-2.5", className)}>
       <div className="flex items-center justify-between gap-3 px-1 pb-2">
         <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
           <SlidersHorizontal className="h-3.5 w-3.5 text-primary-glow" />

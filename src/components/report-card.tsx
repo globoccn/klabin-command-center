@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Download, Eye, FileText, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fmtDateTime } from "@/lib/format";
@@ -21,9 +22,9 @@ export function ReportCard({ report, onView, onDelete, deleting = false }: Repor
     : "PDF";
 
   return (
-    <article className="command-card group relative flex min-h-[220px] flex-col p-4 transition duration-200 hover:-translate-y-0.5 hover:border-primary/34">
+    <article className="command-card panel-v5 group relative flex min-h-[220px] flex-col p-4 transition duration-200 hover:-translate-y-0.5" style={{ "--card-accent": "var(--accent-blue)" } as CSSProperties}>
       <div className="flex items-start justify-between gap-2">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-primary/28 bg-primary/12 text-primary-glow">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[color-mix(in_oklab,var(--accent-blue)_38%,transparent)] bg-[radial-gradient(circle_at_35%_28%,color-mix(in_oklab,var(--accent-blue)_22%,transparent),transparent_72%)] text-[color:var(--accent-blue)]">
           <FileText className="h-5 w-5" />
         </div>
         <div className="flex flex-wrap items-center justify-end gap-1.5">

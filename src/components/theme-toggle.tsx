@@ -1,44 +1,50 @@
-import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const STORAGE_KEY = "klabin-dashboard-theme";
 type AppTheme = "light" | "dark";
 
+function readTheme(): AppTheme {
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
 function applyTheme(theme: AppTheme) {
   if (typeof document === "undefined") return;
-  document.documentElement.dataset.theme = theme;
-  document.documentElement.classList.toggle("dark", theme === "dark");
+  const root = document.documentElement;
+  root.classList.toggle("dark", theme === "dark");
+  root.classList.toggle("light", theme === "light");
+  root.dataset.theme = theme;
+  root.style.colorScheme = theme;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, theme);
+  } catch {
+    // O tema continua funcional mesmo quando o storage está bloqueado.
+  }
 }
 
 export function ThemeToggle({ variant = "sidebar" }: { variant?: "sidebar" | "mobile" }) {
   const [theme, setTheme] = useState<AppTheme>("light");
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    const initial: AppTheme = stored === "dark" || stored === "light" ? stored : "light";
-    setTheme(initial);
-    applyTheme(initial);
-    setReady(true);
+    setTheme(readTheme());
   }, []);
 
-  useEffect(() => {
-    if (!ready || typeof window === "undefined") return;
-    applyTheme(theme);
-    window.localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme, ready]);
+  const nextTheme: AppTheme = theme === "dark" ? "light" : "dark";
+  const label = nextTheme === "light" ? "Ativar tema claro" : "Ativar tema escuro";
 
-  const light = theme === "light";
   return (
     <button
       type="button"
       className={variant === "mobile" ? "mobile-theme-toggle" : "sidebar-theme-toggle"}
-      onClick={() => setTheme(light ? "dark" : "light")}
-      aria-label={light ? "Ativar tema escuro" : "Ativar tema claro"}
-      title={light ? "Ativar tema escuro" : "Ativar tema claro"}
+      onClick={() => {
+        applyTheme(nextTheme);
+        setTheme(nextTheme);
+      }}
+      aria-label={label}
+      title={label}
     >
-      {light ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>
   );
 }

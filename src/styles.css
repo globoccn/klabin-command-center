@@ -1713,3 +1713,714 @@ html[data-theme="dark"] .overview-light-page .overview-white-card:hover {
   --border: rgba(110,195,156,.18);
   --muted-foreground: #9aaba6;
 }
+
+/* ========================================================================== 
+   KLABIN V4 — reforço visual dos cards e identidade de tema
+   Objetivo: diferença perceptível entre claro/escuro, referência ANCAR no
+   claro e assinatura Klabin mais forte no escuro.
+   ========================================================================== */
+
+/* Superfícies principais */
+html[data-theme="light"] .dashboard-main {
+  background:
+    radial-gradient(900px 380px at 88% -10%, rgba(7,155,88,.075), transparent 62%),
+    linear-gradient(180deg, #f4f8f6 0%, #edf3f0 100%);
+}
+html[data-theme="dark"] .dashboard-main {
+  background:
+    radial-gradient(920px 420px at 82% -12%, rgba(20,184,102,.075), transparent 62%),
+    linear-gradient(180deg, #02090b 0%, #041113 100%);
+}
+
+/* Card base global */
+.command-card {
+  border-radius: 16px;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+html[data-theme="light"] .command-card {
+  border: 1px solid #d6e2dc;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
+  box-shadow: 0 5px 14px rgba(28,65,51,.055), 0 1px 2px rgba(28,65,51,.035);
+}
+html[data-theme="light"] .command-card:hover,
+html[data-theme="light"] .command-card:focus-within {
+  border-color: #bdd6c9;
+  box-shadow: 0 9px 22px rgba(28,65,51,.085), 0 1px 2px rgba(28,65,51,.04);
+}
+html[data-theme="dark"] .command-card {
+  border: 1px solid rgba(93,169,135,.24);
+  border-left: 3px solid rgba(55,237,99,.62);
+  border-right: 1px solid rgba(55,237,99,.14);
+  background:
+    linear-gradient(100deg, rgba(25,93,62,.08), transparent 22%),
+    linear-gradient(155deg, #0b1a1e 0%, #071216 100%);
+  box-shadow: 0 10px 26px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.025);
+}
+html[data-theme="dark"] .command-card:hover,
+html[data-theme="dark"] .command-card:focus-within {
+  border-left-color: rgba(55,237,99,.9);
+  border-right-color: rgba(55,237,99,.25);
+  box-shadow: 0 14px 34px rgba(0,0,0,.27), 0 0 0 1px rgba(55,237,99,.035);
+}
+
+/* KPI global das demais páginas */
+.kpi-card-reference {
+  position: relative;
+  height: clamp(118px, 11vh, 136px);
+  overflow: hidden;
+  border-radius: 16px;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.kpi-card-reference:hover { transform: translateY(-2px); }
+.kpi-card-accent {
+  position: absolute;
+  left: 0;
+  top: 18px;
+  bottom: 18px;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(180deg, rgba(7,155,88,.18), #079b58 50%, rgba(7,155,88,.18));
+}
+.kpi-card-reference.is-warning .kpi-card-accent { background: linear-gradient(180deg, rgba(233,122,23,.2), #e97a17 50%, rgba(233,122,23,.2)); }
+.kpi-card-inner { position: relative; display: flex; height: 100%; flex-direction: column; padding: 15px 16px 13px 18px; }
+.kpi-card-main { display: flex; min-height: 0; flex: 1; align-items: center; gap: 13px; }
+.kpi-card-icon-shell {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  place-items: center;
+  border-radius: 15px;
+}
+.kpi-card-icon-ring {
+  display: grid;
+  width: 39px;
+  height: 39px;
+  place-items: center;
+  border: 1px solid rgba(7,155,88,.34);
+  border-radius: 50%;
+  color: #07884e;
+  background: rgba(7,155,88,.035);
+}
+.kpi-card-icon-shell.is-warning .kpi-card-icon-ring { border-color: rgba(233,122,23,.42); color: #d96e11; background: rgba(233,122,23,.04); }
+.kpi-card-label { overflow: hidden; color: var(--muted-foreground); font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.kpi-card-value-row { display: flex; min-height: 42px; align-items: center; justify-content: space-between; gap: 9px; margin-top: 2px; }
+.kpi-card-value { color: var(--foreground); font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -.035em; }
+.kpi-card-value.is-rate { font-size: 25px; }
+.kpi-card-footer { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 8px; padding-top: 9px; border-top: 1px solid var(--border); }
+.kpi-card-delta { display: inline-flex; height: 22px; align-items: center; gap: 3px; padding: 0 7px; border: 1px solid; border-radius: 999px; font-size: 9.5px; font-weight: 700; }
+.kpi-card-delta.is-positive { border-color: rgba(7,155,88,.22); background: rgba(7,155,88,.08); color: #087547; }
+.kpi-card-delta.is-negative { border-color: rgba(217,72,65,.22); background: rgba(217,72,65,.07); color: #be433e; }
+.kpi-card-delta.is-warning { border-color: rgba(233,122,23,.24); background: rgba(233,122,23,.07); color: #c76813; }
+.kpi-card-comparison { min-width: 0; overflow: hidden; color: var(--muted-foreground); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.kpi-progress-ring { width: 38px; height: 38px; flex: 0 0 38px; transform: rotate(-90deg); }
+.kpi-progress-ring-track { stroke: rgba(7,155,88,.10); }
+.kpi-progress-ring-value { stroke: #10b866; }
+html[data-theme="light"] .kpi-card-reference {
+  border: 1px solid #d5e2dc;
+  background: linear-gradient(145deg, #fff 0%, #f9fcfa 100%);
+  box-shadow: 0 5px 14px rgba(28,65,51,.055);
+}
+html[data-theme="light"] .kpi-card-reference.is-warning { background: linear-gradient(145deg, #fff 0%, #fffaf4 100%); }
+html[data-theme="light"] .kpi-card-reference:hover { border-color: #bcd5c8; box-shadow: 0 9px 22px rgba(28,65,51,.09); }
+html[data-theme="dark"] .kpi-card-reference {
+  border: 1px solid rgba(93,169,135,.24);
+  border-left: 3px solid rgba(55,237,99,.72);
+  border-right-color: rgba(55,237,99,.14);
+  background: linear-gradient(145deg, #0b1a1e 0%, #071216 100%);
+  box-shadow: 0 10px 26px rgba(0,0,0,.22);
+}
+html[data-theme="dark"] .kpi-card-reference.is-warning { border-left-color: rgba(255,150,52,.82); }
+html[data-theme="dark"] .kpi-card-icon-ring {
+  border-color: rgba(55,237,99,.40);
+  color: #72ee96;
+  background: rgba(55,237,99,.035);
+  box-shadow: 0 0 18px rgba(55,237,99,.04);
+}
+html[data-theme="dark"] .kpi-card-icon-shell.is-warning .kpi-card-icon-ring { border-color: rgba(255,150,52,.45); color: #ffad63; background: rgba(255,150,52,.035); }
+html[data-theme="dark"] .kpi-card-delta.is-positive { color: #86f0a8; }
+html[data-theme="dark"] .kpi-card-delta.is-negative { color: #ff9b94; }
+html[data-theme="dark"] .kpi-card-delta.is-warning { color: #ffb270; }
+
+/* Visão geral: cards de topo e analíticos mais próximos da referência ANCAR */
+.overview-light-page .overview-kpi-card {
+  min-height: 116px;
+  border-radius: 16px;
+  padding: 15px 18px;
+}
+html[data-theme="light"] .overview-light-page .overview-kpi-card {
+  border: 1px solid #d4e1db;
+  background:
+    radial-gradient(180px 100px at 0% 100%, rgba(7,155,88,.055), transparent 72%),
+    linear-gradient(145deg, #ffffff, #f9fcfa);
+  box-shadow: 0 5px 14px rgba(28,65,51,.055);
+}
+html[data-theme="light"] .overview-light-page .overview-kpi-card.is-warning {
+  background:
+    radial-gradient(180px 100px at 0% 100%, rgba(233,122,23,.055), transparent 72%),
+    linear-gradient(145deg, #ffffff, #fffaf5);
+}
+.overview-light-page .overview-kpi-card::before { width: 4px; top: 14px; bottom: 14px; inset-block: 14px; border-radius: 0 999px 999px 0; }
+.overview-light-page .overview-kpi-icon {
+  width: 48px;
+  height: 48px;
+  flex-basis: 48px;
+  border-radius: 15px;
+  border: 1px solid rgba(7,155,88,.22);
+  background: transparent;
+  box-shadow: none;
+}
+.overview-light-page .overview-kpi-icon::before {
+  content: "";
+  position: absolute;
+}
+.overview-light-page .overview-kpi-icon > svg { width: 21px; height: 21px; }
+.overview-light-page .overview-kpi-label { font-size: 12px; font-weight: 600; }
+.overview-light-page .overview-kpi-value { font-size: clamp(31px,1.9vw,39px); }
+.overview-light-page .overview-kpi-comparison { margin-top: 8px; font-size: 10px; }
+html[data-theme="dark"] .overview-light-page .overview-kpi-card {
+  border: 1px solid rgba(93,169,135,.24);
+  border-left: 4px solid rgba(55,237,99,.72);
+  border-right-color: rgba(55,237,99,.13);
+  background:
+    linear-gradient(100deg, rgba(31,115,75,.09), transparent 26%),
+    linear-gradient(145deg, #0b1a1e, #071216);
+  box-shadow: 0 10px 25px rgba(0,0,0,.22);
+}
+html[data-theme="dark"] .overview-light-page .overview-kpi-card::before { display: none; }
+html[data-theme="dark"] .overview-light-page .overview-kpi-card.is-warning { border-left-color: rgba(255,151,52,.82); }
+html[data-theme="dark"] .overview-light-page .overview-kpi-icon {
+  border: 1px solid rgba(55,237,99,.38);
+  background: rgba(55,237,99,.025);
+  color: #72ee96;
+}
+html[data-theme="dark"] .overview-light-page .overview-kpi-card.is-warning .overview-kpi-icon { border-color: rgba(255,151,52,.42); color: #ffad63; background: rgba(255,151,52,.03); }
+
+/* Cards inferiores e recomendações com acabamento mais claro/estruturado */
+.overview-light-page .overview-white-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+}
+html[data-theme="light"] .overview-light-page .overview-white-card {
+  border: 1px solid #d5e1dc;
+  background: linear-gradient(180deg, #ffffff, #fbfdfc);
+  box-shadow: 0 5px 14px rgba(28,65,51,.05);
+}
+html[data-theme="light"] .overview-light-page .overview-white-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(7,155,88,.72), rgba(7,155,88,.16) 42%, transparent 82%);
+}
+html[data-theme="dark"] .overview-light-page .overview-white-card {
+  border: 1px solid rgba(93,169,135,.24);
+  border-left: 3px solid rgba(55,237,99,.64);
+  border-right-color: rgba(55,237,99,.13);
+  background:
+    linear-gradient(100deg, rgba(31,115,75,.065), transparent 22%),
+    linear-gradient(155deg, #0b1a1e, #071216);
+  box-shadow: 0 10px 26px rgba(0,0,0,.20);
+}
+.overview-light-page .overview-detail-title-icon,
+.overview-light-page .overview-recommendation-symbol {
+  position: relative;
+  border-radius: 12px;
+  background: transparent;
+}
+.overview-light-page .overview-detail-title-icon::after,
+.overview-light-page .overview-recommendation-symbol::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: .22;
+}
+.overview-light-page .overview-detail-title-icon > svg,
+.overview-light-page .overview-recommendation-symbol > svg { position: relative; z-index: 1; }
+html[data-theme="light"] .overview-light-page .overview-detail-title-icon,
+html[data-theme="light"] .overview-light-page .overview-recommendation-symbol {
+  border-color: rgba(7,155,88,.25);
+  color: #07884e;
+}
+html[data-theme="dark"] .overview-light-page .overview-detail-title-icon,
+html[data-theme="dark"] .overview-light-page .overview-recommendation-symbol {
+  border-color: rgba(55,237,99,.34);
+  color: #72ee96;
+}
+.overview-light-page .overview-white-title { font-size: 15.5px; font-weight: 800; }
+.overview-light-page .overview-card-heading-row p { font-size: 10.5px; line-height: 1.35; }
+.overview-light-page .overview-recommendation-row { border-radius: 12px; }
+html[data-theme="light"] .overview-light-page .overview-recommendation-row { border-color: #e0e8e4; background: #fcfefd; }
+html[data-theme="dark"] .overview-light-page .overview-recommendation-row { border-color: rgba(93,169,135,.16); background: rgba(255,255,255,.02); }
+html[data-theme="dark"] .overview-light-page .overview-recommendation-row:hover { border-color: rgba(55,237,99,.26); background: rgba(55,237,99,.025); }
+
+/* Donuts/gauges com anel mais limpo */
+.overview-light-page .overview-small-gauge { box-shadow: inset 0 0 0 1px rgba(7,155,88,.06); }
+html[data-theme="light"] .overview-light-page .overview-small-gauge::before { background: #ffffff; }
+html[data-theme="dark"] .overview-light-page .overview-small-gauge::before { background: #071417; }
+.overview-light-page .overview-climate-legend-row { padding-block: 6px; }
+.overview-light-page .overview-climate-legend-label i { width: 9px; height: 9px; box-shadow: 0 0 0 3px rgba(0,0,0,.02); }
+
+/* Títulos dos ChartCards / cards de outras páginas */
+.command-card > .relative.z-10.mb-2:first-child h2 {
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: -.015em;
+}
+html[data-theme="dark"] .command-card > .relative.z-10.mb-2:first-child::before {
+  content: "";
+  width: 3px;
+  height: 16px;
+  margin-right: 7px;
+  border-radius: 999px;
+  background: #37ed63;
+  box-shadow: 0 0 10px rgba(55,237,99,.20);
+}
+
+/* Evita que cards claros tenham blocos escuros residuais em componentes genéricos. */
+html[data-theme="light"] .bg-background\/70,
+html[data-theme="light"] .bg-background\/48,
+html[data-theme="light"] .bg-background\/30 { background-color: rgba(238,244,241,.72) !important; }
+html[data-theme="light"] .bg-card-elevated\/72 { background-color: rgba(241,246,243,.82) !important; }
+html[data-theme="light"] .hover\:bg-card-elevated\/72:hover { background-color: rgba(235,243,239,.96) !important; }
+
+/* Sidebar toggle fica quase invisível até interação. */
+.sidebar-theme-toggle {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  opacity: .72;
+  background: rgba(3,26,24,.66);
+}
+.sidebar-theme-toggle:hover { opacity: 1; }
+
+
+/* ========================================================================== 
+   KLABIN V5 — design system inspirado na disciplina visual ANCAR
+   Componentes semânticos, contraste completo e identidade Klabin preservada.
+   ========================================================================== */
+:root,
+html.light,
+html[data-theme="light"] {
+  --background: oklch(0.972 0.010 160);
+  --foreground: oklch(0.235 0.032 155);
+  --surface: oklch(0.982 0.008 160);
+  --card: oklch(0.996 0.004 160);
+  --card-foreground: oklch(0.235 0.032 155);
+  --card-elevated: oklch(0.958 0.014 160);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.235 0.032 155);
+  --primary: oklch(0.56 0.16 151);
+  --primary-foreground: oklch(0.99 0.004 150);
+  --primary-glow: oklch(0.62 0.18 150);
+  --secondary: oklch(0.942 0.017 160);
+  --secondary-foreground: oklch(0.285 0.035 155);
+  --muted: oklch(0.94 0.014 160);
+  --muted-foreground: oklch(0.49 0.028 155);
+  --accent: oklch(0.925 0.035 153);
+  --accent-foreground: oklch(0.33 0.10 151);
+  --destructive: oklch(0.58 0.21 27);
+  --destructive-foreground: oklch(0.99 0.004 0);
+  --warning: oklch(0.67 0.17 58);
+  --info: oklch(0.58 0.17 240);
+  --success: oklch(0.56 0.17 151);
+  --border: oklch(0.83 0.025 160 / 72%);
+  --input: oklch(0.85 0.022 160 / 82%);
+  --ring: oklch(0.56 0.16 151);
+  --chart-1: oklch(0.56 0.17 151);
+  --chart-2: oklch(0.58 0.15 205);
+  --chart-3: oklch(0.64 0.17 58);
+  --chart-4: oklch(0.57 0.18 250);
+  --chart-5: oklch(0.59 0.18 304);
+  --accent-cyan: oklch(0.58 0.15 205);
+  --accent-green: oklch(0.56 0.17 151);
+  --accent-blue: oklch(0.57 0.18 250);
+  --accent-yellow: oklch(0.70 0.16 90);
+  --accent-purple: oklch(0.59 0.18 304);
+  --accent-red: oklch(0.58 0.21 27);
+  --accent-orange: oklch(0.65 0.18 55);
+  --panel-glow: 0 1px 0 rgb(255 255 255 / 85%) inset, 0 12px 34px -28px rgb(16 56 39 / 28%);
+  --chart-axis: oklch(0.51 0.025 155);
+  --chart-grid: oklch(0.55 0.03 155 / 14%);
+  --chart-label: oklch(0.30 0.036 155);
+}
+
+html.dark,
+html[data-theme="dark"] {
+  --background: oklch(0.155 0.025 165);
+  --foreground: oklch(0.965 0.012 155);
+  --surface: oklch(0.18 0.028 165);
+  --card: oklch(0.195 0.03 165);
+  --card-foreground: oklch(0.965 0.012 155);
+  --card-elevated: oklch(0.225 0.034 165);
+  --popover: oklch(0.205 0.03 165);
+  --popover-foreground: oklch(0.965 0.012 155);
+  --primary: oklch(0.72 0.18 151);
+  --primary-foreground: oklch(0.14 0.025 165);
+  --primary-glow: oklch(0.78 0.19 151);
+  --secondary: oklch(0.25 0.03 165);
+  --secondary-foreground: oklch(0.965 0.012 155);
+  --muted: oklch(0.235 0.026 165);
+  --muted-foreground: oklch(0.72 0.025 155);
+  --accent: oklch(0.28 0.055 155);
+  --accent-foreground: oklch(0.95 0.02 151);
+  --destructive: oklch(0.68 0.21 27);
+  --destructive-foreground: oklch(0.99 0.004 0);
+  --warning: oklch(0.79 0.17 73);
+  --info: oklch(0.72 0.17 240);
+  --success: oklch(0.75 0.18 151);
+  --border: oklch(0.37 0.035 165 / 58%);
+  --input: oklch(0.32 0.035 165 / 72%);
+  --ring: oklch(0.72 0.18 151);
+  --chart-1: oklch(0.75 0.18 151);
+  --chart-2: oklch(0.75 0.15 205);
+  --chart-3: oklch(0.80 0.17 73);
+  --chart-4: oklch(0.72 0.18 250);
+  --chart-5: oklch(0.72 0.19 304);
+  --accent-cyan: oklch(0.78 0.15 205);
+  --accent-green: oklch(0.77 0.19 151);
+  --accent-blue: oklch(0.73 0.18 250);
+  --accent-yellow: oklch(0.86 0.17 91);
+  --accent-purple: oklch(0.75 0.19 304);
+  --accent-red: oklch(0.70 0.21 27);
+  --accent-orange: oklch(0.79 0.18 58);
+  --panel-glow: 0 1px 0 rgb(255 255 255 / 4%) inset, 0 10px 36px -20px rgb(0 0 0 / 58%);
+  --chart-axis: oklch(0.73 0.025 155);
+  --chart-grid: oklch(0.72 0.025 155 / 13%);
+  --chart-label: oklch(0.88 0.018 155);
+}
+
+html.light,
+html.dark { background: var(--background); }
+html.light body,
+html.dark body {
+  background:
+    radial-gradient(1100px 600px at 10% -10%, color-mix(in oklab, var(--accent-cyan) 8%, transparent), transparent 63%),
+    radial-gradient(900px 540px at 108% 8%, color-mix(in oklab, var(--accent-green) 8%, transparent), transparent 64%),
+    var(--background);
+  color: var(--foreground);
+}
+html.light .app-shell,
+html.dark .app-shell,
+html.light .dashboard-main,
+html.dark .dashboard-main { background: transparent; color: var(--foreground); }
+
+.panel-v5,
+.command-card,
+.header-status-card,
+.filter-shell,
+.evidence-card,
+.assistant-conversation {
+  background: color-mix(in oklab, var(--card) 94%, transparent);
+  border-color: var(--border);
+  color: var(--foreground);
+  box-shadow: var(--panel-glow);
+  backdrop-filter: blur(6px);
+}
+.command-card,
+.panel-v5 { border-radius: 14px; }
+.command-card::before { background: linear-gradient(120deg, rgb(255 255 255 / 3%), transparent 36%); }
+
+/* Cards escuros: acento lateral Klabin; claros: linha semântica muito suave. */
+html.dark .command-card,
+html.dark .panel-v5 {
+  border-left: 2px solid color-mix(in oklab, var(--card-accent, var(--accent-green)) 70%, transparent);
+}
+html.light .command-card,
+html.light .panel-v5 {
+  border-left: 1px solid color-mix(in oklab, var(--card-accent, var(--accent-green)) 24%, var(--border));
+}
+
+/* KPI global no padrão ANCAR, adaptado à Klabin. */
+.kpi-card-reference {
+  position: relative;
+  min-height: 96px;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.kpi-card-reference:hover { transform: translateY(-1px); border-color: color-mix(in oklab, var(--card-accent) 32%, var(--border)); }
+.kpi-card-v5-glow,
+.overview-kpi-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 9% 50%, color-mix(in oklab, var(--card-accent) 16%, transparent), transparent 48%);
+}
+.kpi-card-main-v5 { position: relative; display: flex; min-height: 96px; align-items: center; gap: 12px; padding: 12px 14px; }
+.kpi-card-icon-v5,
+.overview-kpi-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--card-accent) 42%, transparent);
+  border-radius: 50%;
+  color: var(--card-accent);
+  background: radial-gradient(circle at 35% 28%, color-mix(in oklab, var(--card-accent) 23%, transparent), color-mix(in oklab, var(--card-accent) 8%, var(--card)) 72%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%), 0 8px 24px -18px var(--card-accent);
+}
+.kpi-card-label-v5,
+.overview-kpi-label { color: color-mix(in oklab, var(--foreground) 82%, var(--muted-foreground)); font-size: 11px; font-weight: 600; line-height: 1.1; }
+.kpi-card-value-v5,
+.overview-kpi-value { margin-top: 6px; color: var(--foreground); font-size: clamp(25px,1.65vw,31px); font-weight: 800; line-height: .98; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+.kpi-card-comparison-v5,
+.overview-kpi-comparison { display: flex; min-width: 0; align-items: center; gap: 6px; margin-top: 8px; font-size: 9.5px; }
+.kpi-card-comparison-v5 > span,
+.overview-kpi-delta { display: inline-flex; shrink: 0; align-items: center; gap: 2px; font-weight: 700; }
+.kpi-card-comparison-v5 > span.is-good,
+.overview-kpi-delta.is-good { color: var(--accent-green); }
+.kpi-card-comparison-v5 > span.is-bad,
+.overview-kpi-delta.is-bad { color: var(--accent-red); }
+.kpi-card-comparison-v5 small,
+.overview-kpi-comparison > span:last-child { min-width: 0; overflow: hidden; color: var(--muted-foreground); text-overflow: ellipsis; white-space: nowrap; }
+
+/* Shell geral: cabeçalhos e filtros com mais leveza no claro e contraste no escuro. */
+.dashboard-main { padding: 18px 20px 12px; }
+.dashboard-topbar { margin-bottom: 14px; }
+.header-status-card,
+.filter-shell { border: 1px solid var(--border); background: color-mix(in oklab, var(--card) 92%, transparent) !important; }
+.filter-shell:hover { border-color: color-mix(in oklab, var(--accent-green) 30%, var(--border)); }
+.section-filter-grid .filter-shell { box-shadow: none; }
+
+/* Visão Geral — compacta e premium. */
+.overview-light-page { color: var(--foreground); }
+.overview-executive-header {
+  grid-template-columns: minmax(310px,.68fr) minmax(760px,2fr);
+  gap: 16px;
+  padding: 13px 15px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 96%, transparent);
+  box-shadow: var(--panel-glow);
+}
+.overview-eyebrow { color: var(--muted-foreground); font-size: 9px; }
+.overview-title-block h1 { color: var(--foreground); font-size: clamp(31px,2vw,39px); }
+.overview-title-block > p { color: var(--muted-foreground); font-size: 11px; }
+.overview-update-line { color: var(--muted-foreground); font-size: 9.5px; }
+.overview-filter-panel { border-color: var(--border); background: color-mix(in oklab, var(--card) 96%, transparent); }
+.overview-filter-label,
+.overview-quick-label { color: var(--foreground); }
+.overview-date-field,
+.overview-quick-button,
+.overview-more-filters { border-color: var(--border); background: var(--secondary); color: var(--foreground); }
+.overview-date-field input { color: var(--foreground); }
+.overview-quick-button:hover,
+.overview-more-filters:hover { border-color: color-mix(in oklab, var(--accent-green) 36%, var(--border)); background: var(--accent); color: var(--accent-foreground); }
+.overview-apply-period { background: linear-gradient(135deg, color-mix(in oklab,var(--accent-green) 90%,#006a3d), var(--accent-green)) !important; color: white !important; }
+
+.overview-kpi-grid { gap: 11px; }
+.overview-kpi-card {
+  position: relative;
+  display: flex;
+  min-height: 100px;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--card) 96%, transparent);
+  box-shadow: var(--panel-glow);
+}
+.overview-kpi-card:hover { border-color: color-mix(in oklab, var(--card-accent) 32%, var(--border)); }
+
+.overview-main-grid { grid-template-columns: minmax(0,1.6fr) minmax(390px,.9fr); gap: 11px; margin-top: 11px; }
+.overview-health-card { min-height: 330px; border-radius: 14px; }
+.overview-health-image { background-image: url('/images/klabin/lages-operacao.webp'); background-size: cover; background-position: center 48%; }
+.overview-health-overlay {
+  background:
+    linear-gradient(90deg, rgba(0,39,28,.97) 0%, rgba(0,43,31,.90) 36%, rgba(0,40,29,.46) 68%, rgba(0,32,24,.24) 100%),
+    linear-gradient(180deg, rgba(0,23,17,.10), rgba(0,24,18,.58));
+}
+.overview-health-content { min-height: 330px; padding: 16px; }
+.overview-title-icon,
+.overview-detail-title-icon {
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in oklab, var(--card-accent, var(--accent-green)) 40%, transparent);
+  border-radius: 10px;
+  color: var(--card-accent, var(--accent-green));
+  background: radial-gradient(circle at 35% 28%, color-mix(in oklab, var(--card-accent, var(--accent-green)) 20%, transparent), transparent 74%);
+}
+.overview-title-icon { width: 31px; height: 31px; }
+.overview-card-title { font-size: 16px; }
+.overview-health-heading p { font-size: 10px; }
+.overview-score-ring { width: 114px; height: 114px; }
+.overview-score-ring strong { font-size: 34px; }
+.overview-health-message h2 { font-size: clamp(23px,1.55vw,30px); }
+.overview-health-message p { font-size: 10.5px; }
+.overview-health-metric strong { font-size: 14px; }
+.overview-health-metric small { font-size: 8.5px; }
+
+.overview-white-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 96%, transparent);
+  box-shadow: var(--panel-glow);
+}
+.overview-white-title { color: var(--foreground); font-size: 14px; }
+.overview-card-heading-row p { color: var(--muted-foreground); font-size: 9.5px; }
+.overview-card-heading-row > a { color: var(--accent-foreground); font-size: 9.5px; }
+.overview-detail-title-icon { width: 32px; height: 32px; flex: 0 0 32px; }
+.overview-detail-card { min-height: 255px; }
+
+.overview-recommendations-card { min-height: 330px; padding: 13px; }
+.overview-recommendation-list { gap: 7px; margin-top: 10px; }
+.overview-recommendation-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0,1fr) auto 16px;
+  min-height: 66px;
+  align-items: center;
+  gap: 9px;
+  overflow: hidden;
+  padding: 8px 9px 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(110deg, color-mix(in oklab,var(--card) 96%,transparent), color-mix(in oklab,var(--background) 62%,transparent));
+}
+.overview-recommendation-row:hover { border-color: color-mix(in oklab, var(--insight-accent) 38%, var(--border)); transform: translateY(-1px); box-shadow: 0 12px 28px -24px var(--insight-accent); }
+.overview-recommendation-accent { position: absolute; inset-block: 9px; left: 0; width: 2px; border-radius: 99px; background: var(--insight-accent); box-shadow: 0 0 12px var(--insight-accent); }
+.overview-recommendation-symbol {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid color-mix(in oklab,var(--insight-accent) 35%,transparent);
+  border-radius: 10px;
+  color: var(--insight-accent);
+  background: radial-gradient(circle at 35% 28%, color-mix(in oklab,var(--insight-accent) 22%,transparent), color-mix(in oklab,var(--card) 94%,transparent) 72%);
+}
+.overview-recommendation-copy em { display: block; margin-bottom: 2px; color: var(--insight-accent); font-size: 8px; font-style: normal; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; }
+.overview-recommendation-copy strong { color: var(--foreground); font-size: 10.5px; }
+.overview-recommendation-copy small { color: var(--muted-foreground); font-size: 8.5px; }
+.overview-priority-badge { font-size: 8px; }
+
+.overview-detail-grid { gap: 11px; margin-top: 11px; }
+.overview-detail-content { padding-top: 8px; }
+.overview-small-gauge { background: conic-gradient(var(--card-accent,var(--accent-green)) var(--score), color-mix(in oklab,var(--muted) 86%,transparent) 0); }
+.overview-small-gauge::before { background: var(--card); }
+.overview-small-gauge strong { color: var(--foreground); }
+.overview-small-gauge span { color: var(--muted-foreground); }
+.overview-climate-legend-row,
+.overview-quality-stat { border-bottom-color: var(--border); }
+.overview-climate-legend-label,
+.overview-quality-stat { color: var(--muted-foreground); }
+.overview-climate-legend-row strong,
+.overview-quality-stat strong,
+.overview-evidence-stats strong { color: var(--foreground); }
+.overview-evidence-stats > div { border-left-color: var(--accent-blue); background: color-mix(in oklab,var(--accent-blue) 5%,var(--card)); }
+.overview-detail-footer { background: var(--secondary); color: var(--muted-foreground); }
+.overview-detail-footer strong { color: var(--accent-foreground); }
+.overview-insight-strip { border-color: var(--border); background: color-mix(in oklab,var(--card) 96%,transparent); box-shadow: var(--panel-glow); }
+.overview-insight-strip strong { color: var(--accent-green); }
+.overview-insight-strip span { color: var(--muted-foreground); }
+.overview-insight-strip > a { color: var(--accent-foreground); border-color: color-mix(in oklab,var(--accent-green) 28%,var(--border)); }
+
+/* Sidebar institucional permanece escuro e mantém a fotografia homologada. */
+.app-sidebar-command { background: #010d0e !important; color: #f4faf7; }
+.forest-silhouette {
+  background:
+    linear-gradient(180deg, rgba(1,18,17,0) 0%, rgba(1,20,18,.18) 12%, rgba(0,33,25,.62) 55%, rgba(0,23,19,.94) 100%),
+    linear-gradient(90deg, rgba(0,32,25,.42), rgba(0,39,29,.22)),
+    url('/images/klabin/floresta-mosaico.webp') center bottom / cover no-repeat !important;
+}
+.sidebar-theme-toggle {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(110,195,156,.20);
+  border-radius: 10px;
+  background: rgba(3,25,23,.62);
+  color: #b7c8c2;
+  opacity: .72;
+  transition: opacity .18s ease, color .18s ease, border-color .18s ease, background .18s ease;
+}
+.sidebar-theme-toggle:hover { opacity: 1; border-color: rgba(55,237,99,.34); background: rgba(9,55,42,.74); color: #78ef9b; }
+
+/* Páginas internas — card/ícone no mesmo vocabulário visual. */
+.metric-summary-card { position: relative; min-height: 96px; gap: 12px; overflow: hidden; padding: 12px 14px; }
+.metric-summary-card::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 9% 50%, color-mix(in oklab,var(--metric-accent,var(--accent-green)) 12%,transparent), transparent 48%); }
+.metric-summary-card > * { position: relative; z-index: 1; }
+.metric-summary-icon {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border: 1px solid color-mix(in oklab,var(--metric-accent,var(--accent-green)) 40%,transparent);
+  border-radius: 50%;
+  color: var(--metric-accent,var(--accent-green));
+  background: radial-gradient(circle at 35% 28%, color-mix(in oklab,var(--metric-accent,var(--accent-green)) 23%,transparent), color-mix(in oklab,var(--card) 92%,transparent) 72%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%),0 8px 24px -18px var(--metric-accent,var(--accent-green));
+}
+.metric-summary-card.is-warning { --metric-accent: var(--accent-orange); }
+.metric-summary-icon.is-info { --metric-accent: var(--accent-cyan); border-color: color-mix(in oklab,var(--accent-cyan) 40%,transparent); color: var(--accent-cyan); background: color-mix(in oklab,var(--accent-cyan) 9%,var(--card)); }
+.metric-summary-icon.is-blue { --metric-accent: var(--accent-blue); border-color: color-mix(in oklab,var(--accent-blue) 40%,transparent); color: var(--accent-blue); background: color-mix(in oklab,var(--accent-blue) 9%,var(--card)); }
+.metric-summary-label { color: var(--muted-foreground); font-size: 10.5px; }
+.metric-summary-value { color: var(--foreground); font-size: 24px; }
+
+.command-card > .relative.z-10.mb-2:first-child h2 { color: var(--foreground); font-size: 12.5px; }
+.command-card > .relative.z-10.mb-2:first-child::before { display: none !important; }
+.chart-card-content { color: var(--foreground); }
+
+/* Tabelas, evidências, relatórios e assistente: contraste sem hardcodes de tema. */
+.command-card table thead { background: color-mix(in oklab,var(--secondary) 72%,transparent) !important; color: var(--muted-foreground) !important; }
+.command-card table tbody tr:hover { background: color-mix(in oklab,var(--accent) 42%,transparent) !important; }
+.command-card input,
+.command-card textarea,
+.command-card select { color: var(--foreground); }
+.evidence-card { border: 1px solid var(--border); background: var(--card); }
+.assistant-conversation { color: var(--foreground); }
+
+/* Garante contraste explícito nos temas. */
+html.light .text-foreground,
+html.light [class*="text-foreground"] { color: var(--foreground); }
+html.dark .text-foreground,
+html.dark [class*="text-foreground"] { color: var(--foreground); }
+html.light .text-muted-foreground,
+html.light [class*="text-muted-foreground"] { color: var(--muted-foreground); }
+html.dark .text-muted-foreground,
+html.dark [class*="text-muted-foreground"] { color: var(--muted-foreground); }
+
+/* Recharts segue os tokens, inclusive rótulos no modo claro/escuro. */
+.recharts-cartesian-axis-tick text,
+.recharts-cartesian-axis-tick-value { fill: var(--chart-axis) !important; }
+.recharts-cartesian-grid line { stroke: var(--chart-grid) !important; }
+.recharts-label-list text { fill: var(--chart-label) !important; }
+.recharts-default-tooltip { border-color: var(--border) !important; background: var(--popover) !important; color: var(--popover-foreground) !important; }
+
+@media (max-width: 1550px) {
+  .overview-executive-header { grid-template-columns: 1fr; }
+}
+@media (max-width: 1279px) {
+  .overview-main-grid { grid-template-columns: 1fr; }
+}
+
+.sidebar-nav-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  place-items: center;
+  border: 1px solid rgba(203,220,214,.13);
+  border-radius: 10px;
+  background: rgba(255,255,255,.025);
+  color: #d7dfdc;
+  transition: border-color .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
+}
+.group:hover .sidebar-nav-icon { border-color: rgba(55,237,99,.22); background: rgba(55,237,99,.035); }
+.sidebar-nav-icon.is-active { border-color: rgba(55,237,99,.32); background: radial-gradient(circle at 35% 28%, rgba(55,237,99,.13), rgba(55,237,99,.035) 72%); box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 0 18px rgba(55,237,99,.04); }
+.filter-panel-v5 {
+  background: color-mix(in oklab, var(--card) 94%, transparent);
+  border-color: var(--border);
+  box-shadow: var(--panel-glow);
+  backdrop-filter: blur(6px);
+}
+html.dark .filter-panel-v5 { border-left: 2px solid color-mix(in oklab,var(--accent-green) 55%,transparent); }

@@ -65,13 +65,15 @@ export function AppSidebar() {
               {active && (
                 <span className="absolute inset-y-2 left-0 w-[2px] rounded-r-full bg-primary-glow shadow-[0_0_12px_rgba(55,237,99,.9)]" />
               )}
-              <Icon
-                className={cn(
-                  "h-[18px] w-[18px] shrink-0 transition-colors",
-                  active ? "text-primary-glow drop-shadow-[0_0_7px_rgba(55,237,99,.5)]" : "text-[#d7dfdc] group-hover:text-primary-glow",
-                )}
-                strokeWidth={1.9}
-              />
+              <span className={cn("sidebar-nav-icon", active && "is-active")}>
+                <Icon
+                  className={cn(
+                    "h-[16px] w-[16px] shrink-0 transition-colors",
+                    active ? "text-primary-glow" : "text-[#d7dfdc] group-hover:text-primary-glow",
+                  )}
+                  strokeWidth={1.9}
+                />
+              </span>
               <span>{item.title}</span>
             </Link>
           );

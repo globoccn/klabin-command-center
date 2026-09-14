@@ -14,7 +14,7 @@ export function ChartCard({
   action?: boolean;
 }) {
   return (
-    <section className={cn("command-card relative flex min-h-0 flex-col p-3.5", className)}>
+    <section className={cn("command-card panel-v5 relative flex min-h-0 flex-col p-3.5", className)}>
       <div className="relative z-10 mb-2 flex min-h-[18px] items-center justify-between gap-2">
         <h2 className="truncate text-[12px] font-semibold tracking-[-0.01em] text-foreground">{title}</h2>
         {action && (

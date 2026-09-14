@@ -69,9 +69,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  const themeBoot = `try{var t=localStorage.getItem("klabin-dashboard-theme");if(t!=="dark"&&t!=="light")t="light";document.documentElement.dataset.theme=t;document.documentElement.classList.toggle("dark",t==="dark")}catch(e){}`;
+  const themeBoot = `(function(){try{var t=localStorage.getItem("klabin-dashboard-theme");if(t!=="dark"&&t!=="light")t="light";var r=document.documentElement;r.classList.toggle("dark",t==="dark");r.classList.toggle("light",t==="light");r.dataset.theme=t;r.style.colorScheme=t;}catch(e){}})();`;
   return (
-    <html lang="pt-BR" data-theme="light" suppressHydrationWarning>
+    <html lang="pt-BR" className="light" data-theme="light" suppressHydrationWarning>
       <head><HeadContent /><script dangerouslySetInnerHTML={{ __html: themeBoot }} /></head>
       <body>{children}<Scripts /></body>
     </html>

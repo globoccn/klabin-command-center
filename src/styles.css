@@ -1096,3 +1096,265 @@
     radial-gradient(700px 300px at 82% -8%, rgba(18, 183, 106, .055), transparent 65%),
     #f4f7f5;
 }
+
+/* ========================================================================== 
+   Ajustes de legibilidade + modo claro/escuro — 2026-09
+   ========================================================================== */
+html[data-theme="light"] {
+  --background: #edf3f0;
+  --foreground: #10211c;
+  --surface: #f4f8f6;
+  --card: #ffffff;
+  --card-foreground: #10211c;
+  --card-elevated: #ffffff;
+  --popover: #ffffff;
+  --popover-foreground: #10211c;
+  --secondary: #eff4f1;
+  --secondary-foreground: #10211c;
+  --muted: #eef3f0;
+  --muted-foreground: #647670;
+  --accent: #e8f3ed;
+  --accent-foreground: #0f6f43;
+  --border: rgba(13, 63, 47, 0.14);
+  --input: rgba(13, 63, 47, 0.16);
+  --gradient-card: linear-gradient(180deg, rgba(255,255,255,.98), rgba(249,252,250,.98));
+  --gradient-card-soft: linear-gradient(180deg, rgba(255,255,255,.98), rgba(247,250,248,.98));
+  --gradient-page: radial-gradient(860px 360px at 86% -8%, rgba(18, 183, 106, .06), transparent 60%), linear-gradient(180deg, #f2f6f4, #eaf1ee 100%);
+  --shadow-card: 0 12px 30px rgba(16, 44, 34, 0.08), inset 0 1px 0 rgba(255,255,255,.7);
+  --shadow-glow: 0 0 18px rgba(16,184,102,.12);
+}
+
+html[data-theme="light"] body,
+html[data-theme="light"] .app-shell { background: var(--gradient-page); color: var(--foreground); }
+
+.theme-toggle-floating {
+  position: fixed;
+  top: 16px;
+  right: 18px;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.86);
+  color: #183229;
+  box-shadow: 0 8px 18px rgba(0,0,0,.08);
+  backdrop-filter: blur(10px);
+  font-size: 11px;
+  font-weight: 700;
+}
+.theme-toggle-floating:hover { transform: translateY(-1px); }
+.theme-toggle-floating__icon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(16,184,102,.12);
+  color: #0c7143;
+}
+html[data-theme="dark"] .theme-toggle-floating {
+  background: rgba(5,20,18,.88);
+  color: #e9f3ef;
+  box-shadow: 0 10px 24px rgba(0,0,0,.28);
+}
+html[data-theme="dark"] .theme-toggle-floating__icon {
+  background: rgba(55,237,99,.12);
+  color: #8ff1af;
+}
+
+.overview-light-page .overview-eyebrow { font-size: 11px; }
+.overview-light-page .overview-title-block h1 { font-size: clamp(44px, 2.8vw, 58px); }
+.overview-light-page .overview-title-block > p { font-size: 15px; }
+.overview-light-page .overview-update-line { font-size: 11.5px; gap: 8px; }
+.overview-light-page .overview-filter-label,
+.overview-light-page .overview-quick-label { height: 22px; margin-bottom: 6px; font-size: 11px; }
+.overview-light-page .overview-date-field,
+.overview-light-page .overview-quick-button,
+.overview-light-page .overview-more-filters,
+.overview-light-page .overview-apply-period { height: 44px; }
+.overview-light-page .overview-date-field input { font-size: 13px; }
+.overview-light-page .overview-date-separator { font-size: 12px; }
+.overview-light-page .overview-quick-button,
+.overview-light-page .overview-more-filters,
+.overview-light-page .overview-apply-period { font-size: 12px; }
+.overview-light-page .overview-error-banner { font-size: 12px; }
+.overview-light-page .overview-error-banner button { font-size: 11px; }
+.overview-light-page .overview-kpi-card { min-height: 118px; gap: 16px; padding: 16px 18px; }
+.overview-light-page .overview-kpi-label { font-size: 13px; }
+.overview-light-page .overview-kpi-value { font-size: clamp(30px, 2vw, 42px); }
+.overview-light-page .overview-kpi-comparison { gap: 8px; font-size: 11px; }
+.overview-light-page .overview-kpi-delta { padding: 4px 8px; font-size: 11px; }
+.overview-light-page .overview-main-grid { gap: 12px; margin-top: 12px; }
+.overview-light-page .overview-health-card,
+.overview-light-page .overview-recommendations-card { min-height: 364px; }
+.overview-light-page .overview-health-content { min-height: 364px; padding: 18px; }
+.overview-light-page .overview-card-title { font-size: 17px; }
+.overview-light-page .overview-health-heading p { font-size: 11.5px; }
+.overview-light-page .overview-health-status { padding: 6px 11px; font-size: 10px; }
+.overview-light-page .overview-score-ring { width: 128px; height: 128px; }
+.overview-light-page .overview-score-ring strong { font-size: 38px; }
+.overview-light-page .overview-score-ring span { font-size: 11px; }
+.overview-light-page .overview-health-message { max-width: 430px; }
+.overview-light-page .overview-health-message h2 { font-size: clamp(28px, 1.9vw, 36px); }
+.overview-light-page .overview-health-message p { font-size: 12px; }
+.overview-light-page .overview-health-metric { gap: 10px; padding: 12px; }
+.overview-light-page .overview-health-metric strong { font-size: 17px; }
+.overview-light-page .overview-health-metric small { font-size: 10px; }
+.overview-light-page .overview-white-title { font-size: 18px; }
+.overview-light-page .overview-card-heading-row p { font-size: 12px; }
+.overview-light-page .overview-card-heading-row > a { font-size: 11px; }
+.overview-light-page .overview-recommendation-list { gap: 8px; margin-top: 12px; }
+.overview-light-page .overview-recommendation-row { grid-template-columns: 32px 38px minmax(0, 1fr) auto 18px; min-height: 72px; gap: 10px; padding: 10px 11px; }
+.overview-light-page .overview-recommendation-rank { width: 28px; height: 28px; font-size: 11px; }
+.overview-light-page .overview-recommendation-symbol { width: 36px; height: 36px; }
+.overview-light-page .overview-recommendation-copy strong { font-size: 13px; }
+.overview-light-page .overview-recommendation-copy small { font-size: 10.5px; }
+.overview-light-page .overview-priority-badge { padding: 4px 8px; font-size: 10px; }
+.overview-light-page .overview-detail-grid { gap: 12px; margin-top: 12px; }
+.overview-light-page .overview-detail-card { min-height: 280px; padding: 14px; }
+.overview-light-page .overview-detail-content { height: calc(100% - 44px); padding-top: 10px; }
+.overview-light-page .overview-detail-highlight strong { font-size: 28px; }
+.overview-light-page .overview-detail-highlight span { font-size: 11px; }
+.overview-light-page .overview-mini-bar-row > span,
+.overview-light-page .overview-quality-stat,
+.overview-light-page .overview-mini-bar-row strong { font-size: 11px; }
+.overview-light-page .overview-detail-footer { min-height: 44px; font-size: 11px; }
+.overview-light-page .overview-detail-footer strong { font-size: 11px; }
+.overview-light-page .overview-gauge-layout,
+.overview-light-page .overview-evidence-summary,
+.overview-light-page .overview-climate-layout { grid-template-columns: 116px minmax(0, 1fr); gap: 14px; }
+.overview-light-page .overview-small-gauge { width: 108px; height: 108px; }
+.overview-light-page .overview-small-gauge strong { font-size: 22px; }
+.overview-light-page .overview-small-gauge span { max-width: 70px; font-size: 10px; }
+.overview-light-page .overview-evidence-stats strong { font-size: 18px; }
+.overview-light-page .overview-evidence-stats span { font-size: 10px; }
+.overview-light-page .overview-insight-strip { min-height: 48px; gap: 11px; padding: 10px 12px; margin-top: 12px; }
+.overview-light-page .overview-insight-strip strong { font-size: 11px; }
+.overview-light-page .overview-insight-strip span,
+.overview-light-page .overview-insight-strip > a { font-size: 11px; }
+
+.overview-climate-layout {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+.overview-climate-donut { box-shadow: inset 0 0 0 1px rgba(13,63,47,.06); }
+.overview-climate-legend { display: grid; gap: 8px; }
+.overview-climate-legend-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #eef2f0;
+}
+.overview-climate-legend-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.overview-climate-legend-label {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  color: #233932;
+  font-size: 11px;
+  font-weight: 600;
+}
+.overview-climate-legend-label i {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 999px;
+}
+.overview-climate-legend-row strong { color: #142d25; font-size: 11px; }
+.overview-climate-legend-row small { color: #71807c; font-size: 10px; }
+
+html[data-theme="dark"] .dashboard-main:has(.overview-light-page) {
+  background:
+    radial-gradient(880px 380px at 84% -10%, rgba(18, 183, 106, .08), transparent 58%),
+    linear-gradient(180deg, #01080a, #041215 70%, #031014);
+}
+html[data-theme="dark"] .overview-light-page { color: #eef5f2; }
+html[data-theme="dark"] .overview-executive-header,
+html[data-theme="dark"] .overview-filter-panel,
+html[data-theme="dark"] .overview-white-card,
+html[data-theme="dark"] .overview-kpi-card,
+html[data-theme="dark"] .overview-error-banner,
+html[data-theme="dark"] .overview-insight-strip {
+  border-color: rgba(120, 196, 159, .16);
+  box-shadow: 0 14px 28px rgba(0,0,0,.22);
+}
+html[data-theme="dark"] .overview-executive-header,
+html[data-theme="dark"] .overview-filter-panel,
+html[data-theme="dark"] .overview-white-card,
+html[data-theme="dark"] .overview-kpi-card,
+html[data-theme="dark"] .overview-insight-strip {
+  background: linear-gradient(180deg, rgba(10,22,24,.98), rgba(5,17,20,.98));
+}
+html[data-theme="dark"] .overview-kpi-card.is-warning {
+  background: linear-gradient(180deg, rgba(34,24,15,.96), rgba(22,16,11,.98));
+  border-color: rgba(242, 173, 97, .18);
+}
+html[data-theme="dark"] .overview-title-block h1,
+html[data-theme="dark"] .overview-kpi-value,
+html[data-theme="dark"] .overview-white-title,
+html[data-theme="dark"] .overview-detail-highlight strong,
+html[data-theme="dark"] .overview-recommendation-copy strong,
+html[data-theme="dark"] .overview-climate-legend-row strong,
+html[data-theme="dark"] .overview-card-heading-row > a,
+html[data-theme="dark"] .overview-quality-stat strong,
+html[data-theme="dark"] .overview-evidence-stats strong {
+  color: #f2f7f5;
+}
+html[data-theme="dark"] .overview-title-block > p,
+html[data-theme="dark"] .overview-update-line,
+html[data-theme="dark"] .overview-kpi-label,
+html[data-theme="dark"] .overview-kpi-comparison,
+html[data-theme="dark"] .overview-card-heading-row p,
+html[data-theme="dark"] .overview-recommendation-copy small,
+html[data-theme="dark"] .overview-detail-highlight span,
+html[data-theme="dark"] .overview-detail-footer,
+html[data-theme="dark"] .overview-quality-stat,
+html[data-theme="dark"] .overview-climate-legend-row small,
+html[data-theme="dark"] .overview-mini-bar-row > span,
+html[data-theme="dark"] .overview-mini-bar-row strong,
+html[data-theme="dark"] .overview-insight-strip span,
+html[data-theme="dark"] .overview-date-separator,
+html[data-theme="dark"] .overview-period-error {
+  color: #9eb1ab;
+}
+html[data-theme="dark"] .overview-kpi-icon,
+html[data-theme="dark"] .overview-recommendation-symbol,
+html[data-theme="dark"] .overview-recommendation-rank,
+html[data-theme="dark"] .overview-insight-icon,
+html[data-theme="dark"] .overview-detail-footer.is-positive,
+html[data-theme="dark"] .overview-detail-footer,
+html[data-theme="dark"] .overview-climate-legend-row {
+  background-color: rgba(255,255,255,.03);
+}
+html[data-theme="dark"] .overview-date-field,
+html[data-theme="dark"] .overview-quick-button,
+html[data-theme="dark"] .overview-more-filters,
+html[data-theme="dark"] .overview-error-banner button {
+  border-color: rgba(120,196,159,.16);
+  background: rgba(255,255,255,.03);
+  color: #e8f2ef;
+}
+html[data-theme="dark"] .overview-date-field input { color: #edf5f2; }
+html[data-theme="dark"] .overview-quick-button:hover,
+html[data-theme="dark"] .overview-more-filters:hover { background: rgba(16,184,102,.12); color: #8ef0ae; }
+html[data-theme="dark"] .overview-mini-bar-row > div { background: rgba(255,255,255,.08); }
+html[data-theme="dark"] .overview-quality-stat,
+html[data-theme="dark"] .overview-climate-legend-row { border-bottom-color: rgba(255,255,255,.08); }
+html[data-theme="dark"] .overview-small-gauge::before { background: rgba(7,18,20,.96); }
+html[data-theme="dark"] .overview-small-gauge strong { color: #f0f6f3; }
+html[data-theme="dark"] .overview-small-gauge span { color: #a6b6b1; }
+html[data-theme="dark"] .overview-health-card { box-shadow: 0 18px 32px rgba(0,0,0,.28); }
+
+@media (max-width: 900px) {
+  .theme-toggle-floating { top: 12px; right: 12px; }
+  .theme-toggle-floating__label { display: none; }
+}

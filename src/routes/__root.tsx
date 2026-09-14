@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { ChatAssistant } from "@/components/chat-assistant";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function NotFoundComponent() {
   return (
@@ -87,6 +88,7 @@ function RootComponent() {
           <MobileNav />
           <main className="dashboard-main"><Outlet /></main>
         </div>
+        <ThemeToggle />
         <ChatAssistant />
       </div>
     </QueryClientProvider>

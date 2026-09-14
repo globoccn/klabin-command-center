@@ -235,17 +235,44 @@ function priorityLabel(tone: RecommendationTone) {
 }
 
 function ClimateCard({ data }: { data: DashboardOverview }) {
-  const total = data.climatizacaoTipo.reduce((sum, item) => sum + Number(item.value || 0), 0);
-  const max = Math.max(1, ...data.climatizacaoTipo.map((item) => Number(item.value || 0)));
+  const segments = data.climatizacaoTipo.slice(0, 4);
+  const total = segments.reduce((sum, item) => sum + Number(item.value || 0), 0);
   const topSector = data.topSetoresClimatizacao[0];
+  const colors = ["#10b866", "#f59e0b", "#3b82f6", "#94a3b8"];
+
+  let angle = 0;
+  const gradient = segments.length && total > 0
+    ? segments
+        .map((item, index) => {
+          const value = Number(item.value || 0);
+          const sweep = (value / total) * 360;
+          const start = angle;
+          const end = angle + sweep;
+          angle = end;
+          return `${colors[index % colors.length]} ${start}deg ${end}deg`;
+        })
+        .join(", ")
+    : "#dfe8e4 0deg 360deg";
 
   return (
     <DetailCard title="Climatização" subtitle="Chamados classificados no período" icon={<Snowflake className="h-4 w-4" />} href="/climatizacao">
-      <div className="overview-detail-highlight"><strong>{fmtInt(total)}</strong><span>chamados no período</span></div>
-      <div className="overview-mini-bars">
-        {data.climatizacaoTipo.map((item) => (
-          <MiniBar key={item.name} label={item.name} value={item.value} max={max} />
-        ))}
+      <div className="overview-climate-layout">
+        <div className="overview-small-gauge overview-climate-donut" style={{ background: `conic-gradient(${gradient})` }}>
+          <div><strong>{fmtInt(total)}</strong><span>chamados no período</span></div>
+        </div>
+        <div className="overview-climate-legend">
+          {segments.map((item, index) => {
+            const value = Number(item.value || 0);
+            const share = total > 0 ? (value / total) * 100 : 0;
+            return (
+              <div key={item.name} className="overview-climate-legend-row">
+                <span className="overview-climate-legend-label"><i style={{ background: colors[index % colors.length] }} />{item.name}</span>
+                <strong>{fmtInt(value)}</strong>
+                <small>{fmtDec(share)}%</small>
+              </div>
+            );
+          })}
+        </div>
       </div>
       <div className="overview-detail-footer">
         {topSector ? <><span>Setor com mais registros</span><strong>{topSector.name} · {fmtInt(topSector.value)}</strong></> : <span>Sem chamados de climatização no período.</span>}

@@ -39,8 +39,8 @@ export async function apiPost<T>(path: string, body: unknown, options?: { signal
   return (await response.json()) as T;
 }
 
-export async function apiDownload(path: string): Promise<{ blob: Blob; fileName: string }> {
-  const response = await fetch(buildUrl(path), { method: "GET", headers: { Accept: "application/pdf" } });
+export async function apiDownload(path: string, params?: Record<string, string | number | undefined>): Promise<{ blob: Blob; fileName: string }> {
+  const response = await fetch(buildUrl(path, params), { method: "GET", headers: { Accept: "application/pdf" } });
   if (!response.ok) return parseError(response, path);
   const disposition = response.headers.get("content-disposition") ?? "";
   const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];

@@ -1,4 +1,4 @@
-import { apiGet, apiPost, getApiBaseUrl } from "@/services/apiClient";
+import { apiDownload, apiGet, apiPost, getApiBaseUrl } from "@/services/apiClient";
 import type { Report } from "@/types/dashboard";
 
 const typeCode: Record<Report["tipo"], "daily" | "weekly" | "monthly"> = { Diário: "daily", Semanal: "weekly", Mensal: "monthly" };
@@ -24,6 +24,14 @@ export async function generateReport(
   });
 }
 
+
+export async function downloadReport(report: Pick<Report, "id" | "arquivoNome">): Promise<{ blob: Blob; fileName: string }> {
+  const result = await apiDownload("reports/download", { reportId: report.id });
+  return {
+    blob: result.blob,
+    fileName: result.fileName || report.arquivoNome || "relatorio-klabin.pdf",
+  };
+}
 
 export interface DeleteReportResult {
   ok: boolean;

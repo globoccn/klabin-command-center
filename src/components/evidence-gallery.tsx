@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, CalendarDays, ChevronDown, Image, LoaderCircle, RotateCcw, Search } from "lucide-react";
-import { getEvidence } from "@/services/dashboardService";
+import { getEvidence, getFilterOptions } from "@/services/dashboardService";
 import type { EvidenceRecord, EvidenceResponse } from "@/types/dashboard";
 import { fmtDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -25,8 +25,8 @@ const initialFilters = {
   atividade: "Todas",
   andar: "Todos",
   responsavel: "Todos",
-  inicio: "2025-11-04",
-  fim: "2026-07-23",
+  inicio: "",
+  fim: "",
   busca: "",
 };
 
@@ -42,12 +42,29 @@ const EMPTY_RESPONSE: EvidenceResponse = {
 
 export function EvidenceGallery() {
   const [filters, setFilters] = useState(initialFilters);
+  const [availablePeriod, setAvailablePeriod] = useState({ inicio: "", fim: "" });
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [response, setResponse] = useState<EvidenceResponse | null>(null);
   const [selected, setSelected] = useState<EvidenceRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const requestSequence = useRef(0);
+
+  useEffect(() => {
+    let active = true;
+    getFilterOptions()
+      .then((options) => {
+        if (!active) return;
+        setAvailablePeriod(options.periodo);
+        setFilters((current) => ({
+          ...current,
+          inicio: current.inicio || options.periodo.inicio,
+          fim: current.fim || options.periodo.fim,
+        }));
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(filters.busca), 350);
@@ -114,7 +131,7 @@ export function EvidenceGallery() {
             <div className="text-xs font-semibold">Filtros das evidências</div>
             <div className="mt-0.5 text-[10px] text-muted-foreground">Data, atividade, andar, responsável e classificação da foto</div>
           </div>
-          <Button variant="ghost" size="sm" className="h-8 text-[11px] text-muted-foreground hover:text-primary-glow" onClick={() => setFilters(initialFilters)}>
+          <Button variant="ghost" size="sm" className="h-8 text-[11px] text-muted-foreground hover:text-primary-glow" onClick={() => setFilters({ ...initialFilters, inicio: availablePeriod.inicio, fim: availablePeriod.fim })}>
             <RotateCcw className="mr-1 h-3 w-3" /> Limpar filtros
           </Button>
         </div>
@@ -128,7 +145,7 @@ export function EvidenceGallery() {
           <EvidenceFilter label="Atividade" value={filters.atividade} onChange={(value) => update("atividade", value)} options={activities} />
           <EvidenceFilter label="Andar" value={filters.andar} onChange={(value) => update("andar", value)} options={floors} />
           <EvidenceFilter label="Responsável" value={filters.responsavel} onChange={(value) => update("responsavel", value)} options={responsibles} />
-          <DateRange inicio={filters.inicio} fim={filters.fim} onInicio={(value) => update("inicio", value)} onFim={(value) => update("fim", value)} />
+          <DateRange inicio={filters.inicio} fim={filters.fim} min={availablePeriod.inicio} max={availablePeriod.fim} onInicio={(value) => update("inicio", value)} onFim={(value) => update("fim", value)} />
         </div>
       </div>
 
@@ -272,8 +289,8 @@ function EvidenceFilter({ label, value, onChange, options }: { label: string; va
   return <div className="h-[54px] min-w-0 rounded-[11px] border border-border bg-card px-2 pt-1.5"><div className="px-1 text-[9px] font-semibold text-muted-foreground">{label}</div><Select value={value} onValueChange={onChange}><SelectTrigger className="h-7 border-0 bg-transparent px-1 text-[10px] shadow-none focus:ring-0"><SelectValue /></SelectTrigger><SelectContent className="max-h-72 border-border bg-popover">{options.map((option) => <SelectItem key={option} value={option} className="text-xs">{option}</SelectItem>)}</SelectContent></Select></div>;
 }
 
-function DateRange({ inicio, fim, onInicio, onFim }: { inicio: string; fim: string; onInicio: (value: string) => void; onFim: (value: string) => void }) {
-  return <div className="flex h-[54px] sm:col-span-2 items-center gap-1.5 rounded-[11px] border border-border bg-card px-2 md:col-span-1"><CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary-glow" /><input aria-label="Data inicial" type="date" value={inicio} onChange={(event: React.ChangeEvent<HTMLInputElement>) => onInicio(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[9px] outline-none" /><span className="text-muted-foreground">–</span><input aria-label="Data final" type="date" value={fim} onChange={(event: React.ChangeEvent<HTMLInputElement>) => onFim(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[9px] outline-none" /></div>;
+function DateRange({ inicio, fim, min, max, onInicio, onFim }: { inicio: string; fim: string; min: string; max: string; onInicio: (value: string) => void; onFim: (value: string) => void }) {
+  return <div className="flex h-[54px] sm:col-span-2 items-center gap-1.5 rounded-[11px] border border-border bg-card px-2 md:col-span-1"><CalendarDays className="h-3.5 w-3.5 shrink-0 text-primary-glow" /><input aria-label="Data inicial" type="date" value={inicio} min={min || undefined} max={fim || max || undefined} onChange={(event: React.ChangeEvent<HTMLInputElement>) => onInicio(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[9px] outline-none" /><span className="text-muted-foreground">–</span><input aria-label="Data final" type="date" value={fim} min={inicio || min || undefined} max={max || undefined} onChange={(event: React.ChangeEvent<HTMLInputElement>) => onFim(event.target.value)} className="min-w-0 flex-1 bg-transparent text-[9px] outline-none" /></div>;
 }
 
 function Info({ label, value }: { label: string; value: string }) {

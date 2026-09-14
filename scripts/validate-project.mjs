@@ -21,6 +21,7 @@ const requiredComponents = [
   "app-sidebar.tsx",
   "dashboard-header.tsx",
   "filter-bar.tsx",
+  "overview-filters.tsx",
   "kpi-card.tsx",
   "chart-card.tsx",
   "insight-banner.tsx",
@@ -42,21 +43,25 @@ const filterSource = read("src/components/filter-bar.tsx");
 for (const label of ["Período", "Projeto", "Subprojeto", "Andar", "Status", "Responsável"]) {
   check(`Filtro ${label}`, filterSource.includes(`label=\"${label}\"`) || filterSource.includes(`label="${label}"`) || filterSource.includes(`>${label}<`) || filterSource.includes(`\"${label}\"`));
 }
+check("Período sem datas hardcoded", !filterSource.includes("2025-11-04") && !filterSource.includes("2026-07-23") && !read("src/services/dashboardService.ts").includes("SNAPSHOT_START"));
+check("Período só aplica após confirmação", filterSource.includes("Aplicar período") && filterSource.includes("onApply(draft)"));
+check("Imagem oficial Lages disponível", exists("public/images/klabin/lages-operacao.webp"));
+check("Imagem oficial floresta disponível", exists("public/images/klabin/floresta-mosaico.webp"));
 
 const overviewSource = read("src/routes/index.tsx");
+const overviewAnalysisSource = read("src/lib/overview-analysis.ts");
 for (const title of [
-  "Tarefas por Projeto",
-  "Evolução de Tarefas por Mês",
-  "Status dos itens em aberto",
-  "Climatização — Tipo de Solicitação",
-  "Top 5 Setores — Climatização",
-  "Climatização — Horário de Abertura",
-  "Climatização — Dia da Semana",
-  "Atividades de Ronda (Principais)",
+  "Saúde da operação",
+  "Recomendações para sua operação",
+  "Climatização",
+  "Rondas",
   "Qualidade dos Dados",
-  "Evidências Fotográficas",
-  "Backlog por Idade",
+  "Evidências",
+  "Insight do período",
 ]) check(`Bloco ${title}`, overviewSource.includes(title));
+check("Climatização baseada somente em chamados", overviewSource.includes("Chamados classificados no período") && !/temperatura média|ambientes? dentro|abaixo do ideal/i.test(overviewSource));
+check("Saúde operacional calculada com dados reais", overviewAnalysisSource.includes("completionRate * 0.4") && overviewAnalysisSource.includes("criticalBacklogRate") && overviewAnalysisSource.includes("percentualComEvidencia"));
+check("Recomendações determinísticas", overviewAnalysisSource.includes("recommendationsFor") && overviewAnalysisSource.includes("backlog acima de 90 dias") && overviewAnalysisSource.includes("Reforçar cobertura de evidências"));
 
 const mockSource = read("src/data/mockData.ts");
 for (const metric of ["3783", "3672", "111", "97.1", "944", "5358"]) check(`KPI ${metric}`, mockSource.includes(metric));
@@ -99,13 +104,13 @@ check("Assistente presente nos menus", sidebarSource.includes('url: "/assistente
 
 const styles = read("src/styles.css");
 check("Sidebar de referência", read("src/components/app-sidebar.tsx").includes("w-[188px]") && styles.includes(".app-sidebar-command"));
-check("Grid com 6 KPIs", styles.includes("repeat(6"));
+check("Grid executivo com 4 KPIs", styles.includes(".overview-kpi-grid") && styles.includes("repeat(4, minmax(0, 1fr))"));
 check("Layout otimizado para 1900 × 1200", styles.includes("min-width: 1700px") && styles.includes("min-height: 1100px"));
 const viteConfig = read("vite.config.ts");
 check("Host Klabin autorizado no Vite", viteConfig.includes('allowedHosts: ["klabin.facilities-ai.com.br"]'));
 check("Evidência visual 1900 × 1200", exists("validation/overview-1900x1200.png"));
 
-check("Home com preenchimento ampliado", styles.includes(".overview-command-page") && styles.includes(".kpi-card-reference { height: 150px; }") && styles.includes(".overview-row-primary .chart-card-content { min-height: 232px; }"));
+check("Home executiva repaginada", styles.includes(".overview-health-card") && styles.includes(".overview-recommendations-card") && styles.includes(".overview-detail-grid"));
 check("Botão da IA responsivo", floatingAssistant.includes("sm:bottom-5") && floatingAssistant.includes("lg:bottom-7"));
 check("KPI Taxa de Conclusão com alinhamento dedicado", read("src/components/kpi-card.tsx").includes('kpi.id === "taxa" ? "items-center justify-between"'));
 check("Logo Facilities AI adicionada ao rodapé da sidebar", sidebarSource.includes('src="/facilities-ai-logo.png"') && sidebarSource.includes('<footer className="sidebar-footer">') && styles.includes(".sidebar-partner-brand"));
@@ -118,7 +123,7 @@ check("Arquivo transparente da Facilities AI disponível", exists("public/facili
 
 check("Responsivo 1600 e abaixo", styles.includes("@media (max-width: 1599px)") && styles.includes("repeat(3, minmax(0, 1fr))"));
 check("Responsivo tablets", styles.includes("@media (max-width: 1023px)") && sidebarSource.includes("lg:flex") && sidebarSource.includes("hidden") && mobileNavSource.includes("lg:hidden"));
-check("Responsivo celulares", styles.includes("@media (max-width: 767px)") && styles.includes(".overview-donut-layout"));
+check("Responsivo celulares", styles.includes("@media (max-width: 640px)") && styles.includes(".overview-detail-grid"));
 check("Responsivo telas pequenas", styles.includes("@media (max-width: 479px)"));
 check("Responsivo telas 2K e 4K", styles.includes("@media (min-width: 2200px)") && styles.includes("max-width: 2100px"));
 check("Layout de baixa altura", styles.includes("@media (max-height: 850px)"));
@@ -130,7 +135,8 @@ const reportService = read("src/services/reportService.ts");
 const reportCard = read("src/components/report-card.tsx");
 check("Relatórios conectados à API n8n", reportService.includes('apiPost<Report>("reports/generate"') && reportService.includes('url.searchParams.set("reportId", report.id)'));
 check("Geração mensal envia início e fim", reportService.includes("inicio: period?.inicio") && reportService.includes("fim: period?.fim"));
-check("Download direto em PDF", reportService.includes('`${baseUrl}/reports/download`') && reportCard.includes('href={getReportDownloadUrl(report)}') && !reportService.includes('URL.createObjectURL'));
+check("Download direto em PDF", reportService.includes('apiDownload("reports/download"') && reportCard.includes('href={getReportDownloadUrl(report)}'));
+check("Gerar relatório inicia download automático", reportSource.includes("Gerar e baixar PDF") && reportSource.includes("downloadReport(report)") && reportSource.includes("URL.createObjectURL(blob)"));
 check("Tela de relatórios possui botão Baixar PDF", read("src/components/report-card.tsx").includes("Baixar PDF"));
 
 

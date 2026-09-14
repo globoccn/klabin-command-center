@@ -1,5 +1,5 @@
-import { CalendarDays, RotateCcw, SlidersHorizontal } from "lucide-react";
-import { useEffect, useState } from "react";
+import { CalendarDays, Check, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,7 +8,7 @@ import type { DashboardFilters, FilterOptions } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
 
 export const DEFAULT_FILTERS: DashboardFilters = {
-  periodo: { inicio: "2025-11-04", fim: "2026-07-23" },
+  periodo: { inicio: "", fim: "" },
   projeto: "Todos",
   subprojeto: "Todos",
   andar: "Todos",
@@ -17,7 +17,7 @@ export const DEFAULT_FILTERS: DashboardFilters = {
 };
 
 const INITIAL_OPTIONS: FilterOptions = {
-  periodo: DEFAULT_FILTERS.periodo,
+  periodo: { inicio: "", fim: "" },
   projeto: ["Todos"],
   subprojeto: ["Todos"],
   andar: ["Todos"],
@@ -38,15 +38,20 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
 
   useEffect(() => {
     let active = true;
-    getFilterOptions().then((result) => {
-      if (!active) return;
-      setFilterOptions(result);
-      if (value.periodo.inicio === DEFAULT_FILTERS.periodo.inicio && value.periodo.fim === DEFAULT_FILTERS.periodo.fim) {
-        onChange?.({ ...value, periodo: result.periodo });
-      }
-    }).catch(() => undefined);
+    getFilterOptions()
+      .then((result) => {
+        if (!active) return;
+        setFilterOptions(result);
+      })
+      .catch(() => undefined);
     return () => { active = false; };
   }, []);
+
+  const effectivePeriod = useMemo(() => {
+    if (value.periodo.inicio && value.periodo.fim) return value.periodo;
+    return filterOptions.periodo;
+  }, [filterOptions.periodo, value.periodo]);
+
   const update = <K extends keyof DashboardFilters>(key: K, nextValue: DashboardFilters[K]) => {
     onChange?.({ ...value, [key]: nextValue });
   };
@@ -58,9 +63,9 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
   const content = (
     <>
       <PeriodFilter
-        value={value.periodo}
+        value={effectivePeriod}
         fullPeriod={filterOptions.periodo}
-        onChange={(periodo) => update("periodo", periodo)}
+        onApply={(periodo) => update("periodo", periodo)}
         toolbar={variant === "toolbar"}
       />
       <SelectFilter label="Projeto" value={value.projeto} options={filterOptions.projeto} onChange={(next) => onChange?.({ ...value, projeto: next, subprojeto: "Todos" })} />
@@ -104,17 +109,35 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
 
 function PeriodFilter({
   value,
-  onChange,
+  onApply,
   toolbar,
   fullPeriod,
 }: {
   value: DashboardFilters["periodo"];
   fullPeriod: DashboardFilters["periodo"];
-  onChange: (value: DashboardFilters["periodo"]) => void;
+  onApply: (value: DashboardFilters["periodo"]) => void;
   toolbar: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(value);
+
+  useEffect(() => { setDraft(value); }, [value]);
+
+  const minDate = fullPeriod.inicio || undefined;
+  const maxDate = fullPeriod.fim || undefined;
+  const invalid = !draft.inicio || !draft.fim || draft.inicio > draft.fim;
+
+  const apply = () => {
+    if (invalid) return;
+    onApply(draft);
+    setOpen(false);
+  };
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={(next) => {
+      setOpen(next);
+      if (next) setDraft(value);
+    }}>
       <PopoverTrigger asChild>
         <button type="button" className={cn("filter-shell group flex w-full items-center justify-between gap-2 px-3 text-left", !toolbar && "h-[58px]")}> 
           <div className="min-w-0">
@@ -124,40 +147,54 @@ function PeriodFilter({
           <CalendarDays className="h-4 w-4 shrink-0 text-[#d5dfdc] transition-colors group-hover:text-primary-glow" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 border-border bg-popover p-3 shadow-2xl">
-        <div className="mb-3 text-xs font-semibold">Selecionar período</div>
+      <PopoverContent align="start" className="w-[340px] border-border bg-popover p-3 shadow-2xl">
+        <div className="mb-1 text-xs font-semibold">Selecionar período</div>
+        <div className="mb-3 text-[10px] leading-relaxed text-muted-foreground">
+          Ajuste as datas e confirme em <strong className="font-semibold text-foreground">Aplicar período</strong>. A consulta só é atualizada depois da confirmação.
+        </div>
         <div className="grid grid-cols-2 gap-2">
           <DateField
             label="Início"
-            value={value.inicio}
-            onChange={(inicio) => onChange({ ...value, inicio })}
+            value={draft.inicio}
+            min={minDate}
+            max={draft.fim || maxDate}
+            onChange={(inicio) => setDraft((current) => ({ ...current, inicio }))}
           />
           <DateField
             label="Fim"
-            value={value.fim}
-            onChange={(fim) => onChange({ ...value, fim })}
+            value={draft.fim}
+            min={draft.inicio || minDate}
+            max={maxDate}
+            onChange={(fim) => setDraft((current) => ({ ...current, fim }))}
           />
         </div>
-        <button
-          type="button"
-          onClick={() => onChange(fullPeriod)}
-          className="mt-3 flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary-glow"
-        >
-          <RotateCcw className="h-3 w-3" /> Restaurar período completo
-        </button>
+        {invalid && <div className="mt-2 text-[10px] text-destructive">A data inicial deve ser anterior ou igual à data final.</div>}
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setDraft(fullPeriod)}
+            className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary-glow"
+          >
+            <RotateCcw className="h-3 w-3" /> Período completo
+          </button>
+          <Button type="button" size="sm" onClick={apply} disabled={invalid} className="h-8 bg-primary text-[10px] text-primary-foreground hover:bg-primary-glow">
+            <Check className="mr-1 h-3.5 w-3.5" /> Aplicar período
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );
 }
 
-function DateField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function DateField({ label, value, min, max, onChange }: { label: string; value: string; min?: string; max?: string; onChange: (value: string) => void }) {
   return (
     <label className="space-y-1">
       <span className="text-[10px] uppercase tracking-[.08em] text-muted-foreground">{label}</span>
       <input
         type="date"
         value={value}
-        max={label === "Início" ? undefined : DEFAULT_FILTERS.periodo.fim}
+        min={min}
+        max={max}
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.value)}
         className="h-9 w-full rounded-lg border border-border bg-background px-2 text-[11px] text-foreground outline-none transition focus:border-primary/60 focus:ring-1 focus:ring-primary/30"
       />
@@ -186,6 +223,7 @@ function SelectFilter({ label, value, options, onChange }: { label: string; valu
 }
 
 function formatPeriod(period: DashboardFilters["periodo"]) {
+  if (!period.inicio || !period.fim) return "Período completo";
   const format = (date: string) => {
     const [year, month, day] = date.split("-");
     return `${day}/${month}/${year}`;

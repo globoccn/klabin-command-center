@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { AlertTriangle, CalendarDays, CheckCircle2, Database, Lightbulb, Loader2, Plus, Trash2, TrendingUp } from "lucide-react";
+import { AlertTriangle, CalendarDays, CheckCircle2, Database, Download, Lightbulb, Loader2, Trash2, TrendingUp } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { ReportCard } from "@/components/report-card";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
-import { deleteReport, generateReport, getReportDownloadUrl, getReports } from "@/services/reportService";
+import { deleteReport, downloadReport, generateReport, getReportDownloadUrl, getReports } from "@/services/reportService";
 import { getFilterOptions } from "@/services/dashboardService";
 import type { Report, SnapshotMetadata } from "@/types/dashboard";
 import { Button } from "@/components/ui/button";
@@ -104,7 +104,7 @@ function Relatorios() {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [items, setItems] = useState<Report[] | null>(null);
   const [preview, setPreview] = useState<Report | null>(null);
-  const [generating, setGenerating] = useState(false);
+  const [generationStep, setGenerationStep] = useState<"generating" | "downloading" | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Report | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -165,17 +165,43 @@ function Relatorios() {
       return;
     }
 
-    setGenerating(true);
+    setGenerationStep("generating");
     try {
       const report = await generateReport(type, type === "Mensal" ? period ?? undefined : undefined);
       setItems((current) => [report, ...(current ?? []).filter((item) => item.id !== report.id)]);
-      if (report.status === "Pronto") toast.success("Relatório PDF gerado com sucesso");
-      else if (report.status === "Falhou") toast.error(report.erro || "A geração do PDF falhou. Abra o relatório para ver o detalhe.");
-      else toast.success("A geração do relatório foi registrada");
+
+      if (report.status === "Falhou") {
+        toast.error(report.erro || "A geração do PDF falhou. Abra o relatório para ver o detalhe.");
+        return;
+      }
+
+      if (report.status !== "Pronto" || report.pdfDisponivel === false) {
+        toast.info("O relatório foi registrado, mas o PDF ainda não está disponível para download.");
+        return;
+      }
+
+      setGenerationStep("downloading");
+      try {
+        const { blob, fileName } = await downloadReport(report);
+        const objectUrl = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        anchor.href = objectUrl;
+        anchor.download = fileName || report.arquivoNome || "relatorio-klabin.pdf";
+        anchor.style.display = "none";
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        toast.success("Relatório gerado e download iniciado");
+      } catch (downloadError) {
+        toast.error(downloadError instanceof Error
+          ? `Relatório gerado, mas o download automático falhou: ${downloadError.message}`
+          : "Relatório gerado, mas o download automático falhou. Use o botão Baixar PDF no card.");
+      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Não foi possível gerar o relatório");
     } finally {
-      setGenerating(false);
+      setGenerationStep(null);
     }
   };
 
@@ -284,10 +310,10 @@ function Relatorios() {
 
         <Button
           onClick={create}
-          disabled={generating || type === "Todos" || !snapshot || (type === "Mensal" && !period)}
+          disabled={generationStep !== null || type === "Todos" || !snapshot || (type === "Mensal" && !period)}
           className="h-10 bg-primary text-xs text-primary-foreground hover:bg-primary-glow"
         >
-          <Plus className="mr-1 h-4 w-4" /> {generating ? "Gerando…" : "Gerar novo relatório"}
+          <Download className="mr-1 h-4 w-4" /> {generationStep === "generating" ? "Gerando PDF…" : generationStep === "downloading" ? "Preparando download…" : "Gerar e baixar PDF"}
         </Button>
       </div>
 

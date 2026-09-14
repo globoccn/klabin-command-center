@@ -159,7 +159,7 @@ check("Cards claros com acabamento executivo", styles.includes('html[data-theme=
 check("Ícones executivos com contorno", styles.includes(".metric-summary-icon") && styles.includes(".overview-detail-title-icon") && styles.includes(".overview-kpi-icon"));
 check("Climatização da home em donut", overviewSource.includes("overview-climate-donut") && overviewSource.includes("conic-gradient"));
 check("Período padrão no mês vigente", dateRangeSource.includes("currentMonthStart") && dateRangeSource.includes("latestMonthStart") && overviewSource.includes("defaultDashboardPeriod"));
-check("Fallback para mês mais recente", dateRangeSource.includes("A base ainda não chegou ao mês vigente") && filterSource.includes("defaultDashboardPeriod"));
+check("Fallback para mês mais recente", dateRangeSource.includes("A base ainda não chegou ao mês vigente") && filterSource.includes("resolveAnalysisPeriod"));
 
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));
 const passed = results.filter((result) => result.passed).length;

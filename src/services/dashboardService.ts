@@ -1,4 +1,5 @@
 import { apiGet } from "@/services/apiClient";
+import { readAnalysisPeriod } from "@/lib/analysis-period";
 import type {
   ClimateSummary,
   DashboardFilters,
@@ -58,9 +59,10 @@ export async function getEvidence(filters: {
   page?: number;
   pageSize?: number;
 }, signal?: AbortSignal): Promise<EvidenceResponse> {
+  const sharedPeriod = readAnalysisPeriod();
   return apiGet<EvidenceResponse>("dashboard/evidence", {
-    inicio: filters.inicio || undefined,
-    fim: filters.fim || undefined,
+    inicio: filters.inicio || sharedPeriod?.inicio || undefined,
+    fim: filters.fim || sharedPeriod?.fim || undefined,
     tipo: filters.tipo === "Todos" ? undefined : filters.tipo,
     atividade: filters.atividade === "Todas" ? undefined : filters.atividade,
     andar: filters.andar === "Todos" ? undefined : filters.andar,
@@ -72,8 +74,9 @@ export async function getEvidence(filters: {
 }
 
 function filterParams(filters?: Partial<DashboardFilters>) {
-  const inicio = filters?.periodo?.inicio;
-  const fim = filters?.periodo?.fim;
+  const sharedPeriod = readAnalysisPeriod();
+  const inicio = filters?.periodo?.inicio || sharedPeriod?.inicio;
+  const fim = filters?.periodo?.fim || sharedPeriod?.fim;
   return {
     inicio: inicio || undefined,
     fim: fim || undefined,

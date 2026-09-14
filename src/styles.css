@@ -2424,3 +2424,118 @@ html.dark [class*="text-muted-foreground"] { color: var(--muted-foreground); }
   backdrop-filter: blur(6px);
 }
 html.dark .filter-panel-v5 { border-left: 2px solid color-mix(in oklab,var(--accent-green) 55%,transparent); }
+
+/* ========================================================================== 
+   V5.1 — acabamento dos comparativos/recomendações + coerência visual
+   ========================================================================== */
+.overview-kpi-delta,
+.kpi-card-comparison-v5 > span {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .overview-kpi-delta.is-good,
+html[data-theme="dark"] .kpi-card-comparison-v5 > span.is-good { color: #79e5ad; }
+html[data-theme="dark"] .overview-kpi-delta.is-bad,
+html[data-theme="dark"] .kpi-card-comparison-v5 > span.is-bad { color: #ff8b85; }
+html[data-theme="light"] .overview-kpi-delta.is-good,
+html[data-theme="light"] .kpi-card-comparison-v5 > span.is-good { color: #07824b; }
+html[data-theme="light"] .overview-kpi-delta.is-bad,
+html[data-theme="light"] .kpi-card-comparison-v5 > span.is-bad { color: #c84f48; }
+
+.overview-recommendation-row {
+  grid-template-columns: 38px minmax(0, 1fr) 18px !important;
+  min-height: 78px;
+  align-items: center;
+  padding: 10px 10px 10px 13px;
+  background: color-mix(in oklab, var(--card) 97%, transparent) !important;
+}
+.overview-recommendation-accent {
+  inset-block: 11px;
+  width: 3px;
+  box-shadow: none;
+}
+.overview-recommendation-symbol {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.overview-recommendation-copy {
+  display: block;
+  min-width: 0;
+}
+.overview-recommendation-meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.overview-recommendation-copy em {
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 8px;
+}
+.overview-recommendation-copy strong {
+  display: block;
+  font-size: 11.5px;
+  line-height: 1.22;
+}
+.overview-recommendation-copy small {
+  display: -webkit-box;
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 9.3px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.overview-priority-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: auto !important;
+  min-width: 0 !important;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px !important;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: transparent !important;
+  font-size: 7.5px !important;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.overview-priority-badge.is-high { color: var(--accent-red); }
+.overview-priority-badge.is-medium { color: var(--accent-orange); }
+.overview-priority-badge.is-low { color: var(--accent-cyan); }
+.overview-priority-badge.is-positive { color: var(--accent-green); }
+
+html[data-theme="dark"] .overview-recommendation-row {
+  border-color: color-mix(in oklab, var(--insight-accent) 20%, var(--border));
+  background: color-mix(in oklab, var(--card) 98%, black) !important;
+}
+html[data-theme="dark"] .overview-recommendation-row:hover {
+  border-color: color-mix(in oklab, var(--insight-accent) 44%, var(--border));
+  background: color-mix(in oklab, var(--insight-accent) 4%, var(--card)) !important;
+}
+html[data-theme="dark"] .overview-priority-badge.is-high { color: #ff8b85; }
+html[data-theme="dark"] .overview-priority-badge.is-medium { color: #ffc46b; }
+html[data-theme="dark"] .overview-priority-badge.is-low { color: #69d8ef; }
+html[data-theme="dark"] .overview-priority-badge.is-positive { color: #79e5ad; }
+
+html[data-theme="light"] .overview-recommendation-row {
+  border-color: color-mix(in oklab, var(--insight-accent) 16%, #dfe8e4);
+  background: #fff !important;
+}
+html[data-theme="light"] .overview-recommendation-row:hover {
+  background: color-mix(in oklab, var(--insight-accent) 2.5%, #fff) !important;
+}
+
+/* Evidências: o período compartilhado deve ficar claro no bloco de filtros. */
+.evidence-filter-grid input[type="date"] { color: var(--foreground); }

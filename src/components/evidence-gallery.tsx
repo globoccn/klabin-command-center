@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { EmptyState } from "@/components/empty-state";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { Button } from "@/components/ui/button";
+import { resolveAnalysisPeriod, saveAnalysisPeriod } from "@/lib/analysis-period";
 
 const evidenceTypes = ["Todos", "Antes", "Depois", "Ronda", "CPD"] as const;
 const PAGE_SIZE = 24;
@@ -56,10 +57,11 @@ export function EvidenceGallery() {
       .then((options) => {
         if (!active) return;
         setAvailablePeriod(options.periodo);
+        const sharedPeriod = resolveAnalysisPeriod(options.periodo);
         setFilters((current) => ({
           ...current,
-          inicio: current.inicio || options.periodo.inicio,
-          fim: current.fim || options.periodo.fim,
+          inicio: current.inicio || sharedPeriod.inicio,
+          fim: current.fim || sharedPeriod.fim,
         }));
       })
       .catch(() => undefined);
@@ -97,7 +99,13 @@ export function EvidenceGallery() {
   const activities = useMemo(() => ["Todas", ...(response?.options.activities ?? [])], [response]);
   const floors = useMemo(() => ["Todos", ...(response?.options.floors ?? [])], [response]);
   const responsibles = useMemo(() => ["Todos", ...(response?.options.responsibles ?? [])], [response]);
-  const update = (key: keyof typeof filters, value: string) => setFilters((current) => ({ ...current, [key]: value }));
+  const update = (key: keyof typeof filters, value: string) => setFilters((current) => {
+    const next = { ...current, [key]: value };
+    if ((key === "inicio" || key === "fim") && next.inicio && next.fim && next.inicio <= next.fim) {
+      saveAnalysisPeriod({ inicio: next.inicio, fim: next.fim });
+    }
+    return next;
+  });
 
   const loadMore = async () => {
     if (!response?.hasMore || loadingMore) return;
@@ -131,7 +139,7 @@ export function EvidenceGallery() {
             <div className="text-xs font-semibold">Filtros das evidências</div>
             <div className="mt-0.5 text-[10px] text-muted-foreground">Data, atividade, andar, responsável e classificação da foto</div>
           </div>
-          <Button variant="ghost" size="sm" className="h-8 text-[11px] text-muted-foreground hover:text-primary-glow" onClick={() => setFilters({ ...initialFilters, inicio: availablePeriod.inicio, fim: availablePeriod.fim })}>
+          <Button variant="ghost" size="sm" className="h-8 text-[11px] text-muted-foreground hover:text-primary-glow" onClick={() => { const period = resolveAnalysisPeriod(availablePeriod); setFilters({ ...initialFilters, inicio: period.inicio, fim: period.fim }); }}>
             <RotateCcw className="mr-1 h-3 w-3" /> Limpar filtros
           </Button>
         </div>

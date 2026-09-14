@@ -26,6 +26,7 @@ import type { DashboardFilters, DashboardOverview, Kpi } from "@/types/dashboard
 import { fmtDateTime, fmtDec, fmtInt } from "@/lib/format";
 import { kpiById, operationalModel, periodInsight, recommendationsFor, type OverviewRecommendation, type RecommendationTone } from "@/lib/overview-analysis";
 import { cn } from "@/lib/utils";
+import { saveAnalysisPeriod } from "@/lib/analysis-period";
 import { defaultDashboardPeriod } from "@/lib/date-range";
 
 export const Route = createFileRoute("/")({
@@ -53,9 +54,11 @@ function Overview() {
     getFilterOptions()
       .then((options) => {
         if (!active) return;
+        const periodo = defaultDashboardPeriod(options.periodo);
+        saveAnalysisPeriod(periodo);
         setFilters((current) => ({
           ...current,
-          periodo: defaultDashboardPeriod(options.periodo),
+          periodo,
         }));
       })
       .catch(() => undefined)
@@ -101,7 +104,7 @@ function Overview() {
             {refreshing && <span className="overview-refreshing"><RefreshCw className="h-3 w-3 animate-spin" /> Atualizando…</span>}
           </div>
         </div>
-        <OverviewFilters value={filters} onApply={setFilters} />
+        <OverviewFilters value={filters} onApply={(next) => { saveAnalysisPeriod(next.periodo); setFilters(next); }} />
       </header>
 
       {error && (
@@ -239,11 +242,13 @@ function Recommendations({ items }: { items: OverviewRecommendation[] }) {
               <span className="overview-recommendation-accent" aria-hidden="true" />
               <span className="overview-recommendation-symbol"><RecommendationIcon href={item.href} /></span>
               <span className="overview-recommendation-copy">
-                <em>{recommendationCategory(item)}</em>
+                <span className="overview-recommendation-meta">
+                  <em>{recommendationCategory(item)}</em>
+                  <span className={cn("overview-priority-badge", `is-${item.tone}`)}>{priorityLabel(item.tone)}</span>
+                </span>
                 <strong>{item.title}</strong>
                 <small>{item.detail}</small>
               </span>
-              <span className={cn("overview-priority-badge", `is-${item.tone}`)}>{priorityLabel(item.tone)}</span>
               <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
             </Link>
           );

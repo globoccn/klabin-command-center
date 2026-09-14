@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle2, Copy, Database, ShieldCheck } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard-header";
 import { ChartCard } from "@/components/chart-card";
+import { DEFAULT_FILTERS, FilterBar } from "@/components/filter-bar";
 import { getQuality } from "@/services/dashboardService";
-import type { QualitySummary } from "@/types/dashboard";
+import type { DashboardFilters, QualitySummary } from "@/types/dashboard";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
 import { fmtInt, fmtPct } from "@/lib/format";
 
@@ -17,16 +18,19 @@ export const Route = createFileRoute("/qualidade")({
 });
 
 function Qualidade() {
+  const [filters, setFilters] = useState<DashboardFilters>(DEFAULT_FILTERS);
   const [data, setData] = useState<QualitySummary | null>(null);
   useEffect(() => {
     let active = true;
-    getQuality().then((result) => active && setData(result)).catch(() => active && setData({ metrics: { semVencimento: 0, coberturaSetor: 0, fechamentoAnterior: 0, camposDuplicados: 0 }, coverage: [], issues: [] }));
+    setData(null);
+    getQuality(filters).then((result) => active && setData(result)).catch(() => active && setData({ metrics: { semVencimento: 0, coberturaSetor: 0, fechamentoAnterior: 0, camposDuplicados: 0 }, coverage: [], issues: [] }));
     return () => { active = false; };
-  }, []);
+  }, [filters]);
 
   return (
     <div className="command-page animate-fade-in-up">
       <DashboardHeader title="Qualidade dos Dados" subtitle="Governança, integridade e cobertura da base operacional" />
+      <FilterBar value={filters} onChange={setFilters} />
       {!data ? <LoadingSkeleton className="h-[520px]" /> : (
         <>
           <div className="page-kpi-grid-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">

@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getFilterOptions } from "@/services/dashboardService";
 import type { DashboardFilters, FilterOptions } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
-import { defaultDashboardPeriod } from "@/lib/date-range";
+import { resolveAnalysisPeriod, saveAnalysisPeriod } from "@/lib/analysis-period";
 
 export const DEFAULT_FILTERS: DashboardFilters = {
   periodo: { inicio: "", fim: "" },
@@ -44,7 +44,9 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
         if (!active) return;
         setFilterOptions(result);
         if (!value.periodo.inicio || !value.periodo.fim) {
-          onChange?.({ ...value, periodo: defaultDashboardPeriod(result.periodo) });
+          const periodo = resolveAnalysisPeriod(result.periodo);
+          saveAnalysisPeriod(periodo);
+          onChange?.({ ...value, periodo });
         }
       })
       .catch(() => undefined);
@@ -69,7 +71,7 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
       <PeriodFilter
         value={effectivePeriod}
         fullPeriod={filterOptions.periodo}
-        onApply={(periodo) => update("periodo", periodo)}
+        onApply={(periodo) => { saveAnalysisPeriod(periodo); update("periodo", periodo); }}
         toolbar={variant === "toolbar"}
       />
       <SelectFilter label="Projeto" value={value.projeto} options={filterOptions.projeto} onChange={(next) => onChange?.({ ...value, projeto: next, subprojeto: "Todos" })} />
@@ -99,7 +101,7 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => onChange?.({ ...DEFAULT_FILTERS, periodo: defaultDashboardPeriod(filterOptions.periodo) })}
+          onClick={() => onChange?.({ ...DEFAULT_FILTERS, periodo: value.periodo.inicio && value.periodo.fim ? value.periodo : resolveAnalysisPeriod(filterOptions.periodo) })}
           className="h-7 px-2 text-[11px] text-muted-foreground hover:bg-primary/8 hover:text-primary-glow"
         >
           <RotateCcw className="mr-1 h-3 w-3" />

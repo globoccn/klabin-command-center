@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getFilterOptions } from "@/services/dashboardService";
 import type { DashboardFilters, FilterOptions } from "@/types/dashboard";
 import { cn } from "@/lib/utils";
+import { defaultDashboardPeriod } from "@/lib/date-range";
 
 export const DEFAULT_FILTERS: DashboardFilters = {
   periodo: { inicio: "", fim: "" },
@@ -42,6 +43,9 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
       .then((result) => {
         if (!active) return;
         setFilterOptions(result);
+        if (!value.periodo.inicio || !value.periodo.fim) {
+          onChange?.({ ...value, periodo: defaultDashboardPeriod(result.periodo) });
+        }
       })
       .catch(() => undefined);
     return () => { active = false; };
@@ -87,7 +91,7 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
   return (
     <div className={cn("mb-5 rounded-[14px] border border-border bg-card/55 p-2.5 shadow-[0_10px_30px_rgba(0,0,0,.14)]", className)}>
       <div className="flex items-center justify-between gap-3 px-1 pb-2">
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#dce5e2]">
+        <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
           <SlidersHorizontal className="h-3.5 w-3.5 text-primary-glow" />
           Filtros da análise
         </div>
@@ -95,7 +99,7 @@ export function FilterBar({ value = DEFAULT_FILTERS, onChange, variant = "sectio
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => onChange?.({ ...DEFAULT_FILTERS, periodo: filterOptions.periodo })}
+          onClick={() => onChange?.({ ...DEFAULT_FILTERS, periodo: defaultDashboardPeriod(filterOptions.periodo) })}
           className="h-7 px-2 text-[11px] text-muted-foreground hover:bg-primary/8 hover:text-primary-glow"
         >
           <RotateCcw className="mr-1 h-3 w-3" />
@@ -141,10 +145,10 @@ function PeriodFilter({
       <PopoverTrigger asChild>
         <button type="button" className={cn("filter-shell group flex w-full items-center justify-between gap-2 px-3 text-left", !toolbar && "h-[58px]")}> 
           <div className="min-w-0">
-            <div className="text-[10px] font-semibold text-[#dce5e2]">Período</div>
-            <div className="mt-1 truncate text-[10px] text-[#f1f5f3]">{formatPeriod(value)}</div>
+            <div className="text-[10px] font-semibold text-foreground">Período</div>
+            <div className="mt-1 truncate text-[10px] text-foreground">{formatPeriod(value)}</div>
           </div>
-          <CalendarDays className="h-4 w-4 shrink-0 text-[#d5dfdc] transition-colors group-hover:text-primary-glow" />
+          <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary-glow" />
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" className="w-[340px] border-border bg-popover p-3 shadow-2xl">
@@ -205,9 +209,9 @@ function DateField({ label, value, min, max, onChange }: { label: string; value:
 function SelectFilter({ label, value, options, onChange }: { label: string; value: string; options: string[]; onChange: (value: string) => void }) {
   return (
     <div className="filter-shell min-w-0 px-2.5 pt-2">
-      <div className="px-1 text-[10px] font-semibold text-[#dce5e2]">{label}</div>
+      <div className="px-1 text-[10px] font-semibold text-foreground">{label}</div>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger aria-label={label} className="h-8 min-w-0 border-0 bg-transparent px-1 text-[10px] text-[#f1f5f3] shadow-none focus:ring-0">
+        <SelectTrigger aria-label={label} className="h-8 min-w-0 border-0 bg-transparent px-1 text-[10px] text-foreground shadow-none focus:ring-0">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="max-h-72 border-border bg-popover">

@@ -59,11 +59,11 @@ function Qualidade() {
 }
 
 function Metric({ icon, value, label, tone = "primary" }: { icon: React.ReactNode; value: string; label: string; tone?: "primary" | "warning" | "info" | "blue" }) {
-  const style = tone === "warning" ? "border-warning/28 text-warning" : tone === "info" ? "border-[#21c5b6]/28 text-[#45d8cc]" : tone === "blue" ? "border-info/28 text-[color:var(--info)]" : "border-primary/28 text-primary-glow";
+  const style = tone === "warning" ? "is-warning" : tone === "info" ? "is-info" : tone === "blue" ? "is-blue" : "";
   return (
-    <article className={`command-card relative flex items-center gap-3 p-4 ${style}`}>
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-border bg-background/30">{icon}</span>
-      <div className="min-w-0"><div className="text-[25px] font-bold leading-none text-foreground">{value}</div><div className="mt-1.5 text-[10px] leading-tight text-muted-foreground">{label}</div></div>
+    <article className={`command-card metric-summary-card ${style}`}>
+      <span className={`metric-summary-icon ${style}`}>{icon}</span>
+      <div className="min-w-0"><div className="metric-summary-value">{value}</div><div className="metric-summary-label mt-1.5">{label}</div></div>
     </article>
   );
 }
@@ -71,7 +71,7 @@ function Metric({ icon, value, label, tone = "primary" }: { icon: React.ReactNod
 function QualityBar({ label, value, target, warning = false }: { label: string; value: number; target: number; warning?: boolean }) {
   return (
     <div>
-      <div className="mb-2 flex items-center justify-between text-[11px]"><span className="text-[#dbe3e0]">{label}</span><span className={warning ? "font-semibold text-warning" : "font-semibold text-primary-glow"}>{value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% <span className="font-normal text-muted-foreground">/ meta {target}%</span></span></div>
+      <div className="mb-2 flex items-center justify-between text-[11px]"><span className="text-foreground">{label}</span><span className={warning ? "font-semibold text-warning" : "font-semibold text-primary-glow"}>{value.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% <span className="font-normal text-muted-foreground">/ meta {target}%</span></span></div>
       <div className="relative h-2 overflow-hidden rounded-full bg-card-elevated"><span className={`block h-full rounded-full ${warning ? "bg-gradient-to-r from-[#db3b12] to-warning" : "bg-gradient-to-r from-primary to-primary-glow"}`} style={{ width: `${Math.min(100, value)}%` }} /><span className="absolute inset-y-0 w-px bg-white/65" style={{ left: `${Math.min(100, target)}%` }} /></div>
     </div>
   );
@@ -81,7 +81,7 @@ function Action({ number, text }: { number: string; text: string }) {
   return (
     <div className="flex items-start gap-3 rounded-xl border border-border bg-background/24 p-3">
       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg border border-primary/25 bg-primary/10 text-[10px] font-bold text-primary-glow">{number}</span>
-      <div className="flex-1 text-[11px] leading-relaxed text-[#d5dfdc]">{text}</div>
+      <div className="flex-1 text-[11px] leading-relaxed text-foreground">{text}</div>
       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary/55" />
     </div>
   );

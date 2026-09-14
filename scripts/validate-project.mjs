@@ -147,6 +147,20 @@ check("Frontend sincroniza lista após exclusão", deleteSource.includes("const 
 check("Serviço chama workflow 29", reportService.includes('apiPost<DeleteReportResult>("reports/delete"') && !reportService.includes("deleteCode"));
 check("Card possui ação de excluir", reportCard.includes("onDelete") && reportCard.includes("Trash2"));
 
+
+const themeSource = read("src/components/theme-toggle.tsx");
+const dateRangeSource = read("src/lib/date-range.ts");
+check("Tema claro e escuro global", styles.includes('html[data-theme="dark"]') && styles.includes('html[data-theme="light"]') && styles.includes("--gradient-card"));
+check("Toggle de tema discreto no rodapé", sidebarSource.includes("<ThemeToggle") && styles.includes(".sidebar-theme-toggle") && !read("src/routes/__root.tsx").includes("<ThemeToggle"));
+check("Tema persistido no navegador", themeSource.includes("localStorage") && themeSource.includes("klabin-dashboard-theme"));
+check("Tema disponível no mobile", mobileNavSource.includes('ThemeToggle variant="mobile"'));
+check("Cards escuros com acento Klabin", styles.includes('html[data-theme="dark"] .command-card') && styles.includes("border-left-color"));
+check("Cards claros com acabamento executivo", styles.includes('html[data-theme="light"] .command-card') && styles.includes("metric-summary-card"));
+check("Ícones executivos com contorno", styles.includes(".metric-summary-icon") && styles.includes(".overview-detail-title-icon") && styles.includes(".overview-kpi-icon"));
+check("Climatização da home em donut", overviewSource.includes("overview-climate-donut") && overviewSource.includes("conic-gradient"));
+check("Período padrão no mês vigente", dateRangeSource.includes("currentMonthStart") && dateRangeSource.includes("latestMonthStart") && overviewSource.includes("defaultDashboardPeriod"));
+check("Fallback para mês mais recente", dateRangeSource.includes("A base ainda não chegou ao mês vigente") && filterSource.includes("defaultDashboardPeriod"));
+
 console.table(results.map(({ name, passed }) => ({ Item: name, Status: passed ? "OK" : "FALHOU" })));
 const passed = results.filter((result) => result.passed).length;
 console.log(`\n${passed}/${results.length} validações aprovadas.`);

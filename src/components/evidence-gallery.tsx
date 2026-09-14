@@ -174,7 +174,7 @@ export function EvidenceGallery() {
               <button key={item.id} type="button" onClick={() => setSelected(item)} className="command-card evidence-card group text-left transition duration-200 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_16px_34px_rgba(0,0,0,.28)] hover:text-foreground">
                 <EvidenceVisual record={item} />
                 <div className="p-3">
-                  <div className="truncate text-[12px] font-medium text-[#e8eeeb]">{item.titulo}</div>
+                  <div className="truncate text-[12px] font-medium text-foreground">{item.titulo}</div>
                   <div className="mt-1 truncate text-[10px] text-muted-foreground">{item.andar} · {item.responsavel}</div>
                   <div className="mt-1 flex items-center justify-between text-[9px] text-muted-foreground"><span>{fmtDate(item.data)}</span><span className="font-mono text-primary-glow/75">{item.taskId}</span></div>
                 </div>
@@ -187,7 +187,7 @@ export function EvidenceGallery() {
               <Button
                 type="button"
                 variant="outline"
-                className="min-w-[220px] border-primary/30 bg-background/45 text-xs text-[#e5f8e9] hover:border-primary/50 hover:bg-primary/12 hover:text-white"
+                className="min-w-[220px] border-primary/30 bg-background/45 text-xs text-foreground hover:border-primary/50 hover:bg-primary/12 hover:text-foreground"
                 onClick={loadMore}
                 disabled={loadingMore}
               >
@@ -257,7 +257,7 @@ function EvidenceVisual({ record }: { record: EvidenceRecord }) {
   const showImage = Boolean(record.url) && !failed;
 
   return (
-    <div className="relative aspect-video overflow-hidden border-b border-border" style={{ background: `radial-gradient(circle at 68% 28%, ${record.cor}3c, transparent 28%), linear-gradient(135deg, ${record.cor}16, #071b1a 64%)` }}>
+    <div className="relative aspect-video overflow-hidden border-b border-border" style={{ background: `radial-gradient(circle at 68% 28%, ${record.cor}3c, transparent 28%), linear-gradient(135deg, ${record.cor}16, var(--surface) 64%)` }}>
       {showImage && (
         <img
           src={record.url}
@@ -282,7 +282,7 @@ function EvidenceVisual({ record }: { record: EvidenceRecord }) {
 }
 
 function ComparisonVisual({ label, color }: { label: string; color: string }) {
-  return <div className="relative aspect-square" style={{ background: `radial-gradient(circle at 65% 28%, ${color}55, transparent 30%), linear-gradient(135deg, ${color}20, #071b1a 66%)` }}><Camera className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 text-primary-glow/38" /><span className="absolute left-3 top-3 rounded-full border px-2.5 py-1 text-[10px] font-medium" style={{ color, borderColor: `${color}66`, background: `${color}1a` }}>{label}</span></div>;
+  return <div className="relative aspect-square" style={{ background: `radial-gradient(circle at 65% 28%, ${color}55, transparent 30%), linear-gradient(135deg, ${color}20, var(--surface) 66%)` }}><Camera className="absolute left-1/2 top-1/2 h-12 w-12 -translate-x-1/2 -translate-y-1/2 text-primary-glow/38" /><span className="absolute left-3 top-3 rounded-full border px-2.5 py-1 text-[10px] font-medium" style={{ color, borderColor: `${color}66`, background: `${color}1a` }}>{label}</span></div>;
 }
 
 function EvidenceFilter({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: string[] }) {
@@ -294,5 +294,5 @@ function DateRange({ inicio, fim, min, max, onInicio, onFim }: { inicio: string;
 }
 
 function Info({ label, value }: { label: string; value: string }) {
-  return <div className="border-b border-border pb-2"><div className="text-[9px] uppercase tracking-[.08em] text-muted-foreground">{label}</div><div className="mt-1 leading-relaxed text-[#e3e9e6]">{value}</div></div>;
+  return <div className="border-b border-border pb-2"><div className="text-[9px] uppercase tracking-[.08em] text-muted-foreground">{label}</div><div className="mt-1 leading-relaxed text-foreground">{value}</div></div>;
 }

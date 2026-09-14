@@ -50,7 +50,7 @@ function Rondas() {
                   return (
                     <div key={item.name} className="grid grid-cols-[24px_minmax(0,1.25fr)_minmax(70px,1fr)_36px] items-center gap-3">
                       <span className="grid h-7 w-7 place-items-center rounded-lg border border-primary/24 bg-primary/10 text-primary-glow"><ClipboardCheck className="h-4 w-4" /></span>
-                      <span className="truncate text-xs text-[#dce5e2]">{item.name}</span>
+                      <span className="truncate text-xs text-foreground">{item.name}</span>
                       <span className="h-2 overflow-hidden rounded-full bg-primary/10"><span className="block h-full rounded-full bg-gradient-to-r from-primary to-primary-glow" style={{ width: `${(item.value / max) * 100}%` }} /></span>
                       <strong className="text-right text-sm">{item.value}</strong>
                     </div>
@@ -64,7 +64,7 @@ function Rondas() {
                 <div className="grid h-36 w-36 place-items-center rounded-full border-[12px] border-primary/12 border-t-primary border-r-primary/60 shadow-[0_0_36px_rgba(18,183,106,.12)]">
                   <div><div className="text-3xl font-bold">{fmtDec(data.metrics.evidenceRate)}%</div><div className="mt-1 text-[10px] text-muted-foreground">com evidência</div></div>
                 </div>
-                <div className="mt-4 flex items-center gap-2 rounded-lg border border-warning/25 bg-warning/7 px-3 py-2 text-[11px] text-[#e8ded6]"><Camera className="h-4 w-4 text-warning" /> {fmtInt(data.metrics.withoutEvidence)} rondas sem evidência fotográfica</div>
+                <div className="mt-4 flex items-center gap-2 rounded-lg border border-warning/25 bg-warning/7 px-3 py-2 text-[11px] text-foreground"><Camera className="h-4 w-4 text-warning" /> {fmtInt(data.metrics.withoutEvidence)} rondas sem evidência fotográfica</div>
               </div>
             </ChartCard>
           </div>
@@ -76,9 +76,9 @@ function Rondas() {
 
 function RoundMetric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="command-card relative flex items-center gap-3 p-4">
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-primary/25 bg-primary/10 text-primary-glow">{icon}</span>
-      <div className="min-w-0"><div className="text-[10px] text-muted-foreground">{label}</div><div className="mt-1 truncate text-2xl font-bold">{value}</div></div>
+    <div className="command-card metric-summary-card">
+      <span className="metric-summary-icon">{icon}</span>
+      <div className="min-w-0"><div className="metric-summary-label">{label}</div><div className="metric-summary-value">{value}</div></div>
     </div>
   );
 }

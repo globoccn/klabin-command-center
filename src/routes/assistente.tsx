@@ -62,7 +62,7 @@ function AssistenteOperacional() {
                 "Comparações e riscos",
                 "Análise assistida",
               ].map((item) => (
-                <div key={item} className="flex items-center gap-2 rounded-lg border border-border bg-background/25 px-2.5 py-2 text-[10px] text-[#dce5e2]">
+                <div key={item} className="flex items-center gap-2 rounded-lg border border-border bg-background/25 px-2.5 py-2 text-[10px] text-foreground">
                   <BrainCircuit className="h-3.5 w-3.5 shrink-0 text-primary-glow" /> {item}
                 </div>
               ))}

@@ -12,6 +12,7 @@ import {
   BrainCircuit,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const items = [
   { title: "Visão Geral", url: "/", icon: Home },
@@ -85,13 +86,16 @@ export function AppSidebar() {
           <SidebarNote icon={Building2} text="Facility Management escrito com excelência." />
         </div>
 
-        <div className="sidebar-partner-brand" aria-label="Facilities AI">
-          <img
-            src="/facilities-ai-logo.png"
-            alt="Facilities AI"
-            width={900}
-            height={213}
-          />
+        <div className="sidebar-partner-row">
+          <div className="sidebar-partner-brand" aria-label="Facilities AI">
+            <img
+              src="/facilities-ai-logo.png"
+              alt="Facilities AI"
+              width={900}
+              height={213}
+            />
+          </div>
+          <ThemeToggle />
         </div>
       </footer>
     </aside>

@@ -1,6 +1,6 @@
 # Central Operacional Klabin — frontend integrado
 
-Frontend React/TypeScript conectado aos webhooks do n8n entregues no pacote Marco 4.
+Frontend React/TypeScript da Central Operacional Klabin, integrado aos webhooks n8n do projeto.
 
 ## Configuração
 
@@ -27,17 +27,25 @@ npm run dev
 npm run build
 ```
 
-## Integrações reais do Marco 4
+## Integrações atuais
 
-- visão geral;
-- filtros;
+- Visão Geral executiva e filtros dinâmicos;
 - chamados e tarefas paginadas;
-- climatização;
-- rondas;
-- evidências;
-- qualidade dos dados.
+- climatização baseada em chamados;
+- rondas e preventivas;
+- evidências e auditoria;
+- qualidade dos dados;
+- relatórios PDF reais, com geração e download automático;
+- Assistente Operacional conectado ao chat governado do n8n/Groq;
+- histórico e feedback do assistente.
 
-Relatórios e chatbot permanecem mockados e pertencem ao Marco 5.
+## Experiência visual
+
+- temas claro e escuro globais, persistidos no navegador;
+- sidebar institucional Klabin mantida escura nos dois temas;
+- período padrão no mês vigente, limitado à última data disponível na base;
+- fallback automático para o mês mais recente disponível quando a base não alcança o mês vigente;
+- cards executivos com linguagem visual consistente entre todas as páginas.
 
 ## Publicação
 

@@ -13,7 +13,6 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppSidebar } from "@/components/app-sidebar";
 import { MobileNav } from "@/components/mobile-nav";
 import { ChatAssistant } from "@/components/chat-assistant";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 function NotFoundComponent() {
   return (
@@ -70,9 +69,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const themeBoot = `try{var t=localStorage.getItem("klabin-dashboard-theme");if(t!=="dark"&&t!=="light")t="light";document.documentElement.dataset.theme=t;document.documentElement.classList.toggle("dark",t==="dark")}catch(e){}`;
   return (
-    <html lang="pt-BR">
-      <head><HeadContent /></head>
+    <html lang="pt-BR" data-theme="light" suppressHydrationWarning>
+      <head><HeadContent /><script dangerouslySetInnerHTML={{ __html: themeBoot }} /></head>
       <body>{children}<Scripts /></body>
     </html>
   );
@@ -88,7 +88,6 @@ function RootComponent() {
           <MobileNav />
           <main className="dashboard-main"><Outlet /></main>
         </div>
-        <ThemeToggle />
         <ChatAssistant />
       </div>
     </QueryClientProvider>

@@ -3,6 +3,7 @@ import { Menu, X } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Headphones, Snowflake, ClipboardCheck, ShieldCheck, Database, FileBarChart2, BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const items = [
   { title: "Visão Geral", url: "/", icon: Home },
@@ -25,9 +26,12 @@ export function MobileNav() {
           <span className="text-xl font-bold">Klabin</span>
           <span className="h-1.5 w-1.5 rounded-full bg-primary-glow" />
         </div>
-        <button onClick={() => setOpen((o) => !o)} className="h-9 w-9 rounded-lg grid place-items-center bg-card border border-border">
-          {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle variant="mobile" />
+          <button onClick={() => setOpen((o) => !o)} className="h-9 w-9 rounded-lg grid place-items-center bg-card border border-border">
+            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
+        </div>
       </div>
       {open && (
         <nav className="px-3 pb-3 space-y-1">

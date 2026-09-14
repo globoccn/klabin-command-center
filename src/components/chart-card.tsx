@@ -16,7 +16,7 @@ export function ChartCard({
   return (
     <section className={cn("command-card relative flex min-h-0 flex-col p-3.5", className)}>
       <div className="relative z-10 mb-2 flex min-h-[18px] items-center justify-between gap-2">
-        <h2 className="truncate text-[12px] font-semibold tracking-[-0.01em] text-[#f2f5f4]">{title}</h2>
+        <h2 className="truncate text-[12px] font-semibold tracking-[-0.01em] text-foreground">{title}</h2>
         {action && (
           <button
             type="button"

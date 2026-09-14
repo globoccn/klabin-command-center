@@ -25,7 +25,7 @@ export function DetailDrawer({ task, onClose }: { task: Task | null; onClose: ()
 
   return (
     <Sheet open={!!task} onOpenChange={(open: boolean) => !open && onClose()}>
-      <SheetContent className="w-full overflow-y-auto border-border bg-[linear-gradient(180deg,#0b1d22,#061715)] sm:max-w-xl">
+      <SheetContent className="w-full overflow-y-auto border-border bg-background sm:max-w-xl">
         {current && (
           <>
             <SheetHeader className="border-b border-border pb-4">
@@ -35,7 +35,7 @@ export function DetailDrawer({ task, onClose }: { task: Task | null; onClose: ()
             </SheetHeader>
 
             <div className="mt-5 space-y-5 text-xs">
-              {current.descricao && <div className="rounded-xl border border-border bg-background/28 p-3 leading-relaxed text-[#d5dfdc]">{current.descricao}</div>}
+              {current.descricao && <div className="rounded-xl border border-border bg-background/28 p-3 leading-relaxed text-foreground">{current.descricao}</div>}
 
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <Info label="Status"><StatusBadge status={current.status} /></Info>
@@ -61,9 +61,9 @@ export function DetailDrawer({ task, onClose }: { task: Task | null; onClose: ()
                 ) : (
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {current.anexos.map((attachment) => (
-                      <a key={attachment.id} href={attachment.url} target="_blank" rel="noreferrer" className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-[radial-gradient(circle_at_65%_25%,rgba(55,237,99,.17),transparent_30%),linear-gradient(135deg,#0d2a22,#061715)]">
+                      <a key={attachment.id} href={attachment.url} target="_blank" rel="noreferrer" className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-card">
                         {attachment.url ? <img src={attachment.url} alt={attachment.label ?? "Evidência"} loading="lazy" className="h-full w-full object-cover opacity-80 transition group-hover:scale-105 group-hover:opacity-100" /> : <Camera className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2 text-primary-glow/38" />}
-                        {attachment.label && <span className="absolute left-2 top-2 max-w-[calc(100%-16px)] truncate rounded-full border border-primary/25 bg-background/80 px-2 py-0.5 text-[9px] text-[#e7eeeb]">{attachment.label}</span>}
+                        {attachment.label && <span className="absolute left-2 top-2 max-w-[calc(100%-16px)] truncate rounded-full border border-primary/25 bg-background/80 px-2 py-0.5 text-[9px] text-foreground">{attachment.label}</span>}
                       </a>
                     ))}
                   </div>
@@ -84,7 +84,7 @@ export function DetailDrawer({ task, onClose }: { task: Task | null; onClose: ()
                         {detail.fields.map((field) => (
                           <div key={field.id} className="rounded-lg border border-border/70 bg-card/55 px-2.5 py-2">
                             <div className="flex items-center justify-between gap-2 text-[9px] uppercase tracking-[.06em] text-muted-foreground"><span>{field.label}</span>{field.duplicate && <span className="rounded-full border border-warning/25 bg-warning/10 px-1.5 py-0.5 text-warning">duplicado</span>}</div>
-                            <div className="mt-1 break-words text-[11px] text-[#e4ebe8]">{formatFieldValue(field.value)}</div>
+                            <div className="mt-1 break-words text-[11px] text-foreground">{formatFieldValue(field.value)}</div>
                           </div>
                         ))}
                       </div>
@@ -119,7 +119,7 @@ function formatFieldValue(value: unknown) {
 }
 
 function Info({ label, value, children }: { label: string; value?: string; children?: React.ReactNode }) {
-  return <div className="min-h-[62px] rounded-xl border border-border bg-background/22 p-3"><div className="text-[9px] uppercase tracking-[.07em] text-muted-foreground">{label}</div><div className="mt-1.5 font-medium text-[#e4ebe8]">{children ?? value}</div></div>;
+  return <div className="min-h-[62px] rounded-xl border border-border bg-background/22 p-3"><div className="text-[9px] uppercase tracking-[.07em] text-muted-foreground">{label}</div><div className="mt-1.5 font-medium text-foreground">{children ?? value}</div></div>;
 }
 
 function Timeline({ label, value, last = false }: { label: string; value: string; last?: boolean }) {

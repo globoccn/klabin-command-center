@@ -360,7 +360,7 @@ function Relatorios() {
               {preview.status === "Falhou" && (
                 <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/8 p-3 text-xs text-destructive">
                   <div className="mb-1 font-semibold">A geração do PDF falhou</div>
-                  <div className="break-words text-[10px] text-[#ffd7d7]">{preview.erro || "Não foram registrados detalhes adicionais. Tente gerar o relatório novamente ou acione o suporte técnico."}</div>
+                  <div className="break-words text-[10px] text-destructive">{preview.erro || "Não foram registrados detalhes adicionais. Tente gerar o relatório novamente ou acione o suporte técnico."}</div>
                 </div>
               )}
 
@@ -379,9 +379,9 @@ function Relatorios() {
                   <div className="mb-2 text-xs font-semibold">Evolução no período</div>
                   <ResponsiveContainer width="100%" height={170}>
                     <BarChart data={preview.tendencia}>
-                      <XAxis dataKey="name" stroke="#AAB8B2" fontSize={10} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#AAB8B2" fontSize={10} tickLine={false} axisLine={false} />
-                      <Tooltip contentStyle={{ background: "#0b1d22", border: "1px solid rgba(110,195,156,.25)", borderRadius: 8, fontSize: 10, color: "#F5F7F6" }} />
+                      <XAxis dataKey="name" stroke="var(--chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
+                      <YAxis stroke="var(--chart-axis)" fontSize={10} tickLine={false} axisLine={false} />
+                      <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 10, color: "var(--popover-foreground)" }} />
                       <Bar dataKey="value" fill="#39E75F" radius={[5, 5, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>

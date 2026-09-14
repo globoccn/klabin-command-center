@@ -44,7 +44,7 @@ export function ReportCard({ report, onView, onDelete, deleting = false }: Repor
         </div>
       </div>
 
-      <h3 className="mt-3 line-clamp-2 text-sm font-semibold text-[#eef3f1]">{report.titulo}</h3>
+      <h3 className="mt-3 line-clamp-2 text-sm font-semibold text-foreground">{report.titulo}</h3>
       <div className="mt-1 text-[10px] text-muted-foreground">{report.periodo}</div>
       <div className="mt-2 text-[9px] text-muted-foreground">Gerado em {fmtDateTime(report.geradoEm)}</div>
       <div
@@ -56,7 +56,7 @@ export function ReportCard({ report, onView, onDelete, deleting = false }: Repor
         <span className="h-1.5 w-1.5 rounded-full bg-current" /> {report.status}
       </div>
       {report.status === "Falhou" && report.erro && (
-        <div className="mt-2 line-clamp-2 text-[9px] leading-relaxed text-[#ffb7b7]">{report.erro}</div>
+        <div className="mt-2 line-clamp-2 text-[9px] leading-relaxed text-destructive">{report.erro}</div>
       )}
 
       <div className="mt-auto flex gap-2 pt-4">

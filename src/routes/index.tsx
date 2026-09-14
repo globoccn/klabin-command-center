@@ -12,6 +12,7 @@ import {
   Clock3,
   Database,
   Image as ImageIcon,
+  Gauge,
   RefreshCw,
   ShieldCheck,
   Snowflake,
@@ -20,11 +21,12 @@ import {
 import { DEFAULT_FILTERS } from "@/components/filter-bar";
 import { OverviewFilters } from "@/components/overview-filters";
 import { LoadingSkeleton } from "@/components/loading-skeleton";
-import { getOverview } from "@/services/dashboardService";
+import { getFilterOptions, getOverview } from "@/services/dashboardService";
 import type { DashboardFilters, DashboardOverview, Kpi } from "@/types/dashboard";
 import { fmtDateTime, fmtDec, fmtInt } from "@/lib/format";
 import { kpiById, operationalModel, periodInsight, recommendationsFor, type OverviewRecommendation, type RecommendationTone } from "@/lib/overview-analysis";
 import { cn } from "@/lib/utils";
+import { defaultDashboardPeriod } from "@/lib/date-range";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,12 +42,29 @@ export const Route = createFileRoute("/")({
 
 function Overview() {
   const [filters, setFilters] = useState<DashboardFilters>(DEFAULT_FILTERS);
+  const [filtersReady, setFiltersReady] = useState(false);
   const [data, setData] = useState<DashboardOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
+    let active = true;
+    getFilterOptions()
+      .then((options) => {
+        if (!active) return;
+        setFilters((current) => ({
+          ...current,
+          periodo: defaultDashboardPeriod(options.periodo),
+        }));
+      })
+      .catch(() => undefined)
+      .finally(() => { if (active) setFiltersReady(true); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!filtersReady) return;
     let active = true;
     if (data) setRefreshing(true);
     setError(null);
@@ -64,7 +83,7 @@ function Overview() {
       });
 
     return () => { active = false; };
-  }, [filters, retryKey]);
+  }, [filters, retryKey, filtersReady]);
 
   const model = useMemo(() => data ? operationalModel(data) : null, [data]);
   const recommendations = useMemo(() => data ? recommendationsFor(data) : [], [data]);
@@ -95,7 +114,7 @@ function Overview() {
         </div>
       )}
 
-      {!data ? (
+      {!filtersReady || !data ? (
         <OverviewLoading />
       ) : (
         <>
@@ -164,7 +183,7 @@ function OperationalHealth({ data, model }: { data: DashboardOverview; model: Re
       <div className="overview-health-content">
         <div className="overview-health-heading">
           <div>
-            <div className="overview-card-title"><Snowflake className="h-4 w-4" /> Saúde da operação</div>
+            <div className="overview-card-title"><span className="overview-title-icon"><Gauge className="h-4 w-4" /></span> Saúde da operação</div>
             <p>Visão consolidada dos indicadores disponíveis no período selecionado.</p>
           </div>
           <span className={cn("overview-health-status", `is-${model.status.tone}`)}><span />{model.status.label}</span>
@@ -211,7 +230,7 @@ function Recommendations({ items }: { items: OverviewRecommendation[] }) {
             <span className="overview-recommendation-symbol"><RecommendationIcon href={item.href} /></span>
             <span className="overview-recommendation-copy"><strong>{item.title}</strong><small>{item.detail}</small></span>
             <span className={cn("overview-priority-badge", `is-${item.tone}`)}>{priorityLabel(item.tone)}</span>
-            <ArrowRight className="h-4 w-4 shrink-0 text-[#0c392c]" />
+            <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground" />
           </Link>
         ))}
       </div>
@@ -339,7 +358,7 @@ function DetailCard({ title, subtitle, icon, href, children }: { title: string; 
     <article className="overview-white-card overview-detail-card">
       <div className="overview-card-heading-row">
         <div>
-          <div className="overview-white-title">{icon}{title}</div>
+          <div className="overview-white-title"><span className="overview-detail-title-icon">{icon}</span>{title}</div>
           <p>{subtitle}</p>
         </div>
         <Link to={href}>Ver detalhes <ArrowRight className="h-3 w-3" /></Link>

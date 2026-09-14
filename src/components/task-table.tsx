@@ -75,7 +75,7 @@ export function TaskTable({ filters }: { filters?: DashboardFilters }) {
                 <tr key={task.id} onClick={() => setSelected(task)} className="cursor-pointer border-t border-border/72 transition hover:bg-card-elevated/72 hover:text-foreground">
                   <td className="px-3 py-3 font-mono text-[10px] text-primary-glow/80">{task.id}</td>
                   <td className="max-w-[250px] px-3 py-3">
-                    <div className="truncate font-medium text-[#e7ecea]">{task.titulo}</div>
+                    <div className="truncate font-medium text-foreground">{task.titulo}</div>
                     <div className="mt-0.5 truncate text-[9px] text-muted-foreground">{task.subprojeto}</div>
                   </td>
                   <td className="px-3 py-3 text-muted-foreground">{task.projeto}</td>

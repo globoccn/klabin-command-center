@@ -241,7 +241,7 @@ export function AssistantConversation({
   return (
     <section
       className={cn(
-        "assistant-conversation flex min-h-0 flex-col overflow-hidden rounded-[18px] border border-border bg-[linear-gradient(160deg,rgba(8,31,32,.98),rgba(3,16,20,.99))] shadow-[0_20px_54px_rgba(0,0,0,.28)]",
+        "assistant-conversation flex min-h-0 flex-col overflow-hidden rounded-[18px] border border-border bg-card shadow-[0_20px_54px_rgba(0,0,0,.28)]",
         compact ? "h-full rounded-none border-0 shadow-none" : "min-h-[680px]",
         className,
       )}
@@ -339,7 +339,7 @@ export function AssistantConversation({
                   <span className="block text-[9px] uppercase tracking-[.08em] text-primary-glow/85">
                     {question.label}
                   </span>
-                  <span className="mt-1 block text-[11px] leading-snug text-[#e3ebe8]">{question.text}</span>
+                  <span className="mt-1 block text-[11px] leading-snug text-foreground">{question.text}</span>
                 </span>
                 <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary-glow" />
               </button>
@@ -389,7 +389,7 @@ export function AssistantConversation({
                 key={suggestion}
                 type="button"
                 onClick={() => void send(suggestion)}
-                className="rounded-full border border-primary/22 bg-primary/6 px-2 py-1 text-[9px] text-[#d9e8de] transition hover:bg-primary/12 hover:text-primary-glow"
+                className="rounded-full border border-primary/22 bg-primary/6 px-2 py-1 text-[9px] text-foreground transition hover:bg-primary/12 hover:text-primary-glow"
               >
                 {suggestion}
               </button>
@@ -440,7 +440,7 @@ export function AssistantConversation({
             <Database className="h-3 w-3 text-primary-glow" /> Base operacional disponível
           </span>
           {compact ? (
-            <Link to="/assistente" className="inline-flex items-center gap-1 font-medium text-primary-glow hover:text-white">
+            <Link to="/assistente" className="inline-flex items-center gap-1 font-medium text-primary-glow hover:text-foreground">
               Abrir assistente completo <ArrowRight className="h-3 w-3" />
             </Link>
           ) : (
@@ -477,7 +477,7 @@ function ChatBubble({
           className={cn(
             "rounded-2xl px-3.5 py-3 text-[12px] leading-relaxed",
             assistant
-              ? "rounded-bl-sm border border-border bg-card-elevated/82 text-[#e6ece9]"
+              ? "rounded-bl-sm border border-border bg-card-elevated/82 text-foreground"
               : "rounded-br-sm bg-primary text-primary-foreground shadow-[0_7px_20px_rgba(18,183,106,.18)]",
           )}
         >
@@ -539,7 +539,7 @@ function ChatBubble({
                 key={suggestion}
                 type="button"
                 onClick={() => onSuggestion(suggestion)}
-                className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-1 text-[9px] text-[#dce7e2] transition hover:bg-primary/12 hover:text-primary-glow"
+                className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/5 px-2 py-1 text-[9px] text-foreground transition hover:bg-primary/12 hover:text-primary-glow"
               >
                 {suggestion} <ChevronRight className="h-2.5 w-2.5" />
               </button>
@@ -605,7 +605,7 @@ function DataArray({ label, rows, compact }: { label: string; rows: unknown[]; c
     return (
       <div className="rounded-xl border border-border/80 bg-background/24 p-2.5">
         <div className="mb-2 text-[9px] font-semibold uppercase tracking-[.08em] text-primary-glow/85">{label}</div>
-        <ul className="space-y-1 text-[10px] text-[#d8e2de]">
+        <ul className="space-y-1 text-[10px] text-foreground">
           {rows.slice(0, compact ? 4 : 8).map((row, index) => <li key={index}>• {formatValue(row)}</li>)}
         </ul>
       </div>
@@ -624,7 +624,7 @@ function DataArray({ label, rows, compact }: { label: string; rows: unknown[]; c
           <tbody>
             {objects.slice(0, compact ? 4 : 8).map((row, rowIndex) => (
               <tr key={rowIndex} className="border-t border-border/70">
-                {keys.map((key) => <td key={key} className="max-w-[220px] truncate px-2 py-1.5 text-[#e1e8e5]">{formatValue(row[key])}</td>)}
+                {keys.map((key) => <td key={key} className="max-w-[220px] truncate px-2 py-1.5 text-foreground">{formatValue(row[key])}</td>)}
               </tr>
             ))}
           </tbody>

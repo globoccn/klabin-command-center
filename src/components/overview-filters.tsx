@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getFilterOptions } from "@/services/dashboardService";
 import type { DashboardFilters, FilterOptions } from "@/types/dashboard";
+import { defaultDashboardPeriod } from "@/lib/date-range";
 
 interface Props {
   value: DashboardFilters;
@@ -41,7 +42,7 @@ function quickPeriod(kind: "7" | "30" | "90" | "month" | "6months", fullPeriod: 
   let start = new Date(end);
 
   if (kind === "month") {
-    start = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), 1, 12));
+    return defaultDashboardPeriod(fullPeriod);
   } else if (kind === "6months") {
     start.setUTCMonth(start.getUTCMonth() - 6);
     start.setUTCDate(start.getUTCDate() + 1);
@@ -69,7 +70,7 @@ export function OverviewFilters({ value, onApply }: Props) {
         setOptions(result);
         setDraft((current) => ({
           ...current,
-          periodo: current.periodo.inicio && current.periodo.fim ? current.periodo : result.periodo,
+          periodo: current.periodo.inicio && current.periodo.fim ? current.periodo : defaultDashboardPeriod(result.periodo),
         }));
       })
       .catch(() => undefined)
@@ -104,7 +105,7 @@ export function OverviewFilters({ value, onApply }: Props) {
 
   const reset = () => {
     const next: DashboardFilters = {
-      periodo: effectiveFullPeriod,
+      periodo: defaultDashboardPeriod(effectiveFullPeriod),
       projeto: "Todos",
       subprojeto: "Todos",
       andar: "Todos",

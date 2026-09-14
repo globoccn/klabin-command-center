@@ -59,14 +59,14 @@ function HeaderIdentity({ title, subtitle, command = false }: { title: string; s
 
 function UpdateStatus({ updatedAt, statusLabel }: { updatedAt: string; statusLabel: string }) {
   return (
-    <div className="min-h-[76px] w-full min-w-0 sm:w-auto sm:min-w-[142px] rounded-[13px] border border-border bg-[linear-gradient(150deg,rgba(8,31,29,.92),rgba(3,20,20,.96))] px-3 py-2.5 shadow-[0_9px_24px_rgba(0,0,0,.2)]">
+    <div className="header-status-card min-h-[76px] w-full min-w-0 sm:w-auto sm:min-w-[142px] rounded-[13px] border border-border px-3 py-2.5">
       <div className="flex items-start gap-2">
         <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-primary/25 bg-primary/8">
           <RefreshCw className="h-3.5 w-3.5 text-primary-glow" />
         </div>
         <div className="min-w-0">
           <div className="text-[9px] text-muted-foreground">Última atualização</div>
-          <div className="mt-0.5 whitespace-nowrap text-[10px] font-medium text-[#e5ece9]">{updatedAt}</div>
+          <div className="mt-0.5 whitespace-nowrap text-[10px] font-medium text-foreground">{updatedAt}</div>
         </div>
       </div>
       <div className="mt-2 flex items-center gap-1.5 border-t border-primary/10 pt-1.5 text-[10px] font-medium text-primary-glow">
